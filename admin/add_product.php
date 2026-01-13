@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-success btn-lg">บันทึกข้อมูลสินค้า</button>
-                                <a href="admin.php" class="btn btn-light">ยกเลิกและกลับหน้าจัดการ</a>
+                                <a href="index_ad.php" class="btn btn-light">ยกเลิกและกลับหน้าจัดการ</a>
                             </div>
                         </form>
                     </div>

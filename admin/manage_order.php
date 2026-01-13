@@ -1,5 +1,5 @@
 <?php 
-require_once "config.php"; // เชื่อมต่อฐานข้อมูล
+require_once "../config.php"; // เชื่อมต่อฐานข้อมูล
 
 // ดึงข้อมูลสินค้าทั้งหมดจากตาราง products
 try {

@@ -1,4 +1,4 @@
-
+<?php include_once "config.php"; ?>
 </head>
 <!DOCTYPE html>
 <html lang="th">
@@ -56,39 +56,26 @@
       <ul class="navbar-nav">
 
         <li class="nav-item">
-          <a class="nav-link active" href="#">Home</a>
+          <a class="nav-link active" href="#">หน้าแรก</a>
         </li>
 
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button"
              data-bs-toggle="dropdown">
-            Products
+            รายการน้ำหอม
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="index.php?link=women">Perfume women</a></li>
-            <li><a class="dropdown-item" href="perfume_formen">Perfume for men</a></li>
+            <li><a class="dropdown-item" href="index.php?link=women">น้ำหอมสำหรับผู้หญิง</a></li>
+            <li><a class="dropdown-item" href="index.php?link=men">น้ำหอมสำหรับผู้ชาย</a></li>
             <li><a class="dropdown-item" href="#"></a></li>
           </ul>
         </li>
-
         <li class="nav-item">
-          <a class="nav-link" href="#">Promotion</a>
+          <a class="nav-link" href="#">ตะกร้าสินค้า</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="#">About us</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="#">Contact us</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="#">Track your order</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="login/login.php">Login & Sign up</a>
+          <a class="nav-link" href="login/login.php">เข้าสู่ระบบ</a>
         </li>
       </ul>
 <form class="d-flex ms-auto" role="search">
@@ -115,7 +102,99 @@
 
 
 
+<?php 
+// ดึงข้อมูลรีวิว พร้อมชื่อผู้รีวิว (Join ตาราง reviews และ users)
+try {
+    $stmt_rev = $conn->prepare("SELECT r.*, u.fullname FROM reviews r 
+                                JOIN users u ON r.user_id = u.user_id 
+                                ORDER BY r.review_date DESC LIMIT 3");
+    $stmt_rev->execute();
+    $reviews = $stmt_rev->fetchAll();
+} catch(PDOException $e) {
+    $reviews = []; // ป้องกัน error หากยังไม่มีข้อมูล
+}
+?>
 
+<style>
+    .review-section {
+        background-color: #1a1a1a; /* พื้นหลังสีดำเข้ม */
+        color: white;
+        padding: 80px 0;
+    }
+    .review-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 50px;
+    }
+    .review-card {
+        background: white;
+        color: #333;
+        border-radius: 10px;
+        padding: 30px;
+        position: relative;
+        height: 100%;
+        border: none;
+    }
+    .review-text {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 40px;
+        color: #555;
+    }
+    .reviewer-info {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        bottom: -25px;
+        left: 30px;
+    }
+    .reviewer-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid #1a1a1a;
+        object-fit: cover;
+        background: #eee;
+    }
+    .reviewer-name {
+        margin-left: 10px;
+        color: white;
+        font-size: 0.85rem;
+        margin-top: 25px;
+    }
+    .review-quote {
+        color: #e84c88;
+        font-weight: bold;
+        margin-bottom: 10px;
+        display: block;
+    }
+</style>
+
+<section class="review-section">
+    <div class="container text-center">
+        <h2 class="review-title">Social Proof & Review</h2>
+        <div class="mb-5">— ⚪ —</div>
+
+        <div class="row g-5">
+            <?php if (empty($reviews)): ?>
+ </div>
+            <?php else: ?>
+                <?php foreach($reviews as $rev): ?>
+                <div class="col-md-4">
+                    <div class="review-card text-start shadow">
+                        <span class="review-quote">Rating: <?= str_repeat('⭐', $rev['rating']) ?></span>
+                        <p class="review-text"><?= htmlspecialchars($rev['comment']) ?></p>
+                        <div class="reviewer-info">
+                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($rev['fullname']) ?>" class="reviewer-img">
+                            <div class="reviewer-name"><?= htmlspecialchars($rev['fullname']) ?></div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+</section>
 <footer class="footer-section">
     <div class="container">
         <div class="row align-items-start">

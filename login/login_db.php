@@ -23,9 +23,9 @@ if ($user) {
     $_SESSION['role'] = $user['role'];
 
     if ($user['role'] === 'owner') {
-        header("Location: ../admin.php");
+        header("Location: ../admin/index_ad.php");
     } else {
-        header("Location: dashboard_customer.php");
+        header("Location: ../index.php");
     }
     exit();
 

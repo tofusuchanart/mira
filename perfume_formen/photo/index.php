@@ -73,7 +73,7 @@ try {
 
     <div class="row g-4">
         <?php foreach($products as $row): ?>
-            <a href="perfume_forwomen/product_detail.php?id=<?= $row['product_id'] ?>">
+            <a href="perfume_formen/product_detail.php?id=<?= $row['product_id'] ?>">
         <div class="col-6 col-md-4 col-lg-3">
             <div class="product-card shadow-sm">
                 <img src="photo/<?= $row['image'] ?>" class="product-img" alt="<?= $row['product_name'] ?>">
