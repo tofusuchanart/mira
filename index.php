@@ -62,11 +62,11 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button"
              data-bs-toggle="dropdown">
-            รายการน้ำหอม
+            Products
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="index.php?link=women">น้ำหอมสำหรับผู้หญิง</a></li>
-            <li><a class="dropdown-item" href="index.php?link=men">น้ำหอมสำหรับผู้ชาย</a></li>
+            <li><a class="dropdown-item" href="perfume_formen">น้ำหอมสำหรับผู้ชาย</a></li>
             <li><a class="dropdown-item" href="#"></a></li>
           </ul>
         </li>
@@ -177,7 +177,7 @@ try {
 
         <div class="row g-5">
             <?php if (empty($reviews)): ?>
- </div>
+                
             <?php else: ?>
                 <?php foreach($reviews as $rev): ?>
                 <div class="col-md-4">

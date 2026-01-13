@@ -16,7 +16,9 @@ include_once "banner.php";
 elseif($link=='women'){
     include_once "perfume_forwomen/index.php";
 }
-
+elseif($link=='men'){
+    include_once "perfume_formen/index.php";
+}
 
 
 ?>
