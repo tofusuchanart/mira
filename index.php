@@ -1,4 +1,6 @@
-<?php include_once "config.php"; ?>
+<?php include_once "config.php";
+
+?>
 </head>
 <!DOCTYPE html>
 <html lang="th">
@@ -105,11 +107,12 @@
 <?php 
 // ดึงข้อมูลรีวิว พร้อมชื่อผู้รีวิว (Join ตาราง reviews และ users)
 try {
-    $stmt_rev = $conn->prepare("SELECT r.*, u.fullname FROM reviews r 
-                                JOIN users u ON r.user_id = u.user_id 
-                                ORDER BY r.review_date DESC LIMIT 3");
-    $stmt_rev->execute();
-    $reviews = $stmt_rev->fetchAll();
+// ตัวอย่างคำสั่ง SQL ในหน้า index.php
+$stmt_rev = $conn->prepare("SELECT r.*, u.fullname, u.profile_img FROM reviews r 
+                            JOIN users u ON r.user_id = u.user_id 
+                            ORDER BY r.review_date DESC LIMIT 3");
+$stmt_rev->execute();
+$reviews = $stmt_rev->fetchAll();
 } catch(PDOException $e) {
     $reviews = []; // ป้องกัน error หากยังไม่มีข้อมูล
 }
@@ -173,20 +176,35 @@ try {
 <section class="review-section">
     <div class="container text-center">
         <h2 class="review-title">Social Proof & Review</h2>
-        <div class="mb-5">— ⚪ —</div>
-
+        <div class="mb-3">— ⚪ —</div>
+        <button type="button" class="btn btn-outline-light mb-5" data-bs-toggle="modal" data-bs-target="#reviewModal">
+            <i class="bi bi-pencil-square"></i> เขียนรีวิวของคุณ
+        </button>
         <div class="row g-5">
             <?php if (empty($reviews)): ?>
-                
+                <p class="text-white-50">ยังไม่มีรีวิวในขณะนี้ เป็นคนแรกที่รีวิวสิ!</p>
             <?php else: ?>
                 <?php foreach($reviews as $rev): ?>
                 <div class="col-md-4">
                     <div class="review-card text-start shadow">
-                        <span class="review-quote">Rating: <?= str_repeat('⭐', $rev['rating']) ?></span>
+                        <div class="mb-2">
+                            <span class="text-warning"><?= str_repeat('⭐', $rev['rating']) ?></span>
+                            <span class="text-muted small">(<?= $rev['rating'] ?>/5)</span>
+                        </div>
+                        
                         <p class="review-text"><?= htmlspecialchars($rev['comment']) ?></p>
+                        
                         <div class="reviewer-info">
-                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($rev['fullname']) ?>" class="reviewer-img">
-                            <div class="reviewer-name"><?= htmlspecialchars($rev['fullname']) ?></div>
+                            <?php 
+                                $user_pic = (!empty($rev['profile_img'])) 
+                                            ? "photo/" . $rev['profile_img'] 
+                                            : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
+                            ?>
+                            <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
+                            
+                            <div class="reviewer-name">
+                                <strong><?= htmlspecialchars($rev['fullname']) ?></strong>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -195,6 +213,52 @@ try {
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark">เขียนรีวิวสินค้า</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="save_review.php" method="POST">
+                <div class="modal-body text-start text-dark">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">คะแนนความพึงพอใจ</label>
+                        <select name="rating" class="form-select" required>
+                            <option value="5">5 ดาว - ดีมาก</option>
+                            <option value="4">4 ดาว - ดี</option>
+                            <option value="3">3 ดาว - ปานกลาง</option>
+                            <option value="2">2 ดาว - พอใช้</option>
+                            <option value="1">1 ดาว - ควรปรับปรุง</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">เลือกสินค้าที่ต้องการรีวิว</label>
+                        <select name="product_id" class="form-select" required>
+                            <?php
+                            // ดึงรายชื่อสินค้ามาให้เลือก
+                            $stmt_p = $conn->query("SELECT product_id, product_name FROM products");
+                            while($p = $stmt_p->fetch()) {
+                                echo "<option value='{$p['product_id']}'>{$p['product_name']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ความคิดเห็น</label>
+                        <textarea name="comment" class="form-control" rows="4" placeholder="แบ่งปันความประทับใจของคุณ..." required></textarea>
+                    </div>
+                    <input type="hidden" name="user_id" value="3"> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary">ส่งรีวิว</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <footer class="footer-section">
     <div class="container">
         <div class="row align-items-start">

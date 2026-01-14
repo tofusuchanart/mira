@@ -104,16 +104,13 @@
 </Form>
     <div class="options">
         <label>
+        <a href="../register/register.php">สมัครสมาชิก</a>
+    </div>
+    <div class="options">
+        <label>
             <input type="checkbox"> Remember Me
         </label>
         <a href="#">Forgot Password</a>
-    </div>
-
-    <p>- Or Sign In With -</p>
-
-    <div class="social-login">
-        <button>Facebook</button>
-        <button>Line</button>
     </div>
 </div>
 

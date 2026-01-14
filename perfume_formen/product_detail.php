@@ -1,5 +1,5 @@
 <?php 
-require_once "config.php";
+require_once "../config.php";
 
 try {
     // ดึงข้อมูลสินค้าทั้งหมดจากตาราง products
@@ -20,7 +20,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Products - ESXENSE</title>
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f9f9f9; }
@@ -98,6 +98,6 @@ try {
     </div>
 </footer>
 
-<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
