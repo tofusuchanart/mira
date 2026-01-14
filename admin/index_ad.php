@@ -30,21 +30,23 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
     
     <style>
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            /* ใส่รูป Background โทนเดียวกับหน้าสมัครสมาชิก */
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1594035910387-fea47794261f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            min-height: 100vh;
-            color: white;
-        }
+       body { 
+    font-family: 'Sarabun', sans-serif; 
+    /* 👇 แก้ไข URL ในวงเล็บด้านล่างนี้ 👇 */
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                url('../admin/photo_ad/ro.jpg');
+    
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    min-height: 100vh;
+    color: white;
+}
 
         .glass-header {
-            background: rgba(255, 255, 255, 0.1);
+            background: #F3B8D11A;
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid #ffb6b6;
             padding: 20px 0;
             margin-bottom: 50px;
         }
@@ -53,7 +55,7 @@ try {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #ffb6b6;
             border-radius: 20px; 
             transition: all 0.4s ease;
             color: white;
@@ -61,14 +63,14 @@ try {
 
         .action-card:hover { 
             transform: translateY(-10px); 
-            background: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            background: #ffb6b6 255, 255, 0.25;
+            box-shadow: 0 15px 35px #ffb6b6;
         }
 
         .icon-circle {
             width: 80px;
             height: 80px;
-            background: rgba(255, 255, 255, 0.2);
+            background: #fff;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -84,7 +86,7 @@ try {
 
         .btn-glass {
             background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid #ffb6b6;
             color: white;
             border-radius: 10px;
             transition: 0.3s;
@@ -166,7 +168,7 @@ try {
     </div>
 
     <div class="text-center mt-5 pb-5">
-        <a href="../index.php" class="btn btn-outline-light px-4">กลับหน้าเว็บไซต์</a>
+        <a href="../login/logout.php" class="btn btn-danger px-4">ออกจากระบบ</a>
     </div>
 </div>
 

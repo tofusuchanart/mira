@@ -25,7 +25,7 @@ try {
         body { 
             font-family: 'Sarabun', sans-serif; 
             /* ใช้รูปพื้นหลังเดียวกับหน้า Dashboard เพื่อความต่อเนื่อง */
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1594035910387-fea47794261f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../admin/photo_ad/ro.jpg');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
@@ -114,7 +114,6 @@ try {
         </a>
         <div class="ms-auto">
             <a href="index_ad.php" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
-            <a href="../index.php" class="btn btn-light btn-sm">ไปหน้าเว็บหลัก</a>
         </div>
     </div>
 </nav>

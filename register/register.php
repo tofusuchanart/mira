@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: url('https://images.unsplash.com/photo-1594035910387-fea47794261f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); /* รูปพื้นหลังน้ำหอมโทนชมพู */
+            background: url('../register/photo/bv.jpg'); /* รูปพื้นหลังน้ำหอมโทนชมพู */
             background-size: cover;
             background-position: center;
             height: 100vh;

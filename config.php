@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$dbname = "mr_db";
+$dbname = "mira_db";
 $username = "root";
 $password = "";
 

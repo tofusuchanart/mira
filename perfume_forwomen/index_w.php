@@ -1,6 +1,4 @@
 <?php 
-require_once "config.php";
-
 try {
     // ดึงข้อมูลสินค้าทั้งหมดจากตาราง products
     $stmt = $conn->prepare("SELECT * FROM products ORDER BY product_id DESC");
@@ -27,7 +25,7 @@ try {
         
         /* สไตล์ส่วน Header Banner เหมือนในรูปตัวอย่าง */
         .product-banner {
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('img/banner-bg.jpg'); /* ใส่รูปพื้นหลังโทนดำ */
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('perfume_forwomen/photo/bn.png'); /* ใส่รูปพื้นหลังโทนดำ */
             background-size: cover;
             background-position: center;
             height: 300px;
@@ -92,11 +90,7 @@ try {
     </div>
 </div>
 
-<footer class="mt-5 py-5 bg-white border-top">
-    <div class="container text-center text-muted">
-        <p>© 2024 ESXENSE Perfume. All rights reserved.</p>
-    </div>
-</footer>
+
 
 <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>

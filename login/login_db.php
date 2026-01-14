@@ -25,7 +25,7 @@ if ($user) {
     if ($user['role'] === 'owner') {
         header("Location: ../admin/index_ad.php");
     } else {
-        header("Location: ../index.php");
+        header("Location: ../users/index_users.php");
     }
     exit();
 

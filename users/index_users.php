@@ -1,4 +1,5 @@
-<?php include_once "config.php";
+<?php include_once "../config.php";
+
 ?>
 </head>
 <!DOCTYPE html>
@@ -7,15 +8,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mira</title>
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="icon" href="photo/golo.png">
     <style>
         body { font-family: 'Sarabun', sans-serif; }
         .footer-section {
-            background-color: #070606; /* สีพื้นหลังเทาอ่อนตามภาพ */
+            background-color: #FFFFFF; /* สีพื้นหลังเทาอ่อนตามภาพ */
             padding: 40px 0;
-            color: #FFFF;
+            color: #000;
         }
         .footer-title {
             font-weight: bold;
@@ -25,67 +26,91 @@
         .footer-contact-text {
             font-size: 1.1rem;
             text-decoration: none;
-            color: #fffFFF;
+            color: #000;
         }
         .social-icons a {
             font-size: 2rem;
-            color: #FFFF;
+            color: #000;
             margin-right: 15px;
             text-decoration: none;
         }
-        .text-gray { color: #ffff; } /* สีเทาสำหรับหัวข้อ */
+        .text-gray { color: #6c757d; } /* สีเทาสำหรับหัวข้อ */
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light" style="background-color:#FFFFFF;">
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color:#FFFFFF">
   <div class="container-fluid">
 
-    <!-- Logo -->
-    <a class="navbar-brand">
-      <img src="photo/golo.png" width="120" height="80" alt="Mira">
+    <a class="navbar-brand" href="index_users.php?link=home">
+      <img src="../photo/golo.png" width="120" height="80" alt="Mira" style="object-fit: contain;">
     </a>
 
-    <!-- Toggle -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-      data-bs-target="#navbarNavDropdown">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!-- Menu -->
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
       <ul class="navbar-nav">
-
         <li class="nav-item">
-          <a class="nav-link active" href="index.php?link=home">หน้าแรก</a>
+          <a class="nav-link active" href="index_users.php?link=home">หน้าแรก</a>
         </li>
 
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" role="button"
-             data-bs-toggle="dropdown">
-            Products </a>
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Products
           </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item"href="index.php?link=women">น้ำหอมสำหรับผู้หญิง</a></li>
-            <li><a class="dropdown-item" href="index.php?link=men">น้ำหอมสำหรับผู้ชาย</a></li>
+          <ul class="dropdown-menu border-0 shadow-sm">
+            <li><a class="dropdown-item" href="index_users.php?link=women">น้ำหอมสำหรับผู้หญิง</a></li>
+            <li><a class="dropdown-item" href="index_users.php?link=men">น้ำหอมสำหรับผู้ชาย</a></li>
           </ul>
         </li>
-        <li class="nav-item">
-          <a class="nav-link">ตะกร้าสินค้า</a>
-        </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="login/login.php">เข้าสู่ระบบ</a>
+          <a class="nav-link" href="#">ตะกร้าสินค้า</a>
         </li>
       </ul>
-<form class="d-flex ms-auto" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
 
+      <div class="d-lg-flex align-items-center ms-auto mt-3 mt-lg-0 gap-2">
+        <form class="d-flex m-0" role="search">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success nav-btn" type="submit">Search</button>
+        </form>
+        <a href="../login/logout.php">
+        <button class="btn btn-danger nav-btn">ออกจากระบบ</button></a>
+      </div>
+      
     </div>
   </div>
-      </nav>
+</nav>
+
+<style>
+  /* กำหนดให้ปุ่มมีความกว้างเท่ากัน */
+  .nav-btn {
+    min-width: 110px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* ปรับแต่ง Dropdown ให้ดูทันสมัยขึ้น */
+  .nav-link {
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .dropdown-item:active {
+    background-color: #198754;
+  }
+
+  /* ระยะห่างสำหรับมือถือ */
+  @media (max-width: 991.98px) {
+    .nav-btn {
+      width: 100%; /* พอมือถือให้ปุ่มเต็มความกว้าง */
+      margin-top: 5px;
+    }
+  }
+</style>
       <!-- Search -->
       
           <!-- สิ้นสุดแบนเนอร์ -->
@@ -166,6 +191,9 @@ $reviews = $stmt_rev->fetchAll();
     <div class="container text-center">
         <h2 class="review-title">Social Proof & Review</h2>
         <div class="mb-3">— ⚪ —</div>
+        <button type="button" class="btn btn-outline-light mb-5" data-bs-toggle="modal" data-bs-target="#reviewModal">
+            <i class="bi bi-pencil-square"></i> เขียนรีวิวของคุณ
+        </button>
         <div class="row g-5">
             <?php if (empty($reviews)): ?>
                 <p class="text-white-50">ยังไม่มีรีวิวในขณะนี้ เป็นคนแรกที่รีวิวสิ!</p>
@@ -200,7 +228,51 @@ $reviews = $stmt_rev->fetchAll();
     </div>
 </section>
 
-
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark">เขียนรีวิวสินค้า</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="save_review.php" method="POST">
+                <div class="modal-body text-start text-dark">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">คะแนนความพึงพอใจ</label>
+                        <select name="rating" class="form-select" required>
+                            <option value="5">5 ดาว - ดีมาก</option>
+                            <option value="4">4 ดาว - ดี</option>
+                            <option value="3">3 ดาว - ปานกลาง</option>
+                            <option value="2">2 ดาว - พอใช้</option>
+                            <option value="1">1 ดาว - ควรปรับปรุง</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">เลือกสินค้าที่ต้องการรีวิว</label>
+                        <select name="product_id" class="form-select" required>
+                            <?php
+                            // ดึงรายชื่อสินค้ามาให้เลือก
+                            $stmt_p = $conn->query("SELECT product_id, product_name FROM products");
+                            while($p = $stmt_p->fetch()) {
+                                echo "<option value='{$p['product_id']}'>{$p['product_name']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ความคิดเห็น</label>
+                        <textarea name="comment" class="form-control" rows="4" placeholder="แบ่งปันความประทับใจของคุณ..." required></textarea>
+                    </div>
+                    <input type="hidden" name="user_id" value="3"> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary">ส่งรีวิว</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <footer class="footer-section">
     <div class="container">
         <div class="row align-items-start">
@@ -243,6 +315,6 @@ $reviews = $stmt_rev->fetchAll();
     </div>
 </footer>
            <!-- สิ้นสุดfooter -->
-        <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
       </body>
       </html>
