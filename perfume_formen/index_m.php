@@ -75,7 +75,7 @@ try {
 
 <div class="container mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold m-0" style="color: #b3365b;">Women's Collection</h4>
+        <h4 class="fw-bold m-0" style="color: #b3365b;">MEN Collection</h4>
         <div class="badge bg-light text-dark rounded-pill border shadow-sm px-3">
             พบ <?= $total_products ?> รายการ
         </div>
