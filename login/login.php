@@ -4,6 +4,43 @@
     <meta charset="UTF-8">
     <title>Login Page</title>
     <style>
+        /* จัดการกลุ่มตัวเลือก */
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* ปรับแต่ง Checkbox ให้ดูพรีเมียม */
+.options input[type="checkbox"] {
+    accent-color: #b3365b; /* เปลี่ยนสี Checkbox เป็นชมพู Mira */
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+/* ปรับแต่งลิงก์ สมัครสมาชิก / ลืมรหัสผ่าน */
+.options a {
+    color: #b3365b;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.options a:hover {
+    color: #ff85a1; /* สีชมพูสว่างขึ้นเวลา Hover */
+    text-decoration: underline;
+}
+
+/* ปรับเฉพาะส่วนสมัครสมาชิกให้ดูเด่นเหมือนปุ่มเล็กๆ (ถ้าต้องการ) */
+.register-link {
+    background-color: #fff2f6;
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+}
         * {
             margin: 0;
             padding: 0;
@@ -103,15 +140,16 @@
     <button>Login</button>
 </Form>
     <div class="options">
-        <label>
-        <a href="../register/register.php">สมัครสมาชิก</a>
-    </div>
-    <div class="options">
-        <label>
-            <input type="checkbox"> Remember Me
-        </label>
-        <a href="#">Forgot Password</a>
-    </div>
+    <label style="cursor: pointer;">
+        <input type="checkbox"> Remember Me
+    </label>
+    <a href="#">Forgot Password?</a>
+</div>
+
+<div class="text-center mt-3">
+    <span class="text-muted small">ยังไม่มีบัญชีใช่ไหม?</span> 
+    <a href="../register/register.php" class="register-link ms-1">สมัครสมาชิก</a>
+</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

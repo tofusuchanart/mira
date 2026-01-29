@@ -26,7 +26,7 @@
     object-fit: cover;
     height: 450px; /* กำหนดความสูงให้พอดี ไม่ยาวเกินไป */
 }
-.bi
+
 /* ปรับแต่งปุ่ม Previous / Next ให้เป็นวงกลมฟุ้งๆ */
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
