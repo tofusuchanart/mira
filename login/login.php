@@ -34,12 +34,27 @@
     text-decoration: underline;
 }
 
-/* ปรับเฉพาะส่วนสมัครสมาชิกให้ดูเด่นเหมือนปุ่มเล็กๆ (ถ้าต้องการ) */
+/* ปรับแต่งลิงก์สมัครสมาชิกให้เป็นปุ่มแคปซูล */
 .register-link {
-    background-color: #fff2f6;
-    padding: 5px 15px;
+    color: #b3365b !important; /* สีชมพู Mira */
+    background-color: #fff2f6; /* พื้นหลังชมพูอ่อนมาก */
+    padding: 6px 20px;
     border-radius: 50px;
-    font-size: 0.85rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none !important; /* เอาเส้นขีดใต้ออกเด็ดขาด */
+    transition: all 0.3s ease;
+    display: inline-block;
+    border: 1px solid rgba(179, 54, 91, 0.1); /* ขอบบางๆ ให้ดูมีมิติ */
+}
+
+/* เอฟเฟกต์เวลา Hover (ไม่มีเส้นขีดใต้) */
+.register-link:hover {
+    background-color: #b3365b; /* เปลี่ยนพื้นหลังเป็นชมพูเข้ม */
+    color: #ffffff !important; /* เปลี่ยนตัวหนังสือเป็นขาว */
+    text-decoration: none !important; /* ย้ำว่าไม่ต้องมีเส้นขีดใต้ */
+    box-shadow: 0 5px 15px rgba(179, 54, 91, 0.2); /* เพิ่มแสงฟุ้งสีชมพู */
+    transform: translateY(-2px); /* ลอยขึ้นเล็กน้อย */
 }
         * {
             margin: 0;
@@ -141,14 +156,16 @@
 </Form>
     <div class="options">
     <label style="cursor: pointer;">
-        <input type="checkbox"> Remember Me
+        <input type="checkbox"> จดจำฉันไว้
     </label>
-    <a href="#">Forgot Password?</a>
+    <a href="#">ลืมรหัสผ่าน?</a>
 </div>
 
 <div class="text-center mt-3">
-    <span class="text-muted small">ยังไม่มีบัญชีใช่ไหม?</span> 
-    <a href="../register/register.php" class="register-link ms-1">สมัครสมาชิก</a>
+    
+    <span style="color: #fff; font-size: 0.9rem;">หากคุณยังไม่มีบัญชี?</span>
+    <a href="../register/register.php" class="register-link ms-2">สมัครสมาชิก</a>
+</div>
 </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
