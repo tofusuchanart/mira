@@ -9,6 +9,7 @@
     <title>Mira</title>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="icon" href="photo/golo.png">
     <style>
         /* ปรับแต่งกรอบ Banner ให้มนและมีมิติ */
@@ -25,7 +26,7 @@
     object-fit: cover;
     height: 450px; /* กำหนดความสูงให้พอดี ไม่ยาวเกินไป */
 }
-
+.bi
 /* ปรับแต่งปุ่ม Previous / Next ให้เป็นวงกลมฟุ้งๆ */
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
