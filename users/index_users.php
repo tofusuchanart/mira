@@ -12,63 +12,127 @@ session_start();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="icon" href="photo/golo.png">
     <style>
-        body { font-family: 'Sarabun', sans-serif; }
-        .footer-section {
-            background-color: #FFFFFF; /* สีพื้นหลังเทาอ่อนตามภาพ */
-            padding: 40px 0;
-            color: #000;
-        }
-        .footer-title {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-        }
-        .footer-contact-text {
-            font-size: 1.1rem;
-            text-decoration: none;
-            color: #000;
-        }
-        .social-icons a {
-            font-size: 2rem;
-            color: #000;
-            margin-right: 15px;
-            text-decoration: none;
-        }
-        .text-gray { color: #6c757d; } /* สีเทาสำหรับหัวข้อ */
-    </style>
+        /* ปรับแต่งกรอบ Banner ให้มนและมีมิติ */
+#carouselExampleFade {
+    border-radius: 30px; /* ความโค้งตามสไตล์ Dashboard */
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(179, 54, 91, 0.1); /* เงาชมพูจางๆ */
+    margin: 20px auto; /* เพิ่มระยะห่างจาก Header */
+    max-width: 95%; /* ให้เห็นขอบพื้นหลังสีชมพูอ่อนเล็กน้อย */
+}
+
+/* ปรับแต่งภาพ Banner */
+.carousel-item img {
+    object-fit: cover;
+    height: 450px; /* กำหนดความสูงให้พอดี ไม่ยาวเกินไป */
+}
+
+/* ปรับแต่งปุ่ม Previous / Next ให้เป็นวงกลมฟุ้งๆ */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(255, 255, 255, 0.3); /* ขาวโปร่งแสง */
+    border-radius: 50%;
+    padding: 20px;
+    background-size: 50%;
+    transition: all 0.3s ease;
+}
+
+.carousel-control-prev:hover .carousel-control-prev-icon,
+.carousel-control-next:hover .carousel-control-next-icon {
+    background-color: #b3365b; /* เปลี่ยนเป็นชมพู Mira เมื่อชี้ */
+    box-shadow: 0 0 15px rgba(179, 54, 91, 0.5); /* แสงฟุ้งรอบปุ่ม */
+}
+
+/* เพิ่มจุดกลมๆ (Indicators) ด้านล่าง */
+.carousel-indicators [data-bs-target] {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #b3365b;
+    margin: 0 5px;
+}
+    /* ปรับแต่งเมนูให้ดูพรีเมียมตามแบบ Dashboard */
+    .navbar-nav .nav-link {
+        font-size: 1.15rem;
+        padding: 0.5rem 1rem !important;
+        margin: 0 8px; /* เพิ่มระยะห่างระหว่างปุ่ม */
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%; /* เตรียมทรงวงกลม */
+        width: 45px;  /* กำหนดความกว้างวงกลม */
+        height: 45px; /* กำหนดความสูงวงกลม */
+        color: #b3365b !important; /* สีไอคอนบนพื้นดำ */
+    }
+
+    /* Effect วงกลมสีชมพูอ่อนเมื่อ Hover */
+    .navbar-nav .nav-link:hover {
+        background-color: #b5365c33; /* สีชมพู Mira แบบจาง 20% */
+        color: #ff85a1 !important; /* สีไอคอนเมื่อ Hover ให้สว่างขึ้น */
+        transform: translateY(-2px); /* ยกตัวขึ้นเล็กน้อย */
+    }
+
+    /* ปรับแต่ง Dropdown Text (Products) ให้ยังเป็นข้อความแต่ดูดี */
+    .navbar-nav .nav-item.dropdown .nav-link {
+        width: auto; /* ให้ความกว้างตามข้อความ */
+        border-radius: 20px; /* ทรงมนยาว */
+        padding: 0.5rem 1.5rem !important;
+    }
+
+    .navbar-nav .bi {
+        font-size: 1.4rem;
+        line-height: 1;
+    }
+</style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color:#FFFFFF">
+<nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color:#FFF2f6">
   <div class="container-fluid">
 
-    <a class="navbar-brand" href="index_users.php?link=home">
-      <img src="../photo/golo.png" width="120" height="80" alt="Mira" style="object-fit: contain;">
+    <a class="navbar-brand">
+      <img src="../photo/golo.png" width="70" height="50" alt="Mira">
     </a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+<!-- Toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarNavDropdown">
       <span class="navbar-toggler-icon"></span>
     </button>
 
+    <!-- Menu -->
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
       <ul class="navbar-nav">
+
         <li class="nav-item">
-          <a class="nav-link active" href="index_users.php?link=home">หน้าแรก</a>
-        </li>
+    <a class="nav-link active" href="index_users.php" style="color: #b3365b !important;">
+        <i class="bi bi-house-door fs-5"></i> 
+    </a>
+</li>
 
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Products
-          </a>
-          <ul class="dropdown-menu border-0 shadow-sm">
-            <li><a class="dropdown-item" href="index_users.php?link=women">น้ำหอมสำหรับผู้หญิง</a></li>
-            <li><a class="dropdown-item" href="index_users.php?link=men">น้ำหอมสำหรับผู้ชาย</a></li>
-          </ul>
+    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="javascript:void(0)">
+        Products
+    </a>
+    <ul class="dropdown-menu">
+        <li>
+            <a class="dropdown-item" href="index_users.php?link=women">
+                <i class="bi bi-gender-female me-2"></i> น้ำหอมสำหรับผู้หญิง
+            </a>
         </li>
+        <li>
+            <a class="dropdown-item" href="index_users.php?link=men">
+                <i class="bi bi-gender-male me-2"></i> น้ำหอมสำหรับผู้ชาย
+            </a>
+        </li>
+    </ul>
+</li>
 
         <li class="nav-item">
           <a class="nav-link" href="edit/edit.php">🛒</a>
         </li>
+        
         <li class="nav-item">
           <h4><a class="nav-link" href="mes/mes.php">💬</a></h4>
         </li>
@@ -111,7 +175,6 @@ session_start();
     }
   }
 </style>
-      <!-- Search -->
       
           <!-- สิ้นสุดแบนเนอร์ -->
           <!-- เริ่มต้นfooter -->
@@ -227,6 +290,68 @@ $reviews = $stmt_rev->fetchAll();
         </div>
     </div>
 </section>
+<style>
+    /* ปรับแต่ง Footer ให้เข้ากับโทนในรูปภาพ */
+    .footer-section {
+        background-color: #fff2f6; /* สีชมพูอ่อนพาสเทลตามรูป Customer Directory */
+        padding: 60px 0 30px;
+        color: #444;
+        border-top: 1px solid rgba(179, 54, 91, 0.1);
+    }
+    .footer-title {
+        font-family: 'Playfair Display', serif;
+        color: #b3365b; /* สีชมพูเข้มตัวเดียวกับโลโก้ในรูป */
+        font-weight: bold;
+        font-size: 1.25rem;
+        margin-bottom: 25px;
+        position: relative;
+    }
+    /* ขีดเส้นใต้หัวข้อเล็กๆ เพื่อความสวยงาม */
+    
+    .footer-contact-text {
+        font-size: 1rem;
+        text-decoration: none;
+        color: #555;
+        transition: 0.3s;
+    }
+    .footer-contact-text:hover {
+        color: #b3365b;
+    }
+    /* ปรับแต่ง Icon Social ให้ดูสะอาดตา (ขาว-ชมพู) */
+    .social-icons a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: #ffffff;
+        border-radius: 12px; /* โค้งมนแบบ Card ในรูป */
+        color: #b3365b;
+        margin-right: 12px;
+        text-decoration: none;
+        box-shadow: 0 4px 10px rgba(179, 54, 91, 0.08);
+        transition: all 0.3s ease;
+    }
+    .social-icons a:hover {
+        background: #b3365b;
+        color: #ffffff;
+        transform: translateY(-3px);
+    }
+    .footer-info-box {
+        background: rgba(255, 255, 255, 0.5);
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid #ffffff;
+    }
+    .copyright-text {
+        font-size: 0.85rem;
+        color: #888;
+        border-top: 1px solid rgba(179, 54, 91, 0.1);
+        padding-top: 25px;
+        margin-top: 40px;
+    }
+</style>
+
 
 <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -308,38 +433,52 @@ $reviews = $stmt_rev->fetchAll();
 </div>
 <footer class="footer-section">
     <div class="container">
-        <div class="row align-items-start">
+        <div class="row g-4">
             
-            <div class="col-md-4 mb-4 mb-md-0">
-                <h5 class="fw-bold">บริษัท มิรา จำกัด</h5>
-                <p class="mb-0">ศาลากลางจังหวัดพะเยา ถนนพหลโยธิน</p>
-                <p>ต.บ้านต๋อม อ.เมืองพะเยา จ.พะเยา 56000</p>
-            </div>
-
-            <div class="col-md-5 mb-4 mb-md-0">
-                <h5 class="text-gray fw-bold mb-3">Feedback & Question</h5>
-                <div class="d-flex flex-column gap-2">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-telephone-fill me-2 fs-4"></i>
-                        <span class="footer-contact-text fw-bold">098-818-9079</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-envelope-fill me-2 fs-4"></i>
-                        <a href="mailto:miraperfume@gmail.com" class="footer-contact-text fw-bold">miraperfume@gmail.com</a>
-                    </div>
+            <div class="col-md-4">
+                <div class="footer-info-box h-100">
+                    <h6 class="footer-title">บริษัท มิรา จำกัด</h6>
+                    <p class="mb-0 text-muted small">ศาลากลางจังหวัดพะเยา ถนนพหลโยธิน<br>
+                    ต.บ้านต๋อม อ.เมืองพะเยา จ.พะเยา 56000</p>
                 </div>
             </div>
 
-            <div class="col-md-3">
-                <h5 class="text-gray fw-bold mb-3">Follow Us</h5>
-                <div class="social-icons d-flex align-items-center">
+            <div class="col-md-4 text-center"> 
+    <h6 class="footer-title justify-content-center d-flex" style="font-size: 1.1rem;">Customer Support</h6> 
+    
+    <div class="d-flex flex-column align-items-center gap-2"> <div class="d-flex align-items-center justify-content-center w-100">
+            <div class="me-2 text-white d-flex align-items-center justify-content-center" 
+                 style="width:28px; height:28px; background:#b3365b; border-radius:50%; flex-shrink: 0;">
+                <i class="bi bi-telephone-fill" style="font-size: 0.75rem;"></i>
+            </div>
+            <span class="footer-contact-text fw-bold" style="font-size: 0.9rem;">098-818-9079</span>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center w-100">
+            <div class="me-2 text-white d-flex align-items-center justify-content-center" 
+                 style="width:28px; height:28px; background:#b3365b; border-radius:50%; flex-shrink: 0;">
+                <i class="bi bi-envelope-heart-fill" style="font-size: 0.75rem;"></i>
+            </div>
+            <a href="mailto:miraperfume@gmail.com" class="footer-contact-text fw-bold" 
+               style="font-size: 0.9rem; text-decoration: none;">miraperfume@gmail.com</a>
+        </div>
+
+    </div>
+</div>
+
+            <div class="col-md-4 text-md-end">
+                <h6 class="footer-title justify-content-md-end d-md-flex">Follow Our Beauty</h6>
+                <div class="social-icons d-flex align-items-center justify-content-md-end mt-4">
                     <a href="#"><i class="bi bi-facebook"></i></a>
                     <a href="#"><i class="bi bi-line"></i></a>
-                    <a href="#"><i class="bi bi-instagram"></i></a>
-                    <a href="#"><i class="bi bi-youtube"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>                   
                 </div>
+               
             </div>
 
+        </div>
+
+        
         </div>
     </div>
 </footer>

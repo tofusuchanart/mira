@@ -164,8 +164,7 @@
       </nav>
       
           <!-- สิ้นสุดแบนเนอร์ -->
-          <!-- เริ่มต้นfooter -->
-           
+
 
 <?php include_once "body.php"; ?>
 <?php 
