@@ -85,6 +85,21 @@ session_start();
         font-size: 1.4rem;
         line-height: 1;
     }
+    .btn-logout-mira {
+        border: 1px solid #D65A8D;
+        color: #D65A8D;
+        background-color: transparent;
+        border-radius: 50px; /* ทรงมนยาวแบบในรูป */
+        padding: 8px 30px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-logout-mira:hover {
+        background-color: #D65A8D;
+        color: white;
+        box-shadow: 0 4px 12px rgba(214, 90, 141, 0.2);
+    }
 </style>
 </head>
 <body>
@@ -141,7 +156,7 @@ session_start();
       <div class="d-lg-flex align-items-center ms-auto mt-3 mt-lg-0 gap-2">
        
         <a href="../login/logout.php">
-        <button class="btn btn-danger nav-btn">ออกจากระบบ</button></a>
+        <button class="btn btn-logout-mira">ออกจากระบบ</button></a>
       </div>
       
     </div>
@@ -177,6 +192,7 @@ session_start();
 </style>
       
           <!-- สิ้นสุดแบนเนอร์ -->
+
           <!-- เริ่มต้นfooter -->
            
 

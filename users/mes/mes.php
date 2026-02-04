@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
                         <i class="bi bi-send-fill me-2"></i> ส่งข้อความ
                     </button>
                     <div class="mt-4">
-                        <a href="../users/index_users.php" class="text-decoration-none small text-muted">
+                        <a href="../../users/index_users.php" class="text-decoration-none small text-muted">
                             <i class="bi bi-arrow-left me-1"></i> กลับสู่หน้าหลัก
                         </a>
                     </div>
