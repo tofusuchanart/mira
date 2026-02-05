@@ -77,24 +77,54 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
             border-color: var(--mira-pink);
         }
 
-        .btn-send {
-            background: var(--mira-dark-pink);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            transition: 0.3s;
-            width: 100%;
-        }
+        /* ปรับแต่งปุ่มส่งข้อความใหม่ให้มี Glow Effect */
+.btn-send {
+    background: var(--mira-dark-pink);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* เพิ่มความนุ่มนวลในการเคลื่อนไหว */
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(179, 54, 91, 0.2); /* เงาปกติแบบบางๆ */
+}
 
-        .btn-send:hover {
-            background: #8e2a48;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(179, 54, 91, 0.2);
-            color: white;
-        }
+.btn-send:hover {
+    background: #c7456d; /* สีชมพูที่สว่างขึ้นเล็กน้อย */
+    color: white;
+    transform: translateY(-3px) scale(1.02); /* ยกตัวขึ้นและขยายขึ้นนิดเดียว */
+    
+    /* แสงฟุ้ง (Glow) รอบปุ่ม */
+    box-shadow: 0 0 20px rgba(179, 54, 91, 0.4), 
+                0 0 40px rgba(179, 54, 91, 0.2); 
+    
+    letter-spacing: 2px; /* เพิ่มระยะห่างตัวอักษรตอน Hover ให้ดูหรูขึ้น */
+}
+
+/* เพิ่มเอฟเฟกต์แสงวิ่งผ่านปุ่ม (Shine Effect) */
+.btn-send::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: 0.6s;
+}
+
+.btn-send:hover::before {
+    left: 100%;
+}
 
         .contact-info-icon {
             width: 50px;
@@ -111,12 +141,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
         }
     </style>
 </head>
+<style>
+    /* ... CSS เดิมของคุณ ... */
+
+    body {
+        background-color: var(--mira-bg);
+        font-family: 'Sarabun', sans-serif;
+        min-height: 100vh;
+        /* ปรับ padding แทนการใช้ flex center เพื่อให้ scroll ได้สวยๆ */
+        padding: 50px 0;
+    }
+
+    .logo-wrapper {
+        text-align: center;
+        margin-bottom: -30px; /* ให้โลโก้เกยกับแผ่น glass เล็กน้อยดูมีมิติ */
+        position: relative;
+        z-index: 10;
+    }
+
+   .mira-logo-top {
+        width: 140px; /* เพิ่มขนาดขึ้นนิดหน่อยเพราะไม่มีขอบขาวแล้ว */
+        height: auto;
+        /* ใช้ drop-shadow เพื่อให้ตัวโลโก้ดูมีมิติ ลอยออกมาจากพื้นหลัง */
+        filter: drop-shadow(0 8px 12px rgba(179, 54, 91, 0.25));
+        
+        /* ลบพื้นหลังและขอบออก */
+        background: transparent; 
+        padding: 0;
+        border-radius: 0;
+        
+        transition: transform 0.4s ease;
+    }
+
+    .mira-logo-top:hover {
+        /* เพิ่มลูกเล่นเวลาเอาเมาส์มาชี้ ให้โลโก้ขยับเล็กน้อย */
+        transform: scale(1.05) rotate(2deg);
+    }
+
+    .glass-card {
+        /* ... ของเดิม ... */
+        padding-top: 60px; /* เว้นพื้นที่ด้านบนเพิ่มเพราะมีโลโก้เกยเข้ามา */
+    }
+</style>
 <body>
 
 <div class="container">
+    <div class="container">
+    <div class="logo-wrapper">
+        <img src="../photo/golo.png" alt="Mira Logo" class="mira-logo-top">
+    </div>
     <div class="glass-card shadow-lg">
         <div class="text-center mb-5">
-            <h2 class="mira-header fw-bold">Send us a Message</h2>
+            <h2 class="mira-header fw-bold">ส่งข้อความถึงเรา</h2>
             <p class="text-muted">มีคำถามหรือข้อสงสัย? ส่งข้อความหาเราได้ทันที</p>
         </div>
 
@@ -149,9 +225,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
                         <i class="bi bi-send-fill me-2"></i> ส่งข้อความ
                     </button>
                     <div class="mt-4">
-                        <a href="../../users/index_users.php" class="text-decoration-none small text-muted">
-                            <i class="bi bi-arrow-left me-1"></i> กลับสู่หน้าหลัก
-                        </a>
+                        
+
+
+                    <style>
+    .btn-back-pill {
+        display: inline-flex;
+        align-items: center;
+        background: white;
+        color: var(--mira-dark-pink);
+        border: 1px solid #eee;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+    }
+
+    .btn-back-pill i {
+        margin-right: 10px;
+    }
+
+    .btn-back-pill:hover {
+        background: var(--mira-bg); /* ชมพูอ่อนมากที่ตั้งค่าไว้ */
+        border-color: var(--mira-pink);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(179, 54, 91, 0.1);
+        color: var(--mira-dark-pink);
+    }
+</style>
+                        <a href="../../users/index_users.php" class="btn-back-pill">
+    <i class="bi bi-chevron-left"></i> กลับสู่หน้าหลัก
+</a>
                     </div>
                 </div>
             </div>

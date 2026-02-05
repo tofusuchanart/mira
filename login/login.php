@@ -65,7 +65,7 @@
 
         body {
             height: 100vh;
-            background-image: url("photo/pay.jpg");
+            background-image: url("photo/ti.jpg");
             background-size: cover;
             background-position: center;
             display: flex;
@@ -74,9 +74,9 @@
         }
 
         .login-container {
-            width: 350px;
-            padding: 30px;
-            border-radius: 16px;
+            width: 380px;
+            padding: 50px;
+            border-radius: 50px;
             background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
@@ -109,7 +109,7 @@
             padding: 12px;
             border: none;
             border-radius: 25px;
-            background: #ffb6b6;
+            background: #f8a5c2;
             color: #333;
             font-weight: bold;
             cursor: pointer;
@@ -117,8 +117,23 @@
         }
 
         .login-container button:hover {
-            background: #ff9a9a;
-        }
+    transform: translateY(-3px); /* ลอยขึ้นเล็กน้อย */
+    background: linear-gradient(45deg, #f78fb3, #f78fb3);
+    /* เพิ่มความฟุ้งตอนเอาเมาส์วาง */
+    box-shadow: 0 0 25px rgba(255, 51, 153, 0.7), 
+                0 0 10px rgba(255, 255, 255, 0.4);
+}
+login-container button:active {
+    transform: translateY(-1px);
+}
+
+
+
+
+
+
+
+
 
         .options {
             display: flex;
@@ -142,17 +157,62 @@
             background: #ffffff;
             color: #333;
         }
+
+
+
+
+         body {
+        background-color: var(--mira-bg);
+        font-family: 'Sarabun', sans-serif;
+        min-height: 100vh;
+        /* ปรับ padding แทนการใช้ flex center เพื่อให้ scroll ได้สวยๆ */
+        padding: 50px 0;
+    }
+
+    .logo-wrapper {
+        text-align: center;
+        margin-bottom: -30px; /* ให้โลโก้เกยกับแผ่น glass เล็กน้อยดูมีมิติ */
+        position: relative;
+        z-index: 10;
+    }
+
+   .mira-logo-top {
+        width: 140px; /* เพิ่มขนาดขึ้นนิดหน่อยเพราะไม่มีขอบขาวแล้ว */
+        height: auto;
+        /* ใช้ drop-shadow เพื่อให้ตัวโลโก้ดูมีมิติ ลอยออกมาจากพื้นหลัง */
+        filter: drop-shadow(0 8px 12px rgba(179, 54, 91, 0.25));
+        
+        /* ลบพื้นหลังและขอบออก */
+        background: transparent; 
+        padding: 0;
+        border-radius: 0;
+        
+        transition: transform 0.4s ease;
+    }
+
+    .mira-logo-top:hover {
+        /* เพิ่มลูกเล่นเวลาเอาเมาส์มาชี้ ให้โลโก้ขยับเล็กน้อย */
+        transform: scale(1.05) rotate(2deg);
+    }
+
+    .glass-card {
+        /* ... ของเดิม ... */
+        padding-top: 60px; /* เว้นพื้นที่ด้านบนเพิ่มเพราะมีโลโก้เกยเข้ามา */
+    }
     </style>
 </head>
 <body>
-
+<div class="container">
+    <div class="container">
+    <div class="logo-wrapper">
+        <img src="../photo/golo.png" alt="Mira Logo" class="mira-logo-top">
+    </div>
 <div class="login-container">
-    <h1>Mira </h1>
-    <p>Have an account?</p>
+ 
 <Form method="post"action="login_db.php">
     <input type="text" placeholder="Username"name="email">
     <input type="password" placeholder="Password"name="password">
-    <button>Login</button>
+    <button>เข้าสู่ระบบ</button>
 </Form>
     <div class="options">
     <label style="cursor: pointer;">
@@ -168,6 +228,9 @@
 </div>
 </div>
 </div>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
