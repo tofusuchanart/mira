@@ -11,7 +11,7 @@
 
     <div class="carousel-inner">
         <div class="carousel-item active">
-            <img src="photo/banner1.png" class="d-block w-100" alt="Mira Banner 1">
+            <img src="photo/banner4.png" class="d-block w-100" alt="Mira Banner 1">
         </div>
         <div class="carousel-item">
             <img src="photo/banner2.png" class="d-block w-100" alt="Mira Banner 2">

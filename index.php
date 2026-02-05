@@ -388,8 +388,7 @@ $reviews = $stmt_rev->fetchAll();
         </div>
     </div>
 </footer>
-           <!-- สิ้นสุดfooter -->
-        <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+        
         <div class="modal fade" id="loginAlertModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">

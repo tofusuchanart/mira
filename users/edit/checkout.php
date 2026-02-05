@@ -1,3 +1,22 @@
+<?php
+session_start();
+require_once "../../config.php"; // ตรวจสอบ path ไฟล์เชื่อมต่อฐานข้อมูลให้ถูกต้อง
+
+$total_price = 0;
+$items = [];
+
+// ดึงข้อมูลสินค้าจากฐานข้อมูลตาม ID ที่อยู่ใน Session
+if (!empty($_SESSION['cart'])) {
+    $ids = implode(',', array_keys($_SESSION['cart']));
+    try {
+        $sql = "SELECT * FROM products WHERE product_id IN ($ids)";
+        $stmt = $conn->query($sql);
+        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -5,7 +24,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MIRA | Payment Checkout</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
-    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <style>
@@ -25,8 +44,9 @@
         .checkout-header {
             font-family: 'Playfair Display', serif;
             color: var(--mira-dark-pink);
-            font-size: 2.2rem;
+            font-size: 3rem;
             margin-bottom: 30px;
+            font-weight: 800;
         }
 
         .payment-card {
@@ -125,7 +145,7 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <h2 class="checkout-header text-center">Payment Method</h2>
+            <h2 class="checkout-header text-center">ชำระเงิน</h2>
             
             <div class="row g-4">
                 <div class="col-md-7">
@@ -134,14 +154,14 @@
                         
                         <div class="bank-info-box">
                             <div class="d-flex align-items-center mb-3">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c6/Siam_Commercial_Bank_Logo.png" class="bank-logo me-3" alt="Bank Logo">
+                                <img src="../../users/photo/Bank.webp" class="bank-logo me-3" alt="Bank Logo">
                                 <div>
-                                    <p class="mb-0 fw-bold text-dark">ธนาคารไทยพาณิชย์ (SCB)</p>
-                                    <p class="mb-0 small text-muted">ชื่อบัญชี: บจก. มิรา คอสเมติกส์</p>
+                                    <p class="mb-0 fw-bold text-dark">ธนาคารกรุงไทย (KTB)</p>
+                                    <p class="mb-0 small text-muted">ชื่อบัญชี: บจก. มิรา</p>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded-4 border">
-                                <span class="h5 mb-0 fw-bold text-mira">123-4-56789-0</span>
+                                <span class="h5 mb-0 fw-bold text-mira">679-5-69372-4</span>
                                 <button class="copy-btn" onclick="copyAccount()">คัดลอกเลขบัญชี</button>
                             </div>
                         </div>
@@ -198,9 +218,38 @@
                             <i class="bi bi-shield-check text-success"></i> 
                             ตรวจสอบข้อมูลอย่างปลอดภัยตามมาตรฐาน SSL
                         </p>
-                        <a href="cart.php" class="text-decoration-none small text-pink-accent">
-                            <i class="bi bi-chevron-left"></i> กลับไปที่ตะกร้าสินค้า
-                        </a>
+                        
+                        <style>
+    .btn-back-pill {
+        display: inline-flex;
+        align-items: center;
+        background: white;
+        color: var(--mira-dark-pink);
+        border: 1px solid #eee;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+    }
+
+    .btn-back-pill i {
+        margin-right: 10px;
+    }
+
+    .btn-back-pill:hover {
+        background: var(--mira-bg); /* ชมพูอ่อนมากที่ตั้งค่าไว้ */
+        border-color: var(--mira-pink);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(179, 54, 91, 0.1);
+        color: var(--mira-dark-pink);
+    }
+</style>
+                        <a href="edit.php" class="btn-back-pill">
+    <i class="bi bi-chevron-left"></i> กลับไปที่ตะกร้าสินค้า
+</a>
                     </div>
                 </div>
             </div>

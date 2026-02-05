@@ -167,8 +167,8 @@ if (!empty($_SESSION['cart'])) {
 
 <div class="container py-5">
     <div class="text-center mb-5">
-        <h2 class="mira-header fw-bold text-uppercase" style="font-size: 2.5rem;">ตะกร้าของฉัน</h2>
-        <div class="mx-auto" style="width: 40px; height: 3px; background: var(--mira-dark-pink); border-radius: 10px;"></div>
+        <h2 class="mira-header fw-bold text-uppercase" style="font-size: 3rem;">ตะกร้าของฉัน</h2>
+        <div class="mx-auto" style="width: 30px; height: 3px; border-radius: 10px;"></div>
     </div>
 
     <div class="row g-4 justify-content-center">
@@ -257,9 +257,41 @@ if (!empty($_SESSION['cart'])) {
                     สั่งซื้อสินค้าเลย
                 </button>
                 <div class="text-center">
-                    <a href="../index_users.php" class="text-decoration-none small text-muted hover-link">
-                        <i class="bi bi-arrow-left-short"></i> Continue Shopping
-                    </a>
+
+<style>
+    .btn-back-pill {
+        display: inline-flex;
+        align-items: center;
+        background: white;
+        color: var(--mira-dark-pink);
+        border: 1px solid #eee;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+    }
+
+    .btn-back-pill i {
+        margin-right: 10px;
+    }
+
+    .btn-back-pill:hover {
+        background: var(--mira-bg); /* ชมพูอ่อนมากที่ตั้งค่าไว้ */
+        border-color: var(--mira-pink);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(179, 54, 91, 0.1);
+        color: var(--mira-dark-pink);
+    }
+</style>
+<a href="../index_users.php" class="btn-back-pill">
+    <i class="bi bi-chevron-left"></i> กลับไป Shopping
+</a>
+
+
+                    
                 </div>
                 
             </div>
