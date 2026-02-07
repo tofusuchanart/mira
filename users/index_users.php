@@ -11,6 +11,7 @@ session_start();
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet"> 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="icon" href="photo/golo.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         /* ปรับแต่งกรอบ Banner ให้มนและมีมิติ */
 #carouselExampleFade {
@@ -144,13 +145,47 @@ session_start();
     </ul>
 </li>
 
-        <li class="nav-item">
-          <a class="nav-link" href="edit/edit.php">🛒</a>
-        </li>
-        
-        <li class="nav-item">
-          <h4><a class="nav-link" href="mes/mes.php">💬</a></h4>
-        </li>
+
+<style>
+    /* ปรับแต่งไอคอน Navbar ให้เป็นโทนชมพู MIRA */
+    .mira-nav-icon {
+        color: #a34a67 !important; /* สีชมพูเข้มตามรูป Customer Directory */
+        font-size: 1.4rem; /* ปรับขนาดไอคอนให้พอดี */
+        padding: 8px 12px !important;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* เอฟเฟกต์ตอนเอาเมาส์ไปชี้ */
+    .mira-nav-icon:hover {
+        color: #f8a5c2 !important; /* ชมพูอ่อนลงเล็กน้อยเมื่อ hover */
+        transform: translateY(-2px); /* ลอยขึ้นนิดนึงดูน่ารัก */
+    }
+
+    /* ปรับให้แสดงผลเรียงกันสวยๆ ใน Navbar */
+    .nav-item {
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+    <a class="nav-link mira-nav-icon" href="edit/edit.php">
+        <i class="bi bi-bag-heart"></i> </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link mira-nav-icon" href="mes/mes.php">
+        <i class="bi bi-chat-dots"></i>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link mira-nav-icon" href="pf.php">
+        <i class="bi bi-person-circle"></i>
+    </a>
+</li>
       </ul>
 
       <div class="d-lg-flex align-items-center ms-auto mt-3 mt-lg-0 gap-2">
