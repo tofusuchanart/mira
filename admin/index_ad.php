@@ -13,6 +13,15 @@ try {
     
     // 4. จัดการการเงิน: นับจำนวนรายการชำระเงินจากตาราง payments
     $countPayments = $conn->query("SELECT COUNT(*) FROM payments")->fetchColumn();
+    // นับจำนวนข้อความติดต่อ (จากตาราง contact_messages)
+$stmtMsg = $conn->prepare("SELECT COUNT(*) FROM contact_messages");
+$stmtMsg->execute();
+$countMessages = $stmtMsg->fetchColumn();
+
+// นับจำนวนรายการสั่งซื้อทั้งหมด (จากตาราง orders)
+$stmtOrders = $conn->prepare("SELECT COUNT(*) FROM orders");
+$stmtOrders->execute();
+$countOrders = $stmtOrders->fetchColumn();
 
 } catch(PDOException $e) {
     echo "เกิดข้อผิดพลาด: " . $e->getMessage();
@@ -131,6 +140,34 @@ try {
             text-decoration: none;
             font-size: 0.9rem;
         }
+
+
+        /* สีเดิมที่มีอยู่แล้ว... */
+    .bg-message { background-color: #f3e5f5; color: #9c27b0; } /* โทนม่วงอ่อนพาสเทล */
+    .bg-order { background-color: #e0f2f1; color: #009688; }   /* โทนเขียวมิ้นต์ */
+    
+    /* สไตล์เพิ่มเติมสำหรับ Card (ถ้ายังไม่มี) */
+    .stat-card {
+        border: none;
+        border-radius: 20px;
+        padding: 20px;
+        transition: transform 0.3s ease;
+        background: #fff;
+    }
+    .stat-card:hover {
+        transform: translateY(-10px);
+    }
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+    .stat-label { color: #888; font-size: 0.9rem; }
+    .stat-number { font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: #444; }
     </style>
 </head>
 <body>
@@ -148,7 +185,7 @@ try {
             <h1>Customer Directory</h1>
             <p>บริหารจัดการข้อมูลสมาชิกและสถิติการซื้อ</p>
         </div>
-        <a href="#" class="btn-dashboard"><i class="bi bi-layout-text-sidebar-reverse"></i> Dashboard</a>
+       
     </div>
 
     <div class="row g-4">
@@ -193,6 +230,29 @@ try {
                 <div class="stat-label">สมาชิกทั้งหมด</div>
                 <div class="stat-number"><?php echo number_format($countUsers); ?></div>
                 <a href="member/member.php" class="btn btn-mira w-100">ดูสมาชิก</a>
+            </div>
+        </div>
+
+        
+        <div class="col-md-3">
+            <div class="card stat-card h-100">
+                <div class="icon-box bg-message">
+                    <i class="bi bi-envelope-paper fs-4"></i>
+                </div>
+                <div class="stat-label">ข้อความติดต่อทั้งหมด</div>
+                <div class="stat-number"><?php echo number_format($countMessages); ?></div>
+                <a href="contact/manage_messages.php" class="btn btn-mira w-100">ดูข้อความ</a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stat-card h-100">
+                <div class="icon-box bg-order">
+                    <i class="bi bi-cart-check fs-4"></i>
+                </div>
+                <div class="stat-label">คำสั่งซื้อทั้งหมด</div>
+                <div class="stat-number"><?php echo number_format($countOrders); ?></div>
+                <a href="orderss/manage_orders.php" class="btn btn-mira w-100">จัดการคำสั่งซื้อ</a>
             </div>
         </div>
     </div>

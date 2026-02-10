@@ -31,7 +31,7 @@ if (isset($_POST['confirm_delete_account'])) {
         session_destroy();
         echo "<script>
                 alert('บัญชีของคุณถูกลบเรียบร้อยแล้ว หวังว่าจะได้พบกันใหม่นะค่ะ ✨');
-                window.location.href = '../register.php'; 
+                window.location.href = '../register/register.php'; 
               </script>";
         exit();
     } catch (Exception $e) {
@@ -100,7 +100,7 @@ if (isset($_POST['change_password'])) {
             <a href="pf.php" class="nav-back"><i class="bi bi-chevron-left me-2"></i> กลับหน้าโปรไฟล์</a>
 
             <div class="settings-card">
-                <h2 class="mira-header fw-bold mb-4">Account Settings</h2>
+                <h2 class="mira-header fw-bold mb-4">การตั้งค่าบัญชี</h2>
 
                 <div class="status-badge shadow-sm d-flex justify-content-between align-items-center">
                     <div>
@@ -121,7 +121,7 @@ if (isset($_POST['change_password'])) {
                 <?php endif; ?>
 
                 <div class="mb-5">
-                    <div class="section-title"><i class="bi bi-shield-lock"></i> Password & Security</div>
+                    <div class="section-title"><i class="bi bi-shield-lock"></i>รหัสผ่านและความปลอดภัย</div>
                     <form action="" method="POST">
                         <div class="row g-3">
                             <div class="col-12">
@@ -146,7 +146,7 @@ if (isset($_POST['change_password'])) {
                 <hr style="opacity: 0.1;">
 
                 <div class="mt-4">
-                    <div class="section-title"><i class="bi bi-bell"></i> Notifications & Others Settings</div>
+                    <div class="section-title"><i class="bi bi-bell"></i>การแจ้งเตือนและการตั้งค่าอื่นๆ</div>
                     
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
@@ -172,7 +172,7 @@ if (isset($_POST['change_password'])) {
 function confirmDelete() {
     Swal.fire({
         title: 'คุณแน่ใจหรือไม่?',
-        text: "ข้อมูลสมาชิกและประวัติของคุณจะถูกลบออกถาวรนะค่ะ",
+        text: "ข้อมูลสมาชิกและประวัติของคุณจะถูกลบออกถาวรนะคะ",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#a34a67', // สีชมพูเข้ม MIRA

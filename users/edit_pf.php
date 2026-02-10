@@ -178,7 +178,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
             <div class="glass-panel">
                 <div class="text-center mb-4">
-                    <h2 class="mira-header fw-bold">Edit Profile</h2>
+                    <h2 class="mira-header fw-bold">แก้ไขโปรไฟล์</h2>
                     <p class="text-muted small">ปรับปรุงข้อมูลส่วนตัวของคุณให้เป็นปัจจุบัน</p>
                 </div>
 

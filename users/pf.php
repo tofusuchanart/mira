@@ -151,6 +151,41 @@ try {
             border-radius: 50px;
             text-transform: uppercase;
         }
+
+        .mira-back-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-radius: 15px;
+    background: #ffffff;
+    color: var(--mira-pink-dark) !important; /* ใช้สีชมพูหลักแทนสีแดง */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(163, 74, 103, 0.1);
+    margin-bottom: 12px;
+}
+
+.mira-back-link:hover {
+    background: var(--mira-pink-soft); /* พื้นหลังชมพูอ่อนมากเมื่อชี้ */
+    color: var(--mira-pink-dark) !important;
+    transform: translateX(-5px); /* ขยับไปทางซ้ายเล็กน้อยให้ความรู้สึกย้อนกลับ */
+    box-shadow: 0 4px 15px rgba(163, 74, 103, 0.1) !important;
+}
+
+.mira-back-link .menu-icon {
+    font-size: 1.1rem;
+    margin-right: 12px;
+    transition: transform 0.3s ease;
+}
+
+.mira-back-link:hover .menu-icon {
+    transform: scale(1.1);
+}
+
+.menu-text {
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
     </style>
 </head>
 <body>
@@ -172,15 +207,16 @@ try {
                         </div>
 
                         <div class="text-start mt-4">
-                            <a href="order_history.php" class="menu-link shadow-sm">
+                            <a href="od_htr.php" class="menu-link shadow-sm">
                                 <i class="bi bi-clock-history menu-icon"></i> ประวัติการสั่งซื้อ
                             </a>
                             <a href="edit_pf.php" class="menu-link shadow-sm">
                                 <i class="bi bi-pencil-square menu-icon"></i> แก้ไขข้อมูลส่วนตัว
                             </a>
-                            <a href="../../logout.php" class="menu-link shadow-sm text-danger">
-                                <i class="bi bi-box-arrow-right menu-icon"></i> ออกจากระบบ
-                            </a>
+                           <a href="index_users.php" class="menu-link shadow-sm mira-back-link">
+    <i class="bi bi-chevron-left menu-icon"></i> 
+    <span class="menu-text">กลับหน้าหลัก</span>
+</a>
                         </div>
                     </div>
                 </div>

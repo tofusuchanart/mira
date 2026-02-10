@@ -257,23 +257,20 @@ if (!empty($_SESSION['cart'])) {
     </div>
 </div>
 
+<?php if ($status_msg == "success"): ?>
 <script>
-    function copyAccount() {
-        navigator.clipboard.writeText('1234567890');
-        alert('คัดลอกเลขบัญชีแล้วค่ะ!');
-    }
-
-    function previewImage(input) {
-        const container = document.getElementById('preview-container');
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                container.innerHTML = `<img src="${e.target.result}" style="max-height: 150px; border-radius: 10px;" class="mt-2 shadow-sm">`;
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
+    Swal.fire({
+        title: 'แจ้งชำระเงินสำเร็จ',
+        text: 'เราได้รับสลิปของคุณแล้ว จะดำเนินการตรวจสอบโดยเร็วที่สุดค่ะ',
+        icon: 'success',
+        confirmButtonColor: '#a34a67'
+    }).then(() => { window.location.href = 'order_history.php'; });
 </script>
+<?php elseif ($status_msg == "error"): ?>
+<script>
+    Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่ค่ะ', icon: 'error' });
+</script>
+<?php endif; ?>
 
 </body>
 </html>
