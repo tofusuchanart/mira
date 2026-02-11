@@ -2,232 +2,229 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Login Page</title>
+    <title>MIRA | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
     <style>
-        /* จัดการกลุ่มตัวเลือก */
-.options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
-    color: #666;
-}
+        :root {
+            --mira-pink: #f8a5c2;
+            --mira-dark-pink: #a34a67;
+            --mira-soft-pink: #fff2f6;
+            --mira-glass: #ffffff;
+        }
 
-/* ปรับแต่ง Checkbox ให้ดูพรีเมียม */
-.options input[type="checkbox"] {
-    accent-color: #b3365b; /* เปลี่ยนสี Checkbox เป็นชมพู Mira */
-    margin-right: 5px;
-    cursor: pointer;
-}
-
-/* ปรับแต่งลิงก์ สมัครสมาชิก / ลืมรหัสผ่าน */
-.options a {
-    color: #b3365b;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.options a:hover {
-    color: #ff85a1; /* สีชมพูสว่างขึ้นเวลา Hover */
-    text-decoration: underline;
-}
-
-/* ปรับแต่งลิงก์สมัครสมาชิกให้เป็นปุ่มแคปซูล */
-.register-link {
-    color: #b3365b !important; /* สีชมพู Mira */
-    background-color: #fff2f6; /* พื้นหลังชมพูอ่อนมาก */
-    padding: 6px 20px;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none !important; /* เอาเส้นขีดใต้ออกเด็ดขาด */
-    transition: all 0.3s ease;
-    display: inline-block;
-    border: 1px solid rgba(179, 54, 91, 0.1); /* ขอบบางๆ ให้ดูมีมิติ */
-}
-
-/* เอฟเฟกต์เวลา Hover (ไม่มีเส้นขีดใต้) */
-.register-link:hover {
-    background-color: #b3365b; /* เปลี่ยนพื้นหลังเป็นชมพูเข้ม */
-    color: #ffffff !important; /* เปลี่ยนตัวหนังสือเป็นขาว */
-    text-decoration: none !important; /* ย้ำว่าไม่ต้องมีเส้นขีดใต้ */
-    box-shadow: 0 5px 15px rgba(179, 54, 91, 0.2); /* เพิ่มแสงฟุ้งสีชมพู */
-    transform: translateY(-2px); /* ลอยขึ้นเล็กน้อย */
-}
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Sarabun', sans-serif;
         }
 
-        body {
-            height: 100vh;
-            background-image: url("photo/ti.jpg");
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+       body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    /* ใส่สีชมพูเป็นพื้นหลังสำรอง ถ้าสีนี้ขึ้นแต่รูปไม่ขึ้น แสดงว่า Path รูปผิดชัวร์ๆ ครับ */
+    background-color: #fff2f6; 
+    
+    /* ลองลบ ../ ออกถ้าไฟล์ login.php อยู่หน้าหลัก */
+    background-image: url("photo/op.jpg"); 
+    
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .login-container {
-            width: 380px;
-            padding: 50px;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        /* Container หลัก */
+        .login-card {
+            width: 400px;
+            padding: 40px;
+            border-radius: 40px;
+            background: #ffffff26;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid #ffffff4d;
+            box-shadow: 0 20px 40px #00000026;
             text-align: center;
-            color: #fff;
         }
 
-        .login-container h1 {
-            font-size: 22px;
-            margin-bottom: 10px;
+        /* จัดการโลโก้ให้เด่น */
+        .logo-wrapper {
+            margin-bottom: 25px;
         }
 
-        .login-container p {
-            margin-bottom: 20px;
-            font-size: 14px;
+        .mira-logo-top {
+            width: 120px;
+            filter: drop-shadow(0 5px 10px #0000001a);
+            transition: 0.4s ease;
         }
 
-        .login-container input {
-            width: 100%;
-            padding: 12px;
+        .mira-logo-top:hover {
+            transform: scale(1.1);
+        }
+
+        /* หัวข้อ */
+        h1 {
+            color: #ffffff;
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        /* ช่องกรอกข้อมูล */
+        .input-group {
             margin-bottom: 15px;
-            border-radius: 25px;
-            border: none;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.85);
             outline: none;
-            background: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+            color: #555;
+            transition: 0.3s;
         }
 
-        .login-container button {
+        input:focus {
+            background: #fff;
+            box-shadow: 0 0 15px rgba(248, 165, 194, 0.4);
+            border-color: var(--mira-pink);
+        }
+
+        /* ปุ่มเข้าสู่ระบบ */
+        .btn-login {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 25px;
-            background: #f8a5c2;
-            color: #333;
-            font-weight: bold;
+            border-radius: 50px;
+            background: var(--mira-dark-pink);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            margin-bottom: 15px;
+            transition: 0.4s;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(163, 74, 103, 0.3);
         }
 
-        .login-container button:hover {
-    transform: translateY(-3px); /* ลอยขึ้นเล็กน้อย */
-    background: linear-gradient(45deg, #f78fb3, #f78fb3);
-    /* เพิ่มความฟุ้งตอนเอาเมาส์วาง */
-    box-shadow: 0 0 25px rgba(255, 51, 153, 0.7), 
-                0 0 10px rgba(255, 255, 255, 0.4);
-}
-login-container button:active {
-    transform: translateY(-1px);
-}
+        .btn-login:hover {
+            background: #8e3e58;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(163, 74, 103, 0.4);
+        }
 
-
-
-
-
-
-
-
-
+        /* ส่วนเลือกเพิ่มเติม (จดจำฉัน/กลับหน้าหลัก) */
         .options {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
-            margin-bottom: 20px;
+            align-items: center;
+            margin: 20px 0;
+            font-size: 0.85rem;
+            color: #fff;
+        }
+
+        .options label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .options input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--mira-dark-pink);
+            margin: 0;
         }
 
         .options a {
             color: #fff;
             text-decoration: none;
+            opacity: 0.9;
+            transition: 0.3s;
         }
 
-        .social-login {
-            display: flex;
-            gap: 10px;
+        .options a:hover {
+            opacity: 1;
+            text-decoration: underline;
         }
 
-        .social-login button {
-            flex: 1;
-            background: #ffffff;
-            color: #333;
+        /* ส่วนสมัครสมาชิก */
+        .register-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 0.9rem;
         }
 
+        .register-link {
+            display: inline-block;
+            margin-top: 10px;
+            background: var(--mira-soft-pink);
+            color: var(--mira-dark-pink) !important;
+            padding: 8px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: 0.3s;
+            border: 1px solid transparent;
+        }
 
+        .register-link:hover {
+            background: var(--mira-dark-pink);
+            color: #fff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px #0000001a;
+        }
 
-
-         body {
-        background-color: var(--mira-bg);
-        font-family: 'Sarabun', sans-serif;
-        min-height: 100vh;
-        /* ปรับ padding แทนการใช้ flex center เพื่อให้ scroll ได้สวยๆ */
-        padding: 50px 0;
-    }
-
-    .logo-wrapper {
-        text-align: center;
-        margin-bottom: -30px; /* ให้โลโก้เกยกับแผ่น glass เล็กน้อยดูมีมิติ */
-        position: relative;
-        z-index: 10;
-    }
-
-   .mira-logo-top {
-        width: 140px; /* เพิ่มขนาดขึ้นนิดหน่อยเพราะไม่มีขอบขาวแล้ว */
-        height: auto;
-        /* ใช้ drop-shadow เพื่อให้ตัวโลโก้ดูมีมิติ ลอยออกมาจากพื้นหลัง */
-        filter: drop-shadow(0 8px 12px rgba(179, 54, 91, 0.25));
-        
-        /* ลบพื้นหลังและขอบออก */
-        background: transparent; 
-        padding: 0;
-        border-radius: 0;
-        
-        transition: transform 0.4s ease;
-    }
-
-    .mira-logo-top:hover {
-        /* เพิ่มลูกเล่นเวลาเอาเมาส์มาชี้ ให้โลโก้ขยับเล็กน้อย */
-        transform: scale(1.05) rotate(2deg);
-    }
-
-    .glass-card {
-        /* ... ของเดิม ... */
-        padding-top: 60px; /* เว้นพื้นที่ด้านบนเพิ่มเพราะมีโลโก้เกยเข้ามา */
-    }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="container">
+
+<div class="login-card">
     <div class="logo-wrapper">
         <img src="../photo/golo.png" alt="Mira Logo" class="mira-logo-top">
     </div>
-<div class="login-container">
- 
-<Form method="post"action="login_db.php">
-    <input type="text" placeholder="Username"name="email">
-    <input type="password" placeholder="Password"name="password">
-    <button>เข้าสู่ระบบ</button>
-</Form>
+
+    <h1>Welcome to MIRA</h1>
+
+    <form method="post" action="login_db.php">
+        <div class="input-group">
+            <input type="text" placeholder="Username" name="email" required>
+        </div>
+        <div class="input-group">
+            <input type="password" placeholder="Password" name="password" required>
+        </div>
+        <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
+    </form>
+
     <div class="options">
-    <label style="cursor: pointer;">
-        <input type="checkbox"> จดจำฉันไว้
-    </label>
-    <a href="#">ลืมรหัสผ่าน?</a>
+        <label>
+            <input type="checkbox"> จดจำฉันไว้
+        </label>
+        <a href="../index.php"><i class="bi bi-house-door"></i> กลับหน้าหลัก</a>
+    </div>
+
+    <div class="register-section">
+        <p>หากคุณยังไม่มีบัญชี?</p>
+        <a href="../register/register.php" class="register-link">สมัครสมาชิก</a>
+    </div>
 </div>
 
-<div class="text-center mt-3">
-    
-    <span style="color: #fff; font-size: 0.9rem;">หากคุณยังไม่มีบัญชี?</span>
-    <a href="../register/register.php" class="register-link ms-2">สมัครสมาชิก</a>
-</div>
-</div>
-</div>
+</body>
+</html>
 
 
 

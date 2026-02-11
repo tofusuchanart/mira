@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(15px);
             border-radius: 50px;
             border: 1px solid rgba(255, 255, 255, 0.3);

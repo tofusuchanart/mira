@@ -1,14 +1,10 @@
-<?php 
-require_once "../../config.php"; // เชื่อมต่อฐานข้อมูล
+<?php
+$conn = new mysqli("localhost", "root", "", "mira_db");
+if ($conn->connect_error) { die("Connection failed: " . $conn->connect_error); }
 
-// ดึงข้อมูลสินค้าทั้งหมดจากตาราง products โดยเรียงจากใหม่ไปเก่า
-try {
-    $stmt = $conn->prepare("SELECT * FROM products ORDER BY product_id DESC");
-    $stmt->execute();
-    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch(PDOException $e) {
-    echo "Error: " . $e->getMessage();
-}
+// ดึงข้อมูลสินค้าทั้งหมด (ไม่เอา Categories)
+$sql = "SELECT * FROM products ORDER BY created_at DESC";
+$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
@@ -16,169 +12,111 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Products - MIRA Admin</title>
-    <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
-    
+    <title>Product Management - Mira</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Sarabun', sans-serif; 
-            /* ใช้รูปพื้นหลังเดียวกับหน้า Dashboard เพื่อความต่อเนื่อง */
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../../admin/photo_ad/ro.jpg');
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            min-height: 100vh;
-            color: white;
-        }
-
-        .navbar-glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 30px;
-            margin-bottom: 50px;
-        }
-
-        .table {
-            color: white;
-            vertical-align: middle;
-        }
-
-        .table thead th {
-            background: rgba(255, 255, 255, 0.1);
-            color: #f8a5c2; /* สีชมพูพาสเทล */
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-        }
-
-        .table tbody td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 15px;
-        }
-
-        .product-img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 10px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-action {
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            transition: 0.3s;
-        }
-
-        .btn-add {
-            background-color: #f8a5c2;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 20px;
-        }
-        
-        .btn-add:hover {
-            background-color: #f78fb3;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        /* ปรับสีตัวเลขราคา */
-        .price-text {
-            color: #00d2d3;
-            font-weight: bold;
-        }
+        body { font-family: 'Sarabun', sans-serif; background-color: #FFF5F7; }
+        .product-card { border-radius: 2rem; }
     </style>
 </head>
-<body>
+<body class="p-6 md:p-12">
 
-<nav class="navbar navbar-expand-lg navbar-dark navbar-glass sticky-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index_ad.php">
-            <i class="bi bi-shield-lock-fill me-2"></i>MIRA ADMIN
-        </a>
-        <div class="ms-auto">
-            <a href="../index_ad.php" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
-        </div>
-    </div>
-</nav>
-
-<div class="container">
-    <div class="glass-card shadow-lg">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-0">จัดการรายการสินค้า</h2>
-                <p class="text-white-50 small mb-0">จัดการข้อมูล แก้ไข และลบสินค้าในระบบ</p>
-            </div>
-            <a href="add_product.php" class="btn btn-add shadow-sm">
-                <i class="bi bi-plus-lg me-2"></i>เพิ่มสินค้าใหม่
+    <div class="max-w-6xl mx-auto">
+        <div class="mb-8">
+            <a href="../index_ad.php" class="inline-flex items-center text-sm text-gray-400 hover:text-[#F06292] transition-colors mb-4 group">
+                <svg class="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                กลับสู่หน้า Dashboard
             </a>
+            
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-semibold text-[#880E4F]">สินค้าคงคลังของผลิตภัณฑ์</h1>
+                    <p class="text-gray-500 text-sm mt-1">จัดการคลังสินค้า Mira ของคุณ</p>
+                </div>
+                <a href="add_product.php" class="bg-white border border-[#F06292] text-[#F06292] px-6 py-2 rounded-full hover:bg-[#F06292] hover:text-white transition-all shadow-sm">
+                    + เพิ่มสินค้าใหม่
+                </a>
+            </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table">
+        <div class="bg-white product-card shadow-sm overflow-hidden border border-pink-50">
+        
+
+
+        <div class="bg-white product-card shadow-sm overflow-hidden border border-pink-50">
+            <div class="p-6 border-b border-gray-50 flex justify-between items-center">
+                <h2 class="font-semibold text-[#AD1457]">รายการสินค้าทั้งหมด (<?php echo $result->num_rows; ?>)</h2>
+               
+            </div>
+
+            <table class="w-full text-left">
                 <thead>
-                    <tr>
-                        <th width="80">ID</th>
-                        <th width="100">รูปภาพ</th>
-                        <th>ชื่อสินค้า</th>
-                        <th width="150">ราคา</th>
-                        <th width="180" class="text-center">จัดการ</th>
+                    <tr class="text-gray-400 text-xs uppercase border-b border-gray-50">
+                        <th class="px-6 py-4">รูปภาพ</th>
+                        <th class="px-6 py-4">ข้อมูลสินค้า</th>
+                        <th class="px-6 py-4">เพศ</th>
+                        <th class="px-6 py-4 text-center">คงเหลือ</th>
+                        <th class="px-6 py-4 text-right">ราคา</th>
+                        <th class="px-6 py-4 text-center">จัดการ</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php if (count($products) > 0): ?>
-                        <?php foreach($products as $row): ?>
-                        <tr>
-                            <td><span class="badge bg-dark">#<?php echo $row['product_id']; ?></span></td>
-                            <td>
-                                <img src="../photo/<?php echo $row['image']; ?>" class="product-img" onerror="this.src='../img/no-image.png'">
-                            </td>
-                            <td>
-                                <div class="fw-bold"><?php echo $row['product_name']; ?></div>
-                                <small class="text-white-50 d-block text-truncate" style="max-width: 250px;">
-                                    <?php echo $row['description']; ?>
-                                </small>
-                            </td>
-                            <td><span class="price-text"><?php echo number_format($row['price'], 2); ?> ฿</span></td>
-                            <td class="text-center">
-                                <a href="edit.php?id=<?php echo $row['product_id']; ?>" class="btn btn-warning btn-action me-1 shadow-sm">
-                                    <i class="bi bi-pencil-square"></i> แก้ไข
+                <tbody class="divide-y divide-gray-50">
+                    <?php while($row = $result->fetch_assoc()): ?>
+                    <tr class="hover:bg-pink-50/20 transition-colors group">
+                        <td class="px-6 py-4">
+                            <img src="uploads/<?php echo $row['image']; ?>" class="w-14 h-14 rounded-2xl object-cover shadow-sm" onerror="this.src='https://via.placeholder.com/100'">
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-semibold text-gray-800"><?php echo $row['product_name']; ?></div>
+                            <div class="text-[11px] text-gray-400 truncate max-w-[150px]"><?php echo $row['description']; ?></div>
+                        </td>
+                        <td class="px-6 py-4 uppercase text-[10px] font-bold text-pink-400">
+                            <?php echo $row['sex']; ?>
+                        </td>
+                        <td class="px-6 py-4 text-center text-sm <?php echo $row['stock'] <= 0 ? 'text-red-500 font-bold' : 'text-gray-600'; ?>">
+                            <?php echo $row['stock']; ?>
+                        </td>
+                        <td class="px-6 py-4 text-right font-bold text-gray-700">
+                            ฿<?php echo number_format($row['price'], 2); ?>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex justify-center gap-2">
+                                <a href="edit_product.php?id=<?php echo $row['product_id']; ?>" class="p-2 text-blue-400 hover:bg-blue-50 rounded-lg transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </a>
-                                <a href="delete.php?id=<?php echo $row['product_id']; ?>" 
-                                   class="btn btn-danger btn-action shadow-sm" 
-                                   onclick="return confirm('คุณแน่ใจหรือไม่ที่จะลบสินค้า: <?php echo $row['product_name']; ?>?')">
-                                    <i class="bi bi-trash"></i> ลบ
-                                </a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="5" class="text-center py-5">ไม่พบข้อมูลสินค้าในระบบ</td>
-                        </tr>
-                    <?php endif; ?>
+                                <button onclick="confirmDelete(<?php echo $row['product_id']; ?>)" class="p-2 text-red-400 hover:bg-red-50 rounded-lg transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endwhile; ?>
                 </tbody>
             </table>
         </div>
     </div>
-</div>
 
-<script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'คุณแน่ใจไหม?',
+            text: "ข้อมูลสินค้านี้จะถูกลบถาวร!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#F06292',
+            cancelButtonColor: '#9CA3AF',
+            confirmButtonText: 'ยืนยันการลบ',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = 'delete.php?id=' + id;
+            }
+        })
+    }
+    </script>
 </body>
 </html>

@@ -158,7 +158,7 @@ try {
                     </div>
 
                     <h4 class="fw-bold mb-3" style="color: #b3365b;">กรุณาเข้าสู่ระบบ</h4>
-                   <p class="text-muted mb-4">คุณต้องเข้าสู่ระบบก่อนจึงจะสามารถเลือกซื้อสินค้าและทำรายการสั่งซื้อได้</p>
+                   <p class="text-muted mb-4">โปรดเข้าสู่ระบบเพื่อเข้าใช้งานเว็บไซต์ของเรา</p>
 
                     <div class="d-grid gap-2">
                         <a href="login/login.php" class="btn py-2 fw-bold shadow-sm"

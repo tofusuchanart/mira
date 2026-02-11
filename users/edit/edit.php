@@ -186,9 +186,9 @@ if (!empty($_SESSION['cart'])) {
                             <thead>
                                 <tr>
                                     <th style="width: 45%;">Product</th>
-                                    <th>Price</th>
-                                    <th class="text-center">Qty</th>
-                                    <th class="text-end">Total</th>
+                                    <th>ราคา</th>
+                                    <th class="text-center">จำนวน</th>
+                                    <th class="text-end">ทั้งหมด</th>
                                     <th></th>
                                 </tr>
                             </thead>

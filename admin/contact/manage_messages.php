@@ -19,7 +19,7 @@ if (isset($_GET['delete_id'])) {
     }
 }
 
-// ดึงข้อความติดต่อทั้งหมด และ JOIN กับตาราง users เพื่อดูว่าใครส่งมา
+// ดึงข้อความติดต่อทั้งหมด
 $sql = "SELECT m.*, u.fullname, u.email as user_email 
         FROM contact_messages m 
         LEFT JOIN users u ON m.user_id = u.user_id 
@@ -34,17 +34,16 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Messages | MIRA Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
-            --mira-pink-dark: #a34a67;
-            --mira-pink-soft: #fdf5f7;
-            --mira-pink-accent: #f8a5c2;
-            --mira-bg: #fff0f5;
+            --mira-pink-dark: #a34a67; /* สีชมพูเข้มจากหัวข้อ Customer Directory */
+            --mira-bg: #fdf2f4; /* สีพื้นหลังชมพูอ่อนมากแบบในรูป */
+            --mira-card-radius: 2.5rem;
         }
 
         body {
@@ -53,115 +52,188 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: #5d5d5d;
         }
 
-        .mira-header {
-            font-family: 'Playfair Display', serif;
+        /* ปุ่ม Dashboard ด้านบนขวา */
+        .btn-dashboard {
+            background: white;
+            border: 1px solid #333;
+            color: #333;
+            border-radius: 20px;
+            padding: 5px 20px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .btn-dashboard:hover {
+            background: #eee;
+        }
+
+        .mira-title {
             color: var(--mira-pink-dark);
-            letter-spacing: 1px;
+            font-weight: 600;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
         }
 
-        .admin-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px);
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+        /* การ์ดสถิติ (Stat Cards) */
+        .stat-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 25px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            height: 100%;
+        }
+
+        .icon-box {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        /* ส่วนตารางข้อความ (Main Table Card) */
+        .messages-container {
+            background: white;
+            border-radius: var(--mira-card-radius);
             padding: 40px;
-            box-shadow: 0 15px 35px rgba(163, 74, 103, 0.05);
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
         }
 
-        .table {
-            border-collapse: separate;
-            border-spacing: 0 10px;
+        .search-container {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 50px;
+            padding: 10px 25px;
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 0.95rem;
+            color: #888;
         }
 
         .table thead th {
             border: none;
-            color: var(--mira-pink-dark);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            padding: 15px;
+            color: #aaa;
+            font-weight: 400;
+            text-transform: none;
+            font-size: 0.9rem;
+            padding-bottom: 20px;
         }
 
         .table tbody tr {
-            background: white;
-            transition: 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
-
-        .table tbody tr:hover {
-            transform: scale(1.01);
-            box-shadow: 0 5px 15px rgba(163, 74, 103, 0.1);
+            border-bottom: 1px solid #f8f8f8;
+            transition: 0.2s;
         }
 
         .table tbody td {
-            padding: 20px 15px;
-            border: none;
+            padding: 20px 10px;
             vertical-align: middle;
+            border: none;
         }
 
-        .table tbody td:first-child { border-radius: 15px 0 0 15px; }
-        .table tbody td:last-child { border-radius: 0 15px 15px 0; }
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
 
+        /* ปุ่มจัดการ */
         .btn-action {
-            width: 35px;
-            height: 35px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
+            border: none;
+            background: none;
+            padding: 5px 10px;
+            border-radius: 8px;
             transition: 0.3s;
-            text-decoration: none;
         }
+        .btn-view { color: #888; }
+        .btn-view:hover { color: var(--mira-pink-dark); background: var(--mira-bg); }
+        .btn-delete { color: #ff8a8a; }
+        .btn-delete:hover { color: #ff4d4d; background: #fff5f5; }
 
-        .btn-view { background: var(--mira-pink-soft); color: var(--mira-pink-dark); }
-        .btn-view:hover { background: var(--mira-pink-dark); color: white; }
-        
-        .btn-delete { background: #fff5f5; color: #e57373; }
-        .btn-delete:hover { background: #e57373; color: white; }
-
-        .nav-back {
-            color: var(--mira-pink-dark);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
     </style>
 </head>
 <body>
 
 <div class="container py-5">
-    <a href="../index_ad.php" class="nav-back">
-        <i class="bi bi-chevron-left me-2"></i> กลับหน้าDashboard
-    </a>
+    <div class="d-flex justify-content-between align-items-start mb-5">
+        <div>
+            <h1 class="mira-title">Message Directory</h1>
+            <p class="text-muted">บริหารจัดการข้อความติดต่อและสอบถามจากลูกค้า</p>
+        </div>
+        <a href="../index_ad.php" class="btn-dashboard">
+            <i class="bi bi-grid me-2"></i> Dashboard
+        </a>
+    </div>
 
-    <div class="admin-card">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="mira-header fw-bold mb-0">ข้อความติดต่อ</h2>
-                <p class="text-muted small">ข้อความสอบถามจากลูกค้า MIRA</p>
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="icon-box" style="background: #fce4ec; color: #f06292;">
+                    <i class="bi bi-chat-left-dots"></i>
+                </div>
+                <div class="text-muted small">ข้อความทั้งหมด</div>
+                <div class="h2 fw-bold mb-0"><?= count($messages) ?></div>
             </div>
-            <span class="badge rounded-pill p-2 px-3" style="background: var(--mira-pink-dark);">
-                <?= count($messages) ?> ข้อความ
-            </span>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="icon-box" style="background: #e3f2fd; color: #42a5f5;">
+                    <i class="bi bi-envelope-paper"></i>
+                </div>
+                <div class="text-muted small">มาใหม่เดือนนี้</div>
+                <div class="h2 fw-bold mb-0">--</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="icon-box" style="background: #f1f8e9; color: #8bc34a;">
+                    <i class="bi bi-check2-all"></i>
+                </div>
+                <div class="text-muted small">ตอบกลับแล้ว</div>
+                <div class="h2 fw-bold mb-0">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="icon-box" style="background: #fff3e0; color: #ffb74d;">
+                    <i class="bi bi-star"></i>
+                </div>
+                <div class="text-muted small">ระดับความสำคัญ</div>
+                <div class="h2 fw-bold mb-0">Normal</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="messages-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0" style="color: #333;">รายการข้อความทั้งหมด</h4>
         </div>
 
-        <?php if ($status_msg): ?>
-            <script>
-                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: '<?= $status_msg ?>', confirmButtonColor: '#a34a67' });
-            </script>
-        <?php endif; ?>
+        <div class="search-container d-flex align-items-center">
+            <i class="bi bi-search text-muted me-3"></i>
+            <input type="text" id="msgSearch" class="search-input" placeholder="ค้นหาหัวข้อหรือชื่อลูกค้า...">
+        </div>
 
+        
         <div class="table-responsive">
-            <table class="table">
+            <table class="table" id="msgTable">
                 <thead>
                     <tr>
-                        <th width="15%">วันที่</th>
-                        <th width="20%">ลูกค้า</th>
-                        <th width="25%">หัวข้อ</th>
-                        <th width="30%">ข้อความ</th>
-                        <th width="10%">จัดการ</th>
+                        <th width="25%">ข้อมูลลูกค้า</th>
+                        <th width="15%">วันที่ได้รับ</th>
+                        <th width="20%">หัวข้อสอบถาม</th>
+                        <th width="30%">ตัวอย่างข้อความ</th>
+                        <th width="10%" class="text-center">จัดการ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -172,26 +244,39 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php else: ?>
                         <?php foreach ($messages as $msg): ?>
                         <tr>
-                            <td class="small"><?= date('d/m/Y H:i', strtotime($msg['created_at'])) ?></td>
                             <td>
-                                <div class="fw-bold text-dark"><?= htmlspecialchars($msg['fullname'] ?? 'บุคคลทั่วไป') ?></div>
-                                <div class="text-muted small"><?= htmlspecialchars($msg['user_email'] ?? 'ไม่มีอีเมล') ?></div>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-light text-secondary fw-bold" style="width: 40px; height: 40px; margin-right: 12px; font-size: 0.8rem;">
+                                        <?= mb_substr($msg['fullname'] ?? 'G', 0, 1) ?>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 0.95rem;"><?= htmlspecialchars($msg['fullname'] ?? 'บุคคลทั่วไป') ?></div>
+                                        <div class="text-muted small" style="font-size: 0.8rem;"><?= htmlspecialchars($msg['user_email'] ?? 'ไม่มีอีเมล') ?></div>
+                                    </div>
+                                </div>
                             </td>
-                            <td><span class="fw-semibold" style="color: var(--mira-pink-dark);"><?= htmlspecialchars($msg['subject']) ?></span></td>
+                            <td class="small text-muted">
+                                <?= date('Y-m-d H:i', strtotime($msg['created_at'])) ?>
+                            </td>
                             <td>
-                                <div class="text-truncate" style="max-width: 250px;">
+                                <span class="badge rounded-pill fw-normal px-3 py-2" style="background: #fdf5f7; color: var(--mira-pink-dark); font-size: 0.8rem;">
+                                    <?= htmlspecialchars($msg['subject']) ?>
+                                </span>
+                            </td>
+
+
+                            <td>
+                                <div class="text-muted small text-truncate" style="max-width: 280px;">
                                     <?= htmlspecialchars($msg['message']) ?>
                                 </div>
                             </td>
-                            <td>
-                                <div class="d-flex gap-2">
-                                    <a href="#" class="btn-action btn-view" onclick="viewDetail('<?= htmlspecialchars(addslashes($msg['message'])) ?>', '<?= htmlspecialchars($msg['subject']) ?>')">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="#" class="btn-action btn-delete" onclick="confirmDelete(<?= $msg['message_id'] ?>)">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
+                            <td class="text-center">
+                                <button class="btn-action btn-view" onclick="viewDetail('<?= htmlspecialchars(addslashes($msg['message'])) ?>', '<?= htmlspecialchars($msg['subject']) ?>')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="confirmDelete(<?= $msg['message_id'] ?>)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -203,28 +288,45 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
-// ฟังก์ชันดูรายละเอียดข้อความ (ใช้ SweetAlert เพื่อความ Minimal)
+// ระบบค้นหาเบื้องต้น
+document.getElementById('msgSearch').addEventListener('keyup', function() {
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll('#msgTable tbody tr');
+    rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(value) ? '' : 'none';
+    });
+});
+
 function viewDetail(text, subject) {
     Swal.fire({
         title: subject,
-        text: text,
+        html: `<div class="text-start p-3" style="font-size: 0.95rem; line-height: 1.6; color: #666;">${text}</div>`,
         confirmButtonColor: '#a34a67',
-        confirmButtonText: 'ปิด',
-        borderRadius: '25px'
+        confirmButtonText: 'เข้าใจแล้ว',
+        customClass: {
+            popup: 'rounded-5',
+            confirmButton: 'rounded-pill px-4'
+        }
     });
 }
 
-// ฟังก์ชันยืนยันการลบ
+
+
 function confirmDelete(id) {
     Swal.fire({
         title: 'ลบข้อความนี้?',
-        text: "คุณต้องการลบข้อความนี้ออกจากระบบใช่หรือไม่",
+        text: "ข้อมูลนี้จะหายไปจากระบบถาวร",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#a34a67',
-        cancelButtonColor: '#ccc',
-        confirmButtonText: 'ใช่, ลบเลย',
-        cancelButtonText: 'ยกเลิก'
+        confirmButtonColor: '#ff8a8a',
+        cancelButtonColor: '#eee',
+        confirmButtonText: 'ลบเลย',
+        cancelButtonText: 'ยกเลิก',
+        customClass: {
+            popup: 'rounded-5',
+            confirmButton: 'rounded-pill px-4',
+            cancelButton: 'rounded-pill px-4 text-dark'
+        }
     }).then((result) => {
         if (result.isConfirmed) {
             window.location.href = 'manage_messages.php?delete_id=' + id;
@@ -232,6 +334,18 @@ function confirmDelete(id) {
     })
 }
 </script>
+
+<?php if ($status_msg): ?>
+    <script>
+        Swal.fire({ 
+            icon: 'success', 
+            title: 'เรียบร้อยค่ะ', 
+            text: '<?= $status_msg ?>', 
+            confirmButtonColor: '#a34a67',
+            customClass: { popup: 'rounded-5', confirmButton: 'rounded-pill px-4' }
+        });
+    </script>
+<?php endif; ?>
 
 </body>
 </html>
