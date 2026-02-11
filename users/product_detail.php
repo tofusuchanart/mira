@@ -112,7 +112,7 @@ if (isset($_GET['id'])) {
     <input type="number" name="quantity" value="1" min="1">
     <button type="submit">หยิบใส่ตะกร้า</button>
 </form>
-                    <a href="../users/index_users.php?link=women" class="btn btn-outline-secondary ms-2">กลับไปหน้าสินค้า</a>
+                    <a href="../users/index_users.php" class="btn btn-outline-secondary ms-2">กลับไปหน้าสินค้า</a>
                 </div>
             </div>
         </div>

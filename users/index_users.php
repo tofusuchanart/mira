@@ -111,46 +111,73 @@ session_start();
     <a class="navbar-brand">
       <img src="../photo/golo.png" width="70" height="50" alt="Mira">
     </a>
-<!-- Toggle -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-      data-bs-target="#navbarNavDropdown">
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!-- Menu -->
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      <ul class="navbar-nav">
+      
+      <ul class="navbar-nav mx-auto align-items-center">
 
         <li class="nav-item">
-    <a class="nav-link active" href="index_users.php" style="color: #b3365b !important;">
-        <i class="bi bi-house-door fs-5"></i> 
-    </a>
-</li>
+          <a class="nav-link active" href="index_users.php" style="color: #b3365b !important;">
+            <i class="bi bi-house-door fs-5"></i> 
+          </a>
+        </li>
 
         <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="javascript:void(0)">
-        Products
-    </a>
-    <ul class="dropdown-menu">
-        <li>
-            <a class="dropdown-item" href="index_users.php?link=women">
+          <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="javascript:void(0)">
+            Products
+          </a>
+          <ul class="dropdown-menu border-0 shadow-sm">
+            <li>
+              <a class="dropdown-item" href="index_users.php?link=women">
                 <i class="bi bi-gender-female me-2"></i> น้ำหอมสำหรับผู้หญิง
-            </a>
-        </li>
-        <li>
-            <a class="dropdown-item" href="index_users.php?link=men">
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="index_users.php?link=men">
                 <i class="bi bi-gender-male me-2"></i> น้ำหอมสำหรับผู้ชาย
-            </a>
+              </a>
+            </li>
+          </ul>
         </li>
-    </ul>
-</li>
 
+        <li class="nav-item">
+          <a class="nav-link mira-nav-icon" href="edit/edit.php">
+            <i class="bi bi-bag-heart"></i>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link mira-nav-icon" href="mes/mes.php">
+            <i class="bi bi-chat-dots"></i>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link mira-nav-icon" href="pf.php">
+            <i class="bi bi-person-circle"></i>
+          </a>
+        </li>
+      </ul>
+
+      <div class="d-lg-flex align-items-center mt-3 mt-lg-0">
+        <a href="../login/logout.php" class="text-decoration-none">
+          <button class="btn btn-logout-mira">ออกจากระบบ</button>
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</nav>
 
 <style>
-    /* ปรับแต่งไอคอน Navbar ให้เป็นโทนชมพู MIRA */
+    /* CSS เดิมของคุณ */
     .mira-nav-icon {
-        color: #a34a67 !important; /* สีชมพูเข้มตามรูป Customer Directory */
-        font-size: 1.4rem; /* ปรับขนาดไอคอนให้พอดี */
+        color: #a34a67 !important;
+        font-size: 1.4rem;
         padding: 8px 12px !important;
         transition: all 0.3s ease;
         display: flex;
@@ -158,45 +185,26 @@ session_start();
         justify-content: center;
     }
 
-    /* เอฟเฟกต์ตอนเอาเมาส์ไปชี้ */
     .mira-nav-icon:hover {
-        color: #f8a5c2 !important; /* ชมพูอ่อนลงเล็กน้อยเมื่อ hover */
-        transform: translateY(-2px); /* ลอยขึ้นนิดนึงดูน่ารัก */
+        color: #f8a5c2 !important;
+        transform: translateY(-2px);
     }
 
-    /* ปรับให้แสดงผลเรียงกันสวยๆ ใน Navbar */
-    .nav-item {
-        display: flex;
-        align-items: center;
+    /* ตกแต่งปุ่ม Logout เพิ่มเติมเพื่อให้เข้ากับธีม */
+    .btn-logout-mira {
+        background-color: #b3365b;
+        color: white;
+        border-radius: 50px;
+        padding: 8px 20px;
+        border: none;
+        transition: 0.3s;
+    }
+    .btn-logout-mira:hover {
+        background-color: #a34a67;
+        color: white;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 </style>
-
-    <a class="nav-link mira-nav-icon" href="edit/edit.php">
-        <i class="bi bi-bag-heart"></i> </a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link mira-nav-icon" href="mes/mes.php">
-        <i class="bi bi-chat-dots"></i>
-    </a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link mira-nav-icon" href="pf.php">
-        <i class="bi bi-person-circle"></i>
-    </a>
-</li>
-      </ul>
-
-      <div class="d-lg-flex align-items-center ms-auto mt-3 mt-lg-0 gap-2">
-       
-        <a href="../login/logout.php">
-        <button class="btn btn-logout-mira">ออกจากระบบ</button></a>
-      </div>
-      
-    </div>
-  </div>
-</nav>
 
 <style>
   /* กำหนดให้ปุ่มมีความกว้างเท่ากัน */
@@ -534,6 +542,7 @@ $reviews = $stmt_rev->fetchAll();
     </div>
 </footer>
            <!-- สิ้นสุดfooter -->
-        <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
       </body>
       </html>

@@ -18,7 +18,7 @@ try {
 
 <style>
     .product-banner {
-        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../perfume_formen/photo/bner.png'); 
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../perfume_formen/photo/bner.png'),url('perfume_formen/photo/bner.png'); 
         background-size: cover;
         background-position: center;
         height: 300px;
@@ -104,32 +104,23 @@ try {
 </div>
 <?php endforeach; ?> 
 </div> </div> 
-    <div class="modal fade" id="loginAlertModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 25px; border: none;">
-            <div class="modal-body text-center p-5">
-                <i class="bi bi-person-circle" style="font-size: 4rem; color: #b3365b;"></i>
-                <h4 class="fw-bold mb-3">กรุณาเข้าสู่ระบบ</h4>
-                <p class="text-muted mb-4">คุณต้องเข้าสู่ระบบสมาชิกก่อนจึงจะดูรายละเอียดได้</p>
-                <div class="d-grid gap-2">
-                    <a href="/mira/login/login.php" class="btn btn-primary" style="background:#b3365b; border-radius:50px;">เข้าสู่ระบบ</a>
-                    <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">ไว้ทีหลัง</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+   
 <script>
 function checkLoginRedirect(productId) {
+    // 1. ตรวจสอบว่าผู้ใช้ล็อกอินหรือยัง (ใช้ PHP ช่วยเช็ค)
+    // ในที่นี้เราจะใช้ตัวแปร JavaScript ที่รับค่ามาจาก PHP session
     const isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+
     if (isLoggedIn) {
-        window.location.href = "/mira/perfume_formen/product_detail.php?id=" + productId;
+        // ถ้าล็อกอินแล้ว -> ส่งไปหน้ารายละเอียดสินค้า
+        window.location.href = '../users/product_detail.php?id=' + productId;
     } else {
+        // ถ้ายังไม่ได้ล็อกอิน -> สั่งให้ Modal แสดงตัวออกา
         var myModal = new bootstrap.Modal(document.getElementById('loginAlertModal'));
         myModal.show();
     }
 }
+
 </script>
 <div class="modal fade" id="loginAlertModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -154,3 +145,5 @@ function checkLoginRedirect(productId) {
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>

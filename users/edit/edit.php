@@ -201,7 +201,7 @@ if (!empty($_SESSION['cart'])) {
                                 <tr class="product-row">
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="../photo/<?= htmlspecialchars($item['image']) ?>" class="product-img me-3">
+                                            <img src="../../photo/<?= htmlspecialchars($item['image']) ?>" class="product-img me-3">
                                             <div>
                                                 <h6 class="fw-bold mb-1" style="color: #444;"><?= htmlspecialchars($item['product_name']) ?></h6>
                                                 <span class="badge bg-light text-muted fw-normal" style="font-size: 0.65rem;">#<?= $item['product_id'] ?></span>

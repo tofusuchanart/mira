@@ -18,7 +18,7 @@ try {
 
 <style>
     .product-banner {
-        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../perfume_forwomen/photo/bn.png'); 
+background: linear-gradient(rgba(0,0,0,0.6), rgba(        0,0,0,0.6)), url('perfume_forwomen/photo/bn.png'),url('../perfume_forwomen/photo/bn.png'); 
         background-size: cover;
         background-position: center;
         height: 300px;
@@ -124,7 +124,7 @@ try {
 function checkLoginRedirect(productId) {
     const isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
     if (isLoggedIn) {
-        window.location.href = "/mira/perfume_formen/product_detail.php?id=" + productId;
+        window.location.href = "../users/product_detail.php?id=" + productId;
     } else {
         var myModal = new bootstrap.Modal(document.getElementById('loginAlertModal'));
         myModal.show();
