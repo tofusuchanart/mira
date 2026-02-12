@@ -1,20 +1,30 @@
 <?php
 session_start();
-require_once "../../config.php"; // ตรวจสอบ path ไฟล์เชื่อมต่อฐานข้อมูลให้ถูกต้อง
+require_once "../../config.php";
 
 $total_price = 0;
 $items = [];
 
-// ดึงข้อมูลสินค้าจากฐานข้อมูลตาม ID ที่อยู่ใน Session
 if (!empty($_SESSION['cart'])) {
     $ids = implode(',', array_keys($_SESSION['cart']));
     try {
         $sql = "SELECT * FROM products WHERE product_id IN ($ids)";
         $stmt = $conn->query($sql);
         $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // --- เพิ่มส่วนคำนวณยอดเงินตรงนี้ ---
+        foreach ($items as $item) {
+            $qty = $_SESSION['cart'][$item['product_id']];
+            $total_price += $item['price'] * $qty;
+        }
+        // ------------------------------
     } catch (PDOException $e) {
         error_log($e->getMessage());
     }
+} else {
+    // ถ้าตะกร้าว่าง ให้ดีดกลับไปหน้าตะกร้า
+    header("Location: mycart.php");
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -247,7 +257,7 @@ if (!empty($_SESSION['cart'])) {
         color: var(--mira-dark-pink);
     }
 </style>
-                        <a href="edit.php" class="btn-back-pill">
+                        <a href="mycart.php" class="btn-back-pill">
     <i class="bi bi-chevron-left"></i> กลับไปที่ตะกร้าสินค้า
 </a>
                     </div>
@@ -256,21 +266,33 @@ if (!empty($_SESSION['cart'])) {
         </div>
     </div>
 </div>
-
-<?php if ($status_msg == "success"): ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+function copyAccount() {
+    navigator.clipboard.writeText('6795693724');
     Swal.fire({
-        title: 'แจ้งชำระเงินสำเร็จ',
-        text: 'เราได้รับสลิปของคุณแล้ว จะดำเนินการตรวจสอบโดยเร็วที่สุดค่ะ',
         icon: 'success',
-        confirmButtonColor: '#a34a67'
-    }).then(() => { window.location.href = 'order_history.php'; });
+        title: 'คัดลอกสำเร็จ',
+        text: 'คัดลอกเลขบัญชีแล้วค่ะ',
+        showConfirmButton: false,
+        timer: 1500
+    });
+}
+
+function previewImage(input) {
+    const container = document.getElementById('preview-container');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            container.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded-3 mt-3 shadow-sm" style="max-height: 200px;">`;
+            container.classList.remove('hidden');
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
 </script>
-<?php elseif ($status_msg == "error"): ?>
-<script>
-    Swal.fire({ title: 'เกิดข้อผิดพลาด', text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่ค่ะ', icon: 'error' });
-</script>
-<?php endif; ?>
+
+
 
 </body>
 </html>

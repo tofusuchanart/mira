@@ -190,7 +190,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 <form action="" method="POST" enctype="multipart/form-data">
                     <div class="profile-upload-wrapper">
-                        <img src="../photo/<?= !empty($user['profile_img']) ? $user['profile_img'] : 'default.jpg' ?>" id="preview" class="profile-preview">
+                        <img src="../register/photo/<?= !empty($user['profile_img']) ? $user['profile_img'] : 'default.jpg' ?>" id="preview" class="profile-preview">
                         <label for="profile_img" class="file-input-label">
                             <i class="bi bi-camera-fill"></i>
                         </label>

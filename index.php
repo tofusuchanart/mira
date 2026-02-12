@@ -257,7 +257,7 @@ $reviews = $stmt_rev->fetchAll();
                         <div class="reviewer-info">
                             <?php 
                                 $user_pic = (!empty($rev['profile_img'])) 
-                                            ? "photo/" . $rev['profile_img'] 
+                                            ? "register/photo/" . $rev['profile_img'] 
                                             : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
                             ?>
                             <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">

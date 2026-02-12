@@ -1,7 +1,9 @@
 <?php
 session_start();
 require_once "../../config.php";
-
+/** @var PDO $conn */
+$stmt = $conn->query("SELECT COUNT(*) FROM users");
+$user_count = ($stmt) ? $stmt->fetchColumn() : 0;
 $newToday = $conn->query("SELECT COUNT(*) FROM users WHERE DATE(created_at) = CURDATE() AND role = 'customer'")->fetchColumn();
 
 // 2. ลูกค้าใหม่เดือนนี้
@@ -19,6 +21,7 @@ $customers = $conn->query("SELECT u.*,
                            WHERE u.role = 'customer'
                            GROUP BY u.user_id 
                            ORDER BY total_spent DESC")->fetchAll(PDO::FETCH_ASSOC);
+                           
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -112,7 +115,7 @@ $customers = $conn->query("SELECT u.*,
     <div class="glass-panel">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="fw-bold m-0 text-pink-mira">รายชื่อสมาชิกทั้งหมด</h5>
-            <div class="input-group style="width: 250px;">
+            <div class="input-group style=width: 250px;">
                 <input type="text" class="form-control rounded-pill border-0 shadow-sm px-3" placeholder="ค้นหาชื่อลูกค้า...">
             </div>
         </div>
@@ -131,8 +134,16 @@ $customers = $conn->query("SELECT u.*,
                 </thead>
                 <tbody>
                     <?php foreach ($customers as $cus): 
-                        $pic = !empty($cus['profile_img']) ? "../../register/photo/".$cus['profile_img'] : "https://ui-avatars.com/api/?name=".urlencode($cus['fullname'])."&background=f8a5c2&color=fff";
-                    ?>
+    $profile_file = $cus['profile_img'];
+    $file_path = "../../uploads/profiles/" . $profile_file; // ปรับ Path ตรงนี้ให้ตรงกับโฟลเดอร์จริงของคุณ
+
+    if (!empty($profile_file) && file_exists($file_path)) {
+        $pic = $file_path;
+    } else {
+        // ถ้าไม่มีรูป หรือหาไฟล์ไม่เจอ ให้ใช้ Avatar ชื่อแทน
+        $pic = "https://ui-avatars.com/api/?name=".urlencode($cus['fullname'])."&background=f8a5c2&color=fff";
+    }
+?>
                     <tr>
                         <td>
                             <?php if($cus['total_spent'] > 5000): ?>

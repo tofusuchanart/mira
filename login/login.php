@@ -9,7 +9,7 @@
     <style>
         :root {
             --mira-pink: #f8a5c2;
-            --mira-dark-pink: #a34a67;
+            --mira-dark-pink: #f8a;
             --mira-soft-pink: #fff2f6;
             --mira-glass: #ffffff;
         }
@@ -98,7 +98,7 @@
 
         input:focus {
             background: #fff;
-            box-shadow: 0 0 15px rgba(248, 165, 194, 0.4);
+            box-shadow: 0 0 15px #f8a5c2;
             border-color: var(--mira-pink);
         }
 
@@ -115,13 +115,13 @@
             cursor: pointer;
             transition: 0.4s;
             margin-top: 10px;
-            box-shadow: 0 5px 15px rgba(163, 74, 103, 0.3);
+            box-shadow: 0 5px 15px #F5A5C04D;
         }
 
         .btn-login:hover {
-            background: #8e3e58;
+            background: #f8a5c2;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(163, 74, 103, 0.4);
+            box-shadow: 0 8px 20px #F8a;
         }
 
         /* ส่วนเลือกเพิ่มเติม (จดจำฉัน/กลับหน้าหลัก) */
@@ -164,7 +164,7 @@
         .register-section {
             margin-top: 25px;
             padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid #C7545433;
             color: #fff;
             font-size: 0.9rem;
         }

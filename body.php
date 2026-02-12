@@ -10,11 +10,11 @@ switch ($link) {
         break;
 
     case 'women':
-        include_once "perfume_forwomen/index_w.php";
+        include_once "perfume_forwomen/index.php";
         break;
 
     case 'men':
-        include_once "perfume_formen/index_m.php";
+        include_once "perfume_formen/index.php";
         break;
 
     default:

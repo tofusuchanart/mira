@@ -195,7 +195,7 @@ try {
                             </div>
 
                             <div class="col-md-2 text-md-end">
-                                <a href="order_details.php?id=<?= $order['order_id'] ?>" class="btn-view">
+                                <a href="od_details.php?id=<?= $order['order_id'] ?>" class="btn-view">
                                     ดูรายละเอียด
                                 </a>
                             </div>

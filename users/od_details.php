@@ -1,9 +1,9 @@
 <?php
 session_start();
-require_once "../../config.php"; 
+require_once "../config.php"; 
 
 if (!isset($_SESSION['user_id']) || !isset($_GET['id'])) {
-    header("Location: order_history.php");
+    header("Location: od_htr.php");
     exit();
 }
 
@@ -16,7 +16,7 @@ $stmt_order->execute([$order_id, $user_id]);
 $order = $stmt_order->fetch(PDO::FETCH_ASSOC);
 
 if (!$order) {
-    header("Location: order_history.php");
+    header("Location: od_htr.php");
     exit();
 }
 
@@ -129,7 +129,7 @@ $items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
     <div class="row justify-content-center">
         <div class="col-lg-9">
             
-            <a href="order_history.php" class="nav-back">
+            <a href="od_htr.php" class="nav-back">
                 <i class="bi bi-arrow-left me-2"></i> ย้อนกลับไปประวัติการสั่งซื้อ
             </a>
 

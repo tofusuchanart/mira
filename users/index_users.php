@@ -1,6 +1,8 @@
 <?php include_once "../config.php";
 session_start();
+
 ?>
+
 </head>
 <!DOCTYPE html>
 <html lang="th">
@@ -145,7 +147,7 @@ session_start();
         </li>
 
         <li class="nav-item">
-          <a class="nav-link mira-nav-icon" href="edit/edit.php">
+          <a class="nav-link mira-nav-icon" href="cart/mycart.php">
             <i class="bi bi-bag-heart"></i>
           </a>
         </li>
@@ -333,7 +335,7 @@ $reviews = $stmt_rev->fetchAll();
                         <div class="reviewer-info">
                             <?php 
                                 $user_pic = (!empty($rev['profile_img'])) 
-                                            ? "photo/" . $rev['profile_img'] 
+                                            ? "../register/photo/" . $rev['profile_img'] 
                                             : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
                             ?>
                             <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
@@ -425,13 +427,13 @@ $reviews = $stmt_rev->fetchAll();
                     
                     <div class="text-center mb-4">
                         <div class="position-relative d-inline-block">
-                            <?php 
-                                // ดึงรูปโปรไฟล์จาก Session ถ้าไม่มีให้ใช้รูป Default หรือ UI Avatars
-                                $profile_display = !empty($_SESSION['profile_img']) ? "photo/".$_SESSION['profile_img'] : "https://ui-avatars.com/api/?name=".urlencode($_SESSION['fullname'])."&background=f8a5c2&color=fff";
+                           <?php 
+                                $user_pic = (!empty($rev['profile_img'])) 
+                                            ? "../register/photo/" . $rev['profile_img'] 
+                                            : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
                             ?>
-                            <img src="<?php echo $profile_display; ?>" 
-                                 class="rounded-circle shadow-sm border border-3 border-white" 
-                                 style="width: 80px; height: 80px; object-fit: cover;">
+                            <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
+            
                             <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-success border border-2 border-white">
                                 <i class="bi bi-check"></i>
                             </span>

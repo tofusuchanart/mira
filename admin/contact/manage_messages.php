@@ -160,6 +160,22 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         .btn-delete { color: #ff8a8a; }
         .btn-delete:hover { color: #ff4d4d; background: #fff5f5; }
 
+
+
+        /* เพิ่มสไตล์สำหรับปุ่ม Link กลับ Dashboard */
+    .back-link {
+        text-decoration: none;
+        color: #94a3b8; /* สีเทาตามรูป */
+        font-size: 0.95rem;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    .back-link:hover {
+        color: #b3365b;
+    }
     </style>
 </head>
 <body>
@@ -167,12 +183,13 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-start mb-5">
         <div>
+            <a href="../index_ad.php" class="back-link">
+            <i class="bi bi-arrow-left"></i> กลับสู่หน้า Dashboard
+        </a>
             <h1 class="mira-title">Message Directory</h1>
             <p class="text-muted">บริหารจัดการข้อความติดต่อและสอบถามจากลูกค้า</p>
         </div>
-        <a href="../index_ad.php" class="btn-dashboard">
-            <i class="bi bi-grid me-2"></i> Dashboard
-        </a>
+        
     </div>
 
     <div class="row g-4 mb-5">

@@ -2,30 +2,58 @@
 require_once "../../config.php";
 
 try {
-    // 1. สถิติพื้นฐาน
+    // 1. สถิติพื้นฐาน (อิงตามตาราง orders และ products)
     $countProducts = $conn->query("SELECT COUNT(*) FROM products")->fetchColumn();
-    $countOrders = $conn->query("SELECT COUNT(*) FROM orders")->fetchColumn(); // สมมติว่ามีตาราง orders
-    $totalSales = $conn->query("SELECT SUM(total_price) FROM orders WHERE status = 'completed'")->fetchColumn() ?: 0;
-    $estimatedProfit = $totalSales * 0.3; // สมมติกำไร 30%
+    $countOrders = $conn->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+    
+    // ยอดขายรวม (เฉพาะที่สถานะไม่ใช่ cancelled)
+    $totalSales = $conn->query("SELECT SUM(total_price) FROM orders WHERE status != 'cancelled'")->fetchColumn() ?: 0;
+    $estimatedProfit = $totalSales * 0.3; // กำไรสมมติ 30%
 
     // 2. ข้อมูลกราฟยอดขาย (รายวัน 7 วันล่าสุด)
-    $dailySales = $conn->query("SELECT DATE(order_date) as day, SUM(total_price) as total 
-                               FROM orders GROUP BY day ORDER BY day DESC LIMIT 7")->fetchAll(PDO::FETCH_ASSOC);
+    $dailySalesQuery = $conn->query("SELECT DATE(order_date) as day, SUM(total_price) as total 
+                                   FROM orders 
+                                   WHERE status != 'cancelled'
+                                   GROUP BY day 
+                                   ORDER BY day ASC LIMIT 7")->fetchAll(PDO::FETCH_ASSOC);
+    
+    $days = [];
+    $totals = [];
+    foreach($dailySalesQuery as $row) {
+        $days[] = date('d/m', strtotime($row['day']));
+        $totals[] = $row['total'];
+    }
 
-    // 3. ยอดขายแยกตามประเภท (ชาย/หญิง) - สมมติว่าใน products มีคอลัมน์ category
-    $catSales = $conn->query("SELECT p.category, SUM(o.total_price) as total 
-                             FROM order_details o JOIN products p ON o.product_id = p.product_id 
-                             GROUP BY p.category")->fetchAll(PDO::FETCH_ASSOC);
+    // 3. ยอดขายแยกตามเพศ (ชาย/หญิง) - ดึงจากคอลัมน์ sex ในตาราง products
+    $sexSales = $conn->query("SELECT p.sex, SUM(oi.price * oi.quantity) as total 
+                             FROM order_items oi 
+                             JOIN products p ON oi.product_id = p.product_id 
+                             GROUP BY p.sex")->fetchAll(PDO::FETCH_ASSOC);
+    
+    $sexLabels = [];
+    $sexData = [];
+    foreach($sexSales as $row) {
+        $sexLabels[] = ($row['sex'] == 'male') ? 'น้ำหอมผู้ชาย' : (($row['sex'] == 'female') ? 'น้ำหอมผู้หญิง' : 'Unisex');
+        $sexData[] = $row['total'];
+    }
 
-    // 4. ลูกค้ายอดซื้อสูงสุด
+    // 4. ลูกค้ายอดซื้อสูงสุด (Top 5)
     $topCustomers = $conn->query("SELECT u.fullname, SUM(o.total_price) as spent 
-                                 FROM orders o JOIN users u ON o.user_id = u.user_id 
-                                 GROUP BY u.user_id ORDER BY spent DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+                                 FROM orders o 
+                                 JOIN users u ON o.user_id = u.user_id 
+                                 WHERE o.status != 'cancelled'
+                                 GROUP BY u.user_id 
+                                 ORDER BY spent DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+
+    // 5. สินค้าสต็อกต่ำ (น้อยกว่า 5 ชิ้น)
+    $lowStockProducts = $conn->query("SELECT product_name, stock FROM products WHERE stock < 5 ORDER BY stock ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 } catch(PDOException $e) {
     $error = $e->getMessage();
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -36,26 +64,108 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        body { 
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../../admin/photo_ad/ro.jpg');
-            background-size: cover; background-attachment: fixed;
-            font-family: 'Sarabun', sans-serif; color: white;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;
-            padding: 20px; transition: 0.3s; height: 100%;
-        }
-        .stat-icon { font-size: 2.5rem; color: #f8a5c2; }
-        .table-glass { color: white; }
-        .table-glass thead { background: rgba(248, 165, 194, 0.2); }
-    </style>
-</head>
-<body>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@200;400;600&display=swap');
+
+    body { 
+        background-color: #fff5f7; /* พื้นหลังชมพูอ่อนมากแบบ Minimal */
+        font-family: 'Sarabun', sans-serif; 
+        color: #4a4a4a;
+    }
+
+    /* ปรับหัวข้อใหญ่ */
+    h2.fw-bold {
+        color: #b3365b;
+        letter-spacing: -1px;
+    }
+
+    /* การ์ดสถิติแบบ Minimal */
+    .glass-card {
+        background: #ffffff;
+        border: none;
+        border-radius: 25px; /* มนพิเศษแบบในรูป */
+        padding: 25px;
+        transition: all 0.3s ease;
+        height: 100%;
+        box-shadow: 0 10px 30px rgba(179, 54, 91, 0.05); /* เงาจางๆ */
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(179, 54, 91, 0.1);
+    }
+
+    /* ไอคอนและตัวเลข */
+    .stat-icon { font-size: 2rem; color: #f8a5c2; margin-bottom: 10px; }
+    .text-white-50 { color: #8e8e8e !important; font-weight: 400; }
+    h3.fw-bold { color: #b3365b; font-size: 1.8rem; }
+
+    /* ตารางแบบในรูป */
+    .table-glass { 
+        color: #4a4a4a; 
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+    .table-glass thead { 
+        background: transparent; 
+        color: #b3365b;
+        border-bottom: 1px solid #eee;
+    }
+    .table-glass thead th { font-weight: 600; border: none; }
+    .table-glass tbody tr {
+        background: #fff;
+        transition: 0.2s;
+    }
+    .table-glass td { padding: 15px; border: none; vertical-align: middle; }
+
+    /* สินค้าสต็อกต่ำ */
+    .bg-danger.bg-opacity-25 {
+        background-color: #fff0f3 !important;
+        border: 1px solid #f8d7da !important;
+        color: #d63384;
+    }
+    .badge.bg-danger {
+        background-color: #ff4d7d !important;
+        border-radius: 50px;
+        padding: 5px 12px;
+    }
+
+    /* Scrollbar สีชมพู */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #f8a5c2; border-radius: 10px; }
+
+
+
+    /* เพิ่มสไตล์สำหรับปุ่ม Link กลับ Dashboard */
+    .back-link {
+        text-decoration: none;
+        color: #94a3b8; /* สีเทาตามรูป */
+        font-size: 0.95rem;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    .back-link:hover {
+        color: #b3365b;
+    }
+
+</style>
 
 <div class="container py-5">
-    <h2 class="fw-bold mb-4 text-center">MIRA ADMIN INSIGHTS</h2>
+    <div class="d-flex justify-content-between align-items-start mb-2">
+        <a href="../index_ad.php" class="back-link">
+            <i class="bi bi-arrow-left"></i> กลับสู่หน้า Dashboard
+        </a>
+    </div>
 
+<div class="container py-5">
+    <div class="text-start mb-5">
+        
+        <h2 class="fw-bold mb-1">MIRA Insights</h2>
+        <p class="text-muted">จัดการและดูภาพรวมธุรกิจ Mira ของคุณ</p>
+    </div>
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="glass-card text-center">
@@ -120,51 +230,65 @@ try {
             </div>
         </div>
         <div class="col-md-6">
-            <div class="glass-card">
-                <h5 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2"></i>สินค้าสต็อกต่ำ</h5>
+    <div class="glass-card">
+        <h5 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2"></i>สินค้าสต็อกต่ำ</h5>
+        <?php if (empty($lowStockProducts)): ?>
+            <p class="text-muted text-center py-3">ไม่มีสินค้าใกล้หมดสต็อก</p>
+        <?php else: ?>
+            <?php foreach($lowStockProducts as $low): ?>
                 <div class="p-3 mb-2 rounded bg-danger bg-opacity-25 border border-danger">
                     <div class="d-flex justify-content-between">
-                        <span>น้ำหอม มายควีน (8 มล.)</span>
-                        <span class="badge bg-danger">เหลือ 2 ชิ้น</span>
+                        <span><?= htmlspecialchars($low['product_name']) ?></span>
+                        <span class="badge bg-danger">เหลือ <?= $low['stock'] ?> ชิ้น</span>
                     </div>
                 </div>
-            </div>
-        </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 </div>
 
 <script>
-// กราฟเส้นยอดขาย
+// กราฟเส้นยอดขาย (ดึงข้อมูลจริงจาก $days และ $totals)
 const ctxSales = document.getElementById('salesChart').getContext('2d');
 new Chart(ctxSales, {
     type: 'line',
     data: {
-        labels: ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'],
+        labels: <?= json_encode($days) ?>, 
         datasets: [{
-            label: 'ยอดขายรายวัน',
-            data: [1200, 1900, 3000, 5000, 2400, 3300, 4500], // ข้อมูลสมมติ
+            label: 'ยอดขายรายวัน (฿)',
+            data: <?= json_encode($totals) ?>,
             borderColor: '#f8a5c2',
             backgroundColor: 'rgba(248, 165, 194, 0.2)',
             fill: true,
             tension: 0.4
         }]
     },
-    options: { plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } } }
+    options: { 
+        plugins: { legend: { display: false } }, 
+        scales: { 
+            y: { beginAtZero: true, ticks: { color: '#8e8e8e' } }, 
+            x: { ticks: { color: '#8e8e8e' } } 
+        } 
+    }
 });
 
-// กราฟวงกลมแยกประเภท
+// กราฟวงกลมแยกเพศ (ดึงข้อมูลจริงจาก $sexLabels และ $sexData)
 const ctxCat = document.getElementById('categoryChart').getContext('2d');
 new Chart(ctxCat, {
     type: 'doughnut',
     data: {
-        labels: ['น้ำหอมผู้ชาย', 'น้ำหอมผู้หญิง'],
+        labels: <?= json_encode($sexLabels) ?>,
         datasets: [{
-            data: [45, 55],
-            backgroundColor: ['#74b9ff', '#f8a5c2'],
+            data: <?= json_encode($sexData) ?>,
+            backgroundColor: ['#74b9ff', '#f8a5c2', '#a29bfe'],
             borderWidth: 0
         }]
     },
-    options: { plugins: { legend: { position: 'bottom', labels: { color: 'white' } } } }
+    options: { 
+        plugins: { 
+            legend: { position: 'bottom', labels: { color: '#4a4a4a', usePointStyle: true } } 
+        } 
+    }
 });
 </script>
 

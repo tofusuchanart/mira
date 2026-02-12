@@ -198,7 +198,7 @@ try {
                 <div class="col-md-4">
                     <div class="glass-panel text-center">
                         <div class="profile-img-wrapper">
-                            <img src="../photo/<?= !empty($user['profile_img']) ? htmlspecialchars($user['profile_img']) : 'default_user.png' ?>" class="profile-img">
+                            <img src="../register/photo/<?= !empty($user['profile_img']) ? htmlspecialchars($user['profile_img']) : 'default_user.png' ?>" class="profile-img">
                         </div>
                         
                         <h4 class="mira-header fw-bold mb-1"><?= htmlspecialchars($user['fullname']) ?></h4>

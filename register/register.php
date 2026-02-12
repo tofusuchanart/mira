@@ -163,30 +163,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <div class="glass-card">
     <div class="profile-upload-container">
-            <div class="profile-preview" onclick="document.getElementById('profile_img').click();">
-                <img id="image-preview" src="photo/pf.jpg" alt="Profile Preview">
-                <div class="upload-icon">
-                    <i class="fas fa-camera"></i> </div>
-            </div>
-            <input type="file" name="profile_img" id="profile_img" accept="image/*" style="display: none;" onchange="previewImage(event)">
-            <label class="text-white small mt-1 d-block text-center">คลิกที่รูปเพื่ออัปโหลด</label>
+        <div class="profile-preview" onclick="document.getElementById('profile_img').click();">
+            <img id="image-preview" src="photo/pf.jpg" alt="Profile Preview">
+            <div class="upload-icon"><i class="fas fa-camera"></i></div>
         </div>
+        <label class="text-white small mt-1 d-block text-center">คลิกที่รูปเพื่ออัปโหลด</label>
+    </div>
+
     <h2 class="title">ลงทะเบียน</h2>
+    
     <form action="register.php" method="POST" enctype="multipart/form-data">
+        
+        <input type="file" name="profile_img" id="profile_img" accept="image/*" style="display: none;" onchange="previewImage(event)">
+
         <input type="text" name="fullname" class="form-control" placeholder="ชื่อ" required>
         <input type="email" name="email" class="form-control" placeholder="อีเมล" required>
         <input type="password" name="password" class="form-control" placeholder="รหัส" required>
         <input type="text" name="phone" class="form-control" placeholder="หมายเลขโทรศัพท์" required>
         <textarea name="address" class="form-control" placeholder="ที่อยู๋" rows="2"></textarea>
-        
-        
 
         <button type="submit" class="btn-register">ลงชื่อเข้าใช้</button>
+        
         <div class="text-center mt-4">
-    <a href="../login/login.php" class="login-link small" style="text-decoration: none;">
-        มีบัญชีอยู่แล้วใช่ไหม? เข้าสู่ระบบ
-    </a>
-</div>
+            <a href="../login/login.php" class="login-link small" style="text-decoration: none;">
+                มีบัญชีอยู่แล้วใช่ไหม? เข้าสู่ระบบ
+            </a>
+        </div>
     </form>
 </div>
 

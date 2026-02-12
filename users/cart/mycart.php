@@ -212,15 +212,15 @@ if (!empty($_SESSION['cart'])) {
                                     <td>
                                         <div class="d-flex justify-content-center">
                                             <div class="qty-control">
-                                                <a href="cart_action.php?action=update&id=<?= $item['product_id'] ?>&qty=<?= $qty - 1 ?>" class="qty-btn">-</a>
+                                                <a href="../cart_action.php?action=update&id=<?= $item['product_id'] ?>&qty=<?= $qty - 1 ?>" class="qty-btn">-</a>
                                                 <input type="text" value="<?= $qty ?>" class="qty-input" readonly>
-                                                <a href="cart_action.php?action=update&id=<?= $item['product_id'] ?>&qty=<?= $qty + 1 ?>" class="qty-btn">+</a>
+                                                <a href="../cart_action.php?action=update&id=<?= $item['product_id'] ?>&qty=<?= $qty + 1 ?>" class="qty-btn">+</a>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="text-end price-text">฿<?= number_format($subtotal, 2) ?></td>
                                     <td class="text-center">
-                                        <a href="cart_action.php?action=remove&id=<?= $item['product_id'] ?>" class="btn-remove" onclick="return confirm('นำสินค้าออกจากตะกร้าใช่ไหมคะ?')">
+                                        <a href="../cart_action.php?action=remove&id=<?= $item['product_id'] ?>" class="btn-remove" onclick="return confirm('นำสินค้าออกจากตะกร้าใช่ไหมคะ?')">
                                             <i class="bi bi-x-circle-fill"></i>
                                         </a>
                                     </td>

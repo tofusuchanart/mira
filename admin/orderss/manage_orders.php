@@ -22,13 +22,17 @@ if (isset($_POST['update_status'])) {
 }
 
 // ดึงรายการสั่งซื้อทั้งหมด JOIN กับผู้ใช้ และดึงรูปหลักฐานการโอน (ถ้ามี)
-$sql = "SELECT o.*, u.fullname, u.email, p.payment_id, p.payment_method 
+// ดึงรายการสั่งซื้อทั้งหมด JOIN กับผู้ใช้ และดึงรูปหลักฐานการโอน
+$sql = "SELECT o.*, u.fullname, u.email, p.payment_id, p.payment_method, p.payment_proof 
         FROM orders o 
         JOIN users u ON o.user_id = u.user_id 
         LEFT JOIN payments p ON o.order_id = p.order_id 
         ORDER BY o.order_date DESC";
 $stmt = $conn->query($sql);
-$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$orders = [];
+if ($stmt instanceof PDOStatement) { // เช็คว่าเป็น Statement จริงไหม
+    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 ?>
 
@@ -39,136 +43,189 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Orders | MIRA Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@200;400;600&display=swap" rel="stylesheet">
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
-            --mira-pink-dark: #a34a67;
-            --mira-pink-soft: #fdf5f7;
-            --mira-bg: #fff0f5;
+            /* ปรับ Palette สีตามรูปที่แนบ */
+            --mira-pink-primary: #b3365b;
+            --mira-pink-soft: #fff5f7;
+            --mira-text-muted: #94a3b8;
+            --mira-bg-card: #ffffff;
         }
 
-        body { background-color: var(--mira-bg); font-family: 'Sarabun', sans-serif; }
-        .mira-header { font-family: 'Playfair Display', serif; color: var(--mira-pink-dark); }
-        
-        .admin-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 25px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(163, 74, 103, 0.05);
+        body { 
+            background-color: var(--mira-pink-soft); 
+            font-family: 'Sarabun', sans-serif; 
+            color: #4a4a4a;
         }
 
-        /* Status Badge Styling */
-        .badge-status {
-            padding: 8px 15px;
-            border-radius: 50px;
-            font-size: 0.8rem;
+        /* ปุ่มย้อนกลับตามภาพที่แนบ */
+        .nav-back { 
+            text-decoration: none;
+            color: var(--mira-text-muted); 
+            font-size: 0.95rem;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-back:hover { color: var(--mira-pink-primary); }
+
+        /* หัวข้อหน้า */
+        .mira-header { 
+            color: var(--mira-pink-primary); 
             font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        /* การ์ดหลักขาวสะอาด ขอบมนแบบในรูป */
+        .admin-card {
+            background: var(--mira-bg-card);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(179, 54, 91, 0.05);
+            border: none;
+        }
+
+        /* ตารางสไตล์ Minimal */
+        .table { 
+            border-collapse: separate;
+            border-spacing: 0;
+            vertical-align: middle; 
+        }
+        .table thead th {
+            border: none;
+            color: var(--mira-text-muted);
+            font-weight: 400;
+            font-size: 0.85rem;
+            text-transform: none;
+            padding-bottom: 20px;
+        }
+        .table tbody td {
+            border-top: 1px solid #f8f9fa;
+            padding: 20px 10px;
+        }
+        .order-row:hover { background-color: #fafafa; }
+
+        /* Status Badge แบบพาสเทล */
+        .badge-status {
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
         }
         .status-pending { background: #fff3cd; color: #856404; }
-        .status-paid { background: #d1e7dd; color: #0f5132; }
-        .status-shipped { background: #cfe2ff; color: #084298; }
-        .status-completed { background: #fdf5f7; color: var(--mira-pink-dark); border: 1px solid var(--mira-pink-dark); }
-        .status-cancelled { background: #f8d7da; color: #842029; }
+        .status-paid { background: #e8f5e9; color: #2e7d32; }
+        .status-shipped { background: #e3f2fd; color: #1565c0; }
+        .status-completed { background: #fff0f3; color: var(--mira-pink-primary); border: 1px solid #f8d7da; }
+        .status-cancelled { background: #ffebee; color: #c62828; }
 
-        .table { vertical-align: middle; }
-        .order-row:hover { background: var(--mira-pink-soft); transition: 0.3s; }
-        
-        .btn-edit-status {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 5px 10px;
+        /* ปุ่ม "ดูสลิป" ตามสไตล์ในรูป */
+        .btn-view-slip {
+            background-color: #fff0f3;
+            color: var(--mira-pink-primary);
+            border: 1px solid #f8d7da;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            padding: 5px 15px;
             transition: 0.3s;
         }
-        .btn-edit-status:hover { border-color: var(--mira-pink-dark); color: var(--mira-pink-dark); }
-        
-        .nav-back { color: var(--mira-pink-dark); text-decoration: none; font-weight: 600; }
+        .btn-view-slip:hover {
+            background-color: var(--mira-pink-primary);
+            color: white;
+        }
 
+        /* ปุ่มบันทึก */
+        .btn-save {
+            background-color: var(--mira-pink-primary);
+            border: none;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            padding: 6px 20px;
+            transition: 0.3s;
+        }
+        .btn-save:hover { background-color: #8e2b48; transform: translateY(-1px); }
 
+        .form-select-custom {
+            border-radius: 10px;
+            font-size: 0.85rem;
+            border: 1px solid #eee;
+            background-color: #fcfcfc;
+        }
 
-        .btn-light {
-    background-color: #fdf5f7;
-    border: 1px solid rgba(163, 74, 103, 0.1);
-    color: var(--mira-pink-dark);
-}
-.btn-light:hover {
-    background-color: var(--mira-pink-dark);
-    color: white;
-}
     </style>
 </head>
 <body>
 
 <div class="container py-5">
-    <a href="../index_ad.php" class="nav-back mb-4 d-inline-block">
-        <i class="bi bi-arrow-left me-2"></i> กลับหน้าDashboard
-    </a>
+    <div class="mb-2">
+        <a href="../index_ad.php" class="nav-back">
+            <i class="bi bi-arrow-left"></i> กลับสู่หน้า Dashboard
+        </a>
+    </div>
+
+    <div class="text-start mb-5">
+        <h2 class="mira-header fw-bold mb-1">จัดการคำสั่งซื้อ</h2>
+        <p class="text-muted small">ตรวจสอบและอัปเดตสถานะออเดอร์ Mira ของคุณ</p>
+    </div>
 
     <div class="admin-card">
-        <h2 class="mira-header fw-bold mb-4">จัดการคำสั่งซื้อ</h2>
-
         <?php if ($status_msg): ?>
-            <script>Swal.fire({ icon: 'success', title: 'สำเร็จ', text: '<?= $status_msg ?>', confirmButtonColor: '#a34a67' });</script>
+            <script>Swal.fire({ icon: 'success', title: 'สำเร็จ', text: '<?= $status_msg ?>', confirmButtonColor: '#b3365b' });</script>
         <?php endif; ?>
 
         <div class="table-responsive">
             <table class="table">
                 <thead>
-                    <tr class="text-muted small uppercase">
-                        <th>ออเดอร์ ID</th>
-                        <th>วันที่สั่งซื้อ</th>
-                        <th>ลูกค้า</th>
-                        <th>ยอดรวม</th>
-                        <th>สถานะปัจจุบัน</th>
-                        <th>หลักฐาน</th><th class="text-center">จัดการ</th>
-                        
+                    <tr>
+                        <th width="15%">ออเดอร์ ID</th>
+                        <th width="15%">วันที่สั่งซื้อ</th>
+                        <th width="25%">ข้อมูลลูกค้า</th>
+                        <th width="15%">ยอดรวม</th>
+                        <th width="15%">สถานะ</th>
+                        <th width="15% text-center">การจัดการ</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($orders as $order): ?>
                     <tr class="order-row">
-                        <td><strong>#<?= str_pad($order['order_id'], 5, '0', STR_PAD_LEFT) ?></strong></td>
-                        <td class="small"><?= date('d/m/Y H:i', strtotime($order['order_date'])) ?></td>
+                        <td><span class="fw-bold" style="color:#b3365b;">#<?= str_pad($order['order_id'], 5, '0', STR_PAD_LEFT) ?></span></td>
+                        <td class="small text-muted"><?= date('d/m/Y H:i', strtotime($order['order_date'])) ?></td>
                         <td>
-                            <div class="fw-bold"><?= htmlspecialchars($order['fullname']) ?></div>
+                            <div class="fw-bold" style="font-size: 0.95rem;"><?= htmlspecialchars($order['fullname']) ?></div>
                             <div class="text-muted small"><?= htmlspecialchars($order['email']) ?></div>
                         </td>
-                        <td class="fw-bold text-dark">฿<?= number_format($order['total_price'], 2) ?></td>
+                        <td class="fw-bold">฿<?= number_format($order['total_price'], 2) ?></td>
                         <td>
                             <span class="badge-status status-<?= $order['status'] ?>">
                                 <?= strtoupper($order['status']) ?>
                             </span>
                         </td>
-                           
-                        <td>
-    <?php if ($order['payment_id']): ?>
-        <button type="button" class="btn btn-sm btn-light rounded-pill px-3" 
-        onclick="viewSlip('<?= $order['order_id'] ?>', '<?= $order['payment_proof'] ?>')"> 
-    <i class="bi bi-file-earmark-image text-primary"></i> ดูสลิป
-</button>
-    <?php else: ?>
-        <span class="text-muted small">ยังไม่แจ้งชำระ</span>
-    <?php endif; ?>
-</td>
-
-
-
                         <td class="text-center">
-                            <form action="" method="POST" class="d-flex gap-2 justify-content-center">
+                            <?php if ($order['payment_id']): ?>
+                                <button type="button" class="btn btn-view-slip mb-2 w-100" 
+                                    onclick="viewSlip('<?= $order['order_id'] ?>', '<?= $order['payment_proof'] ?>')"> 
+                                    <i class="bi bi-file-earmark-image me-1"></i> ดูสลิป
+                                </button>
+                            <?php else: ?>
+                                <div class="small text-muted mb-2">ยังไม่แจ้งชำระ</div>
+                            <?php endif; ?>
+
+                            <form action="" method="POST" class="d-flex flex-column gap-2">
                                 <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
-                                <select name="new_status" class="form-select form-select-sm border-0 bg-light" style="width: 130px; border-radius: 10px;">
+                                <select name="new_status" class="form-select form-select-sm form-select-custom">
                                     <option value="pending" <?= $order['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
                                     <option value="paid" <?= $order['status'] == 'paid' ? 'selected' : '' ?>>Paid</option>
                                     <option value="shipped" <?= $order['status'] == 'shipped' ? 'selected' : '' ?>>Shipped</option>
                                     <option value="completed" <?= $order['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
                                     <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
                                 </select>
-                                <button type="submit" name="update_status" class="btn btn-sm btn-dark rounded-pill px-3">
+                                <button type="submit" name="update_status" class="btn btn-sm btn-dark btn-save">
                                     บันทึก
                                 </button>
                             </form>
@@ -181,17 +238,26 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
+<script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+
 <script>
 function viewSlip(orderId, imgName) {
+    if (!imgName || imgName === '') {
+        Swal.fire('ไม่พบไฟล์', 'ออเดอร์นี้ไม่มีไฟล์สลิปแนบมาค่ะ', 'error');
+        return;
+    }
     Swal.fire({
         title: 'หลักฐานการโอนเงิน #' + orderId,
-        imageUrl: '../uploads/payments/' + imgName, // ปรับ Path โฟลเดอร์ที่เก็บสลิปของคุณ
+        // ลองเปลี่ยน ../ เป็น ../../ ถ้าไฟล์นี้อยู่ในโฟลเดอร์ย่อย 2 ชั้น
+        imageUrl: '../../uploads/slips/' + imgName, 
+        imageWidth: 400,
         imageAlt: 'Slip Payment',
         confirmButtonColor: '#a34a67',
-        confirmButtonText: 'ปิดหน้าต่าง',
-        borderRadius: '20px'
+        confirmButtonText: 'ปิดหน้าต่าง'
     });
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
 </body>
 </html>

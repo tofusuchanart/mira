@@ -41,7 +41,7 @@ if ($action == 'update' && isset($_GET['id']) && isset($_GET['qty'])) {
     }
 
     // เปลี่ยนชื่อไฟล์ตรงนี้ให้ตรงกับหน้าตะกร้าของคุณจริงๆ
-    header("Location: view_cart.php"); 
+    header("Location: cart/mycart.php"); 
     exit;
 }
 
@@ -55,7 +55,7 @@ if ($action == 'remove' && isset($_GET['id'])) {
         unset($_SESSION['cart'][$product_id]);
     }
 
-    header("Location: view_cart.php");
+    header("Location: cart/mycart.php");
     exit;
 }
 
@@ -64,7 +64,7 @@ if ($action == 'remove' && isset($_GET['id'])) {
  */
 if ($action == 'clear') {
     unset($_SESSION['cart']);
-    header("Location: edit/edit.php");
+    header("Location: cart/mycart.php");
     exit;
 }
 

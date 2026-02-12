@@ -1,6 +1,8 @@
 <?php 
 require_once "../config.php";
-
+/** @var PDO $conn */
+$stmt = $conn->query("SELECT COUNT(*) FROM users");
+$user_count = ($stmt) ? $stmt->fetchColumn() : 0;
 try {
     // 1. จัดการสินค้า: นับจากตาราง products
     $countProducts = $conn->query("SELECT COUNT(*) FROM products")->fetchColumn();
@@ -175,7 +177,7 @@ $countOrders = $stmtOrders->fetchColumn();
 <header class="glass-header text-center">
     <div class="container">
         <h1 class="fw-bold mb-0">MIRA CONTROL CENTER</h1>
-        <p class="text-white-50">ระบบจัดการหลังบ้าน MIRA Store</p>
+        <p class="text-gray-800">ระบบจัดการหลังบ้าน MIRA Store</p>
     </div>
 </header>
 
@@ -262,6 +264,8 @@ $countOrders = $stmtOrders->fetchColumn();
         <a href="../login/logout.php" class="btn btn-outline-danger px-4 rounded-pill">ออกจากระบบ</a>
     </div>
 </div>
+
+
 <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

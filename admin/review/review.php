@@ -27,6 +27,9 @@ if (isset($_GET['delete_id'])) {
     }
 }
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -38,137 +41,148 @@ if (isset($_GET['delete_id'])) {
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@200;400;600&display=swap');
+
         body { 
+            background-color: #fff5f7; /* พื้นหลังชมพูอ่อนมากแบบ Minimal */
             font-family: 'Sarabun', sans-serif; 
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('../../admin/photo_ad/ro.jpg');
-            background-size: cover;
-            background-attachment: fixed;
-            min-height: 100vh;
-            color: white;
+            color: #4a4a4a;
         }
 
-        .glass-container {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 30px;
-            margin-top: 40px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-
-        .review-card-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* ปุ่มย้อนกลับแบบในรูป */
+        .back-link {
+            text-decoration: none;
+            color: #94a3b8;
+            font-size: 0.95rem;
             transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .back-link:hover { color: #b3365b; }
+
+        h2.fw-bold {
+            color: #b3365b;
+            letter-spacing: -1px;
         }
 
-        .review-card-item:hover {
-            background: rgba(255, 255, 255, 0.12);
-            transform: scale(1.01);
+        /* คอนเทนเนอร์หลักขาวสะอาด */
+        .glass-container {
+            background: #ffffff;
+            border-radius: 25px;
+            border: none;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(179, 54, 91, 0.05);
+            margin-top: 20px;
         }
+
+        /* รายการรีวิวแบบ Minimal */
+        .review-card-item {
+            background: #fff;
+            border-bottom: 1px solid #f1f1f1;
+            padding: 20px 0;
+            transition: 0.2s;
+        }
+        .review-card-item:last-child { border-bottom: none; }
 
         .user-img {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #f8a5c2;
         }
 
-        .star-rating { color: #f8a5c2; }
+        .star-rating { color: #f8a5c2; font-size: 0.9rem; }
         
         .product-badge {
-            background: rgba(248, 165, 194, 0.2);
-            color: #f8a5c2;
+            background: #fff0f3;
+            color: #d63384;
             padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            border: 1px solid rgba(248, 165, 194, 0.3);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            border: 1px solid #f8d7da;
+            display: inline-block;
         }
 
+        /* ปุ่มลบสไตล์ Minimal */
         .btn-delete {
-            background: rgba(255, 71, 87, 0.2);
-            border: 1px solid #ff4757;
-            color: #ff4757;
-            border-radius: 10px;
+            background: transparent;
+            border: none;
+            color: #ff4d7d;
+            font-size: 1.2rem;
+            padding: 8px;
             transition: 0.3s;
+            border-radius: 12px;
         }
-
         .btn-delete:hover {
-            background: #ff4757;
-            color: white;
+            background: #fff0f3;
+            color: #ff1f5a;
         }
 
-        .nav-link-custom {
-            color: white;
-            text-decoration: none;
-            opacity: 0.7;
-            transition: 0.3s;
-        }
-
-        .nav-link-custom:hover { opacity: 1; color: #f8a5c2; }
+        .text-muted-custom { color: #8e8e8e; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-<div class="container pb-5">
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-glass sticky-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index_ad.php">
-            <i class="bi bi-shield-lock-fill me-2"></i>MIRA ADMIN
-        </a>
-        <div class="ms-auto">
-            <a href="../index_ad.php" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
-        </div>
+<div class="container py-5">
+    <a href="../index_ad.php" class="back-link">
+        <i class="bi bi-arrow-left"></i> กลับสู่หน้า Dashboard
+    </a>
+
+    <div class="text-start mb-4">
+        <h2 class="fw-bold mb-1">จัดการรีวิวสินค้า</h2>
+        <p class="text-muted">ตรวจสอบและจัดการความคิดเห็นจากลูกค้า Mira ของคุณ</p>
     </div>
-</nav>
+    
 
     <div class="glass-container">
+        <h5 class="fw-bold mb-4" style="color: #b3365b;">รายการรีวิวทั้งหมด (<?= count($reviews) ?>)</h5>
+
         <?php if (empty($reviews)): ?>
             <div class="text-center py-5">
-                <i class="bi bi-chat-dots fs-1 text-white-50"></i>
-                <p class="mt-3 text-white-50">ยังไม่มีข้อมูลการรีวิวในขณะนี้</p>
+                <i class="bi bi-chat-dots fs-1" style="color: #f8a5c2;"></i>
+                <p class="mt-3 text-muted">ยังไม่มีข้อมูลการรีวิวในขณะนี้</p>
             </div>
         <?php else: ?>
-            <div class="row">
-                <?php foreach($reviews as $rev): ?>
-                <div class="col-12">
-                    <div class="review-card-item">
-                        <div class="row align-items-center">
-                            <div class="col-md-1 text-center">
-                                <?php 
-                                    $pic = !empty($rev['profile_img']) ? "../photo/".$rev['profile_img'] : "https://ui-avatars.com/api/?name=".urlencode($rev['fullname']);
-                                ?>
-                                <img src="<?= $pic ?>" class="user-img shadow-sm">
-                            </div>
-                            <div class="col-md-3">
-                                <h6 class="mb-1 fw-bold"><?= htmlspecialchars($rev['fullname']) ?></h6>
-                                <span class="product-badge">รีวิวสินค้า: <?= htmlspecialchars($rev['product_name']) ?></span>
-                            </div>
-                            <div class="col-md-5">
-                                <div class="star-rating mb-1">
-                                    <?= str_repeat('<i class="bi bi-star-fill"></i> ', $rev['rating']) ?>
-                                    <?= str_repeat('<i class="bi bi-star"></i> ', 5 - $rev['rating']) ?>
-                                </div>
-                                <p class="small text-white-50 mb-0">"<?= htmlspecialchars($rev['comment']) ?>"</p>
-                                <small class="text-muted" style="font-size: 0.7rem;"><?= $rev['review_date'] ?></small>
-                            </div>
-                            <div class="col-md-3 text-end">
-                                <a href="?delete_id=<?= $rev['review_id'] ?>" 
-                                   class="btn btn-delete px-3 py-2"
-                                   onclick="return confirm('ยืนยันการลบรีวิวนี้หรือไม่?')">
-                                    <i class="bi bi-trash3 me-1"></i> ลบรีวิว
-                                </a>
-                            </div>
+            <?php foreach($reviews as $rev): ?>
+            <div class="review-card-item">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <?php 
+                            $pic = !empty($rev['profile_img']) ? "../../register/photo/".$rev['profile_img'] : "https://ui-avatars.com/api/?name=".urlencode($rev['fullname']);
+                        ?>
+                        <img src="<?= $pic ?>" class="user-img">
+                    </div>
+
+                    <div class="col-md-3">
+                        <h6 class="mb-1 fw-bold" style="color: #4a4a4a;"><?= htmlspecialchars($rev['fullname']) ?></h6>
+                        <span class="product-badge">
+                            <i class="bi bi-bag-heart me-1"></i><?= htmlspecialchars($rev['product_name']) ?>
+                        </span>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div class="star-rating mb-1">
+                            <?= str_repeat('<i class="bi bi-star-fill"></i>', $rev['rating']) ?>
+                            <?= str_repeat('<i class="bi bi-star"></i>', 5 - $rev['rating']) ?>
                         </div>
+                        <p class="mb-0" style="font-size: 0.95rem; color: #666;">"<?= htmlspecialchars($rev['comment']) ?>"</p>
+                        <small class="text-muted-custom"><?= date('d/m/Y H:i', strtotime($rev['review_date'])) ?></small>
+                    </div>
+
+                    <div class="col text-end">
+                        <a href="?delete_id=<?= $rev['review_id'] ?>" 
+                           class="btn-delete"
+                           onclick="return confirm('คุณต้องการลบรีวิวนี้ใช่หรือไม่?')">
+                            <i class="bi bi-trash3"></i>
+                        </a>
                     </div>
                 </div>
-                <?php endforeach; ?>
+
             </div>
+            <?php endforeach; ?>
         <?php endif; ?>
     </div>
 </div>
