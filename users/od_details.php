@@ -200,7 +200,7 @@ $items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <div class="text-center mt-5">
-                        <p class="small text-muted">หากมีข้อสงสัยเกี่ยวกับคำสั่งซื้อ กรุณา <a href="contact.php" style="color: var(--mira-pink-accent);">ติดต่อเรา</a></p>
+                        
                         <button onclick="window.print()" class="btn btn-outline-secondary btn-sm rounded-pill px-4">
                             <i class="bi bi-printer me-2"></i> พิมพ์ใบเสร็จ
                         </button>

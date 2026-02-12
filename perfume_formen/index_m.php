@@ -130,7 +130,7 @@ function checkLoginRedirect(productId) {
                     <i class="bi bi-person-circle" style="font-size: 4rem; color: #b3365b;"></i>
                 </div>
                 <h4 class="fw-bold mb-3" style="color: #b3365b;">กรุณาเข้าสู่ระบบ</h4>
-                <p class="text-muted mb-4">คุณต้องเข้าสู่ระบบสมาชิกก่อน <br>จึงจะสามารถดูรายละเอียดสินค้าและสั่งซื้อได้</p>
+                <p class="text-muted mb-4">คุณต้องเข้าสู่ระบบสมาชิกก่อนจึงจะดูรายละเอียดได้</p>
                 
                 <div class="d-grid gap-2">
                     <a href="/mira/login/login.php" class="btn py-3 fw-bold shadow-sm" 

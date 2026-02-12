@@ -154,18 +154,19 @@ try {
 </style>
 
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-start mb-2">
+    <div class="d-flex justify-content-between align-items-start mb-0">
         <a href="../index_ad.php" class="back-link">
             <i class="bi bi-arrow-left"></i> กลับสู่หน้า Dashboard
         </a>
     </div>
 
-<div class="container py-5">
-    <div class="text-start mb-5">
-        
-        <h2 class="fw-bold mb-1">MIRA Insights</h2>
+<div class="container py-1">
+    <div class="text-start mb-4">
+        <h2 class="fw-bold mb-1">วิเคราะห์ยอดขาย</h2>
         <p class="text-muted">จัดการและดูภาพรวมธุรกิจ Mira ของคุณ</p>
     </div>
+
+
     <div class="row g-4 mb-4">
         <div class="col-md-3">
             <div class="glass-card text-center">

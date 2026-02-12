@@ -39,6 +39,7 @@ if (isset($_GET['delete_id'])) {
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@200;400;600&display=swap');
@@ -173,11 +174,11 @@ if (isset($_GET['delete_id'])) {
                     </div>
 
                     <div class="col text-end">
-                        <a href="?delete_id=<?= $rev['review_id'] ?>" 
-                           class="btn-delete"
-                           onclick="return confirm('คุณต้องการลบรีวิวนี้ใช่หรือไม่?')">
-                            <i class="bi bi-trash3"></i>
-                        </a>
+                        <a href="javascript:void(0);" 
+   class="btn-delete"
+   onclick="confirmDelete('<?= $rev['review_id'] ?>')">
+    <i class="bi bi-trash3"></i>
+</a>
                     </div>
                 </div>
 
@@ -186,6 +187,32 @@ if (isset($_GET['delete_id'])) {
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+function confirmDelete(reviewId) {
+    Swal.fire({
+        title: 'ยืนยันการลบรีวิว?',
+        text: "เมื่อลบแล้วจะไม่สามารถกู้คืนข้อมูลได้!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#b3365b', // สีชมพูเข้มตามธีมระบบ
+        cancelButtonColor: '#94a3b8', // สีเทาตามธีมปุ่มย้อนกลับ
+        confirmButtonText: 'ยืนยันการลบ',
+        cancelButtonText: 'ยกเลิก',
+        borderRadius: '20px', // ให้ขอบมนเข้ากับ glass-container
+        customClass: {
+            popup: 'rounded-4'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // ส่งไปที่ไฟล์เดิมพร้อม parameter delete_id ตาม Logic PHP เดิมของคุณ
+            window.location.href = '?delete_id=' + reviewId;
+        }
+    })
+}
+</script>
+
+
 
 <script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>

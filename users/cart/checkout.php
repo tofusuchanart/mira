@@ -293,6 +293,43 @@ function previewImage(input) {
 </script>
 
 
+<script>
+document.querySelector('form[action="process_payment.php"]').addEventListener('submit', function(e) {
+    // 1. ป้องกันฟอร์มส่งข้อมูลทันที
+    e.preventDefault();
+    const form = this;
+
+    // 2. แสดง Popup ยืนยันการแจ้งชำระเงิน
+    Swal.fire({
+        title: 'ยืนยันการแจ้งชำระเงิน?',
+        text: "ตรวจสอบข้อมูลและหลักฐานการโอนเงินให้ถูกต้องนะคะ",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#a34a67', // สี mira-dark-pink จากสไตล์ของคุณ
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'ยืนยันและส่งข้อมูล',
+        cancelButtonText: 'ตรวจสอบอีกครั้ง',
+        borderRadius: '20px'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // 3. แสดง Popup โหลดระหว่างกำลังประมวลผล (ถ้าต้องการ)
+            Swal.fire({
+                title: 'กำลังบันทึกข้อมูล...',
+                text: 'กรุณารอสักครู่ค่ะ',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // 4. ส่งฟอร์มไปยัง PHP ตาม Logic เดิม
+            form.submit();
+        }
+    });
+});
+</script>
+
+
 
 </body>
 </html>

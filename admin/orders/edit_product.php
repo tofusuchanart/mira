@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <label class="block text-xs font-semibold text-gray-400 uppercase tracking-widest">รูปภาพสินค้า</label>
                         <div class="relative group">
                             <div class="w-full h-64 rounded-[2rem] overflow-hidden bg-gray-50 border-2 border-dashed border-gray-100 flex items-center justify-center">
-                                <img src="uploads/<?php echo $product['image']; ?>" id="preview" class="w-full h-full object-cover">
+                                <img src="../../photo/<?php echo $product['image']; ?>" id="preview" class="w-full h-full object-cover">
                             </div>
                             <div class="mt-4">
                                 <input type="file" name="image" id="imgInput" class="hidden">
@@ -178,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <button type="submit" class="flex-1 bg-[#880E4F] text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-[#AD1457] transition-all transform active:scale-[0.98]">
                         บันทึกการเปลี่ยนแปลง
                     </button>
-                    <a href="manage_order.php" class="flex-1 text-center py-4 rounded-2xl bg-gray-50 text-gray-400 font-bold hover:bg-gray-100 transition-all">
+                    <a href="manage_products.php" class="flex-1 text-center py-4 rounded-2xl bg-gray-50 text-gray-400 font-bold hover:bg-gray-100 transition-all">
                         ยกเลิก
                     </a>
                 </div>

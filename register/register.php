@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: url('../register/photo/ki.jpg'); /* รูปพื้นหลังน้ำหอมโทนชมพู */
+            background: url('../register/photo/op.jpg'); /* รูปพื้นหลังน้ำหอมโทนชมพู */
             background-size: cover;
             background-position: center;
             height: 100vh;

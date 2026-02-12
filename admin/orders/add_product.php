@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // จัดการอัปโหลดรูปภาพ
     $image = $_FILES['image']['name'];
-    $target = "uploads/" . basename($image);
+    $target = "../../photo/" . basename($image);
     move_uploaded_file($_FILES['image']['tmp_name'], $target);
 
     $sql = "INSERT INTO products (product_name, price, stock, sex, description, image) 
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             <div class="flex gap-3 pt-4">
                 <button type="submit" class="flex-1 bg-[#F06292] text-white py-3 rounded-full font-bold shadow-md hover:bg-[#D81B60] transition">บันทึกข้อมูล</button>
-                <a href="manage_order.php" class="flex-1 text-center bg-gray-100 text-gray-400 py-3 rounded-full font-bold hover:bg-gray-200 transition">ยกเลิก</a>
+                <a href="manage_products.php" class="flex-1 text-center bg-gray-100 text-gray-400 py-3 rounded-full font-bold hover:bg-gray-200 transition">ยกเลิก</a>
             </div>
         </form>
     </div>

@@ -219,11 +219,11 @@ if ($stmt instanceof PDOStatement) { // เช็คว่าเป็น Statem
                             <form action="" method="POST" class="d-flex flex-column gap-2">
                                 <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
                                 <select name="new_status" class="form-select form-select-sm form-select-custom">
-                                    <option value="pending" <?= $order['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-                                    <option value="paid" <?= $order['status'] == 'paid' ? 'selected' : '' ?>>Paid</option>
-                                    <option value="shipped" <?= $order['status'] == 'shipped' ? 'selected' : '' ?>>Shipped</option>
-                                    <option value="completed" <?= $order['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
-                                    <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                                    <option value="pending" <?= $order['status'] == 'pending' ? 'selected' : '' ?>>รอดำเนินการ</option>
+                                    <option value="paid" <?= $order['status'] == 'paid' ? 'selected' : '' ?>>จ่ายแล้ว</option>
+                                    <option value="shipped" <?= $order['status'] == 'shipped' ? 'selected' : '' ?>>จัดส่งแล้ว</option>
+                                    <option value="completed" <?= $order['status'] == 'completed' ? 'selected' : '' ?>>เสร็จสิ้น</option>
+                                    <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : '' ?>>ยกเลิก</option>
                                 </select>
                                 <button type="submit" name="update_status" class="btn btn-sm btn-dark btn-save">
                                     บันทึก

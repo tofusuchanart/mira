@@ -297,7 +297,7 @@ if (!empty($_SESSION['cart'])) {
             </div>
 
             <div class="mt-4 p-4 text-center" style="background: #fff; border-radius: 25px; border: 2px dashed var(--mira-pink-medium);">
-                <p class="mb-0 small" style="color: var(--mira-dark-pink);">✨ รับฟรี! ตัวทดลองทุก order</p>
+                <p class="mb-0 small" style="color: var(--mira-dark-pink);">✨ รับฟรี! ตัวทดลองแบบสุ่มทุก order</p>
             </div>
         </div>
     </div>

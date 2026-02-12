@@ -6,7 +6,13 @@ require_once "../../config.php";
 $user_id = $_SESSION['user_id'] ?? null;
 $fullname = $_SESSION['fullname'] ?? '';
 $email = $_SESSION['email'] ?? '';
-
+// ดึงประวัติการติดต่อของลูกค้าคนนี้
+$my_messages = [];
+if ($user_id) {
+    $stmt_history = $conn->prepare("SELECT * FROM contact_messages WHERE user_id = ? ORDER BY created_at DESC");
+    $stmt_history->execute([$user_id]);
+    $my_messages = $stmt_history->fetchAll(PDO::FETCH_ASSOC);
+}
 $success = false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
@@ -32,7 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
     <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         :root {
             --mira-pink: #f8a5c2;
@@ -193,7 +200,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
     <div class="glass-card shadow-lg">
         <div class="text-center mb-5">
             <h2 class="mira-header fw-bold">ส่งข้อความถึงเรา</h2>
-            <p class="text-muted">มีคำถามหรือข้อสงสัย? ส่งข้อความหาเราได้ทันที</p>
+           
+
+
+            <hr class="my-5" style="border-top: 2px dashed rgba(179, 54, 91, 0.1);">
+
+<div class="history-section">
+    <h5 class="mira-header fw-bold mb-4"><i class="bi bi-chat-square-heart me-2"></i> ประวัติการติดต่อของคุณ</h5>
+    
+    <?php if (empty($my_messages)): ?>
+        <p class="text-muted small text-center py-3">ยังไม่มีประวัติการส่งข้อความค่ะ</p>
+    <?php else: ?>
+        <div class="list-group border-0">
+            <?php foreach ($my_messages as $msg): ?>
+                <div class="list-group-item border-0 bg-white rounded-4 mb-3 shadow-sm p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge mb-2" style="background: <?= !empty($msg['admin_reply']) ? '#8bc34a' : '#f8a5c2' ?>;">
+                                <?= !empty($msg['admin_reply']) ? 'แอดมินตอบกลับแล้ว ✨' : 'รอการตรวจสอบ' ?>
+                            </span>
+                            <div class="fw-bold text-dark"><?= htmlspecialchars($msg['subject']) ?></div>
+                            <div class="text-muted" style="font-size: 0.75rem;"><?= date('d/m/Y H:i', strtotime($msg['created_at'])) ?></div>
+                        </div>
+                        
+                        <?php if (!empty($msg['admin_reply'])): ?>
+                            <button class="btn btn-sm rounded-pill px-3" 
+                                    style="background: var(--mira-bg); color: var(--mira-dark-pink); border: 1px solid var(--mira-pink);"
+                                    onclick="showReply('<?= htmlspecialchars(addslashes($msg['message'])) ?>', '<?= htmlspecialchars(addslashes($msg['admin_reply'])) ?>')">
+                                ดูข้อความตอบกลับ
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</div>
+
+
         </div>
 
         <?php if ($success): ?>
@@ -265,6 +309,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_message'])) {
         </form>
     </div>
 </div>
+
+
+<script>
+function showReply(userMsg, adminReply) {
+    Swal.fire({
+        title: '<span style="color: var(--mira-dark-pink);">ข้อความตอบกลับจาก MIRA</span>',
+        html: `
+            <div class="text-start" style="font-family: 'Sarabun', sans-serif; font-size: 0.9rem;">
+                <div class="p-3 mb-3 rounded-4" style="background: #f8f9fa; border-left: 4px solid #ddd;">
+                    <small class="text-muted">ข้อความของคุณ:</small><br>
+                    ${userMsg}
+                </div>
+                <div class="p-3 rounded-4" style="background: var(--mira-bg); border-left: 4px solid var(--mira-dark-pink);">
+                    <small style="color: var(--mira-dark-pink); font-weight: bold;">แอดมินตอบกลับ:</small><br>
+                    ${adminReply}
+                </div>
+            </div>
+        `,
+        confirmButtonText: 'รับทราบค่ะ',
+        confirmButtonColor: '#b3365b',
+        customClass: {
+            popup: 'rounded-5 shadow',
+            confirmButton: 'rounded-pill px-4'
+        }
+    });
+}
+</script>
+
 
 <script src="../../bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>

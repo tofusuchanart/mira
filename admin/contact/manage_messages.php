@@ -2,7 +2,7 @@
 session_start();
 require_once "../../config.php"; 
 
-// ตรวจสอบสิทธิ์ (เฉพาะ Owner เท่านั้น)
+// ตรวจสอบสิทธิ์
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
     header("Location: ../login.php");
     exit();
@@ -10,7 +10,56 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'owner') {
 
 $status_msg = "";
 
-// ส่วนการลบข้อความ
+// --- 1. จัดการข้อมูล (POST/GET Actions) ก่อนเริ่มดึงข้อมูลแสดงผล ---
+
+// แทนที่ส่วน 'reply' เดิมด้วยโค้ดชุดใหม่ที่มีการส่ง Email
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reply') {
+    $msg_id = $_POST['message_id'];
+    $reply_text = $_POST['reply_content'];
+    
+    // อัปเดตข้อมูลลงฐานข้อมูล
+    $stmt = $conn->prepare("UPDATE contact_messages SET admin_reply = ?, replied_at = NOW() WHERE message_id = ?");
+    if ($stmt->execute([$reply_text, $msg_id])) {
+        
+        // ดึงข้อมูลอีเมลลูกค้าและหัวข้อเดิมเพื่อส่ง Notification
+        $stmt_info = $conn->prepare("SELECT m.subject, u.email, u.fullname FROM contact_messages m 
+                                     LEFT JOIN users u ON m.user_id = u.user_id 
+                                     WHERE m.message_id = ?");
+        $stmt_info->execute([$msg_id]);
+        $client = $stmt_info->fetch(PDO::FETCH_ASSOC);
+
+        if ($client && !empty($client['email'])) {
+            $to = $client['email'];
+            $subject_email = "MIRA Admin ได้ตอบกลับข้อความของคุณแล้ว: " . $client['subject'];
+            
+            $message_email = "
+            <html>
+            <head><title>การตอบกลับจาก MIRA</title></head>
+            <body style='font-family: Sarabun, sans-serif;'>
+                <h2 style='color: #a34a67;'>สวัสดีค่ะ คุณ {$client['fullname']}</h2>
+                <p>แอดมินได้ตอบกลับข้อความในหัวข้อ <strong>'{$client['subject']}'</strong> เรียบร้อยแล้วค่ะ</p>
+                <div style='background: #fdf2f4; padding: 20px; border-left: 4px solid #a34a67;'>
+                    <strong>ข้อความจากแอดมิน:</strong><br>
+                    " . nl2br(htmlspecialchars($reply_text)) . "
+                </div>
+                <p style='color: #888; font-size: 0.8rem; margin-top: 20px;'>
+                    ขอบคุณที่ใช้บริการ MIRA ค่ะ<br>
+                    *นี่เป็นอีเมลแจ้งเตือนอัตโนมัติ กรุณาอย่าตอบกลับอีเมลนี้
+                </p>
+            </body>
+            </html>";
+
+            $headers = "MIME-Version: 1.0" . "\r\n";
+            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+            $headers .= "From: MIRA Support <support@yourdomain.com>" . "\r\n";
+
+            @mail($to, $subject_email, $message_email, $headers);
+        }
+        $status_msg = "ส่งข้อความตอบกลับและแจ้งเตือนผ่านอีเมลเรียบร้อยแล้วค่ะ ✨";
+    }
+}
+
+// ส่วนการลบ (เหมือนเดิม)
 if (isset($_GET['delete_id'])) {
     $delete_id = $_GET['delete_id'];
     $stmt = $conn->prepare("DELETE FROM contact_messages WHERE message_id = ?");
@@ -19,13 +68,29 @@ if (isset($_GET['delete_id'])) {
     }
 }
 
-// ดึงข้อความติดต่อทั้งหมด
+// --- 2. ดึงข้อมูลจาก Database (หลังจากจัดการ Action เสร็จ ข้อมูลในตารางจะได้เป็นปัจจุบัน) ---
+
 $sql = "SELECT m.*, u.fullname, u.email as user_email 
         FROM contact_messages m 
         LEFT JOIN users u ON m.user_id = u.user_id 
         ORDER BY m.created_at DESC";
 $stmt = $conn->query($sql);
 $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// --- 3. คำนวณสถิติ ---
+$replied_count = 0;
+$new_this_month = 0;
+$current_month = date('m');
+$current_year = date('Y');
+
+foreach($messages as $m) {
+    if(!empty($m['admin_reply'])) $replied_count++; 
+    $msg_month = date('m', strtotime($m['created_at']));
+    $msg_year = date('Y', strtotime($m['created_at']));
+    if($msg_month == $current_month && $msg_year == $current_year) {
+        $new_this_month++;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -186,60 +251,57 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <a href="../index_ad.php" class="back-link">
             <i class="bi bi-arrow-left"></i> กลับสู่หน้า Dashboard
         </a>
-            <h1 class="mira-title">Message Directory</h1>
-            <p class="text-muted">บริหารจัดการข้อความติดต่อและสอบถามจากลูกค้า</p>
+            <h1 class="mira-title">ข้อความลูกค้า</h1>
+            <p class="text-muted">บริหารจัดการข้อความจากลูกค้า</p>
         </div>
         
     </div>
 
     <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="icon-box" style="background: #fce4ec; color: #f06292;">
-                    <i class="bi bi-chat-left-dots"></i>
-                </div>
-                <div class="text-muted small">ข้อความทั้งหมด</div>
-                <div class="h2 fw-bold mb-0"><?= count($messages) ?></div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-box" style="background: #fce4ec; color: #f06292;">
+                <i class="bi bi-chat-left-dots"></i>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="icon-box" style="background: #e3f2fd; color: #42a5f5;">
-                    <i class="bi bi-envelope-paper"></i>
-                </div>
-                <div class="text-muted small">มาใหม่เดือนนี้</div>
-                <div class="h2 fw-bold mb-0">--</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="icon-box" style="background: #f1f8e9; color: #8bc34a;">
-                    <i class="bi bi-check2-all"></i>
-                </div>
-                <div class="text-muted small">ตอบกลับแล้ว</div>
-                <div class="h2 fw-bold mb-0">0</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <div class="icon-box" style="background: #fff3e0; color: #ffb74d;">
-                    <i class="bi bi-star"></i>
-                </div>
-                <div class="text-muted small">ระดับความสำคัญ</div>
-                <div class="h2 fw-bold mb-0">Normal</div>
-            </div>
+            <div class="text-muted small">ข้อความทั้งหมด</div>
+            <div class="h2 fw-bold mb-0"><?= count($messages) ?></div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-box" style="background: #e3f2fd; color: #42a5f5;">
+                <i class="bi bi-envelope-paper"></i>
+            </div>
+            <div class="text-muted small">มาใหม่เดือนนี้</div>
+            <div class="h2 fw-bold mb-0"><?= $new_this_month ?></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-box" style="background: #f1f8e9; color: #8bc34a;">
+                <i class="bi bi-check2-all"></i>
+            </div>
+            <div class="text-muted small">ตอบกลับแล้ว</div>
+            <div class="h2 fw-bold mb-0"><?= $replied_count ?></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="icon-box" style="background: #fff3e0; color: #ffb74d;">
+                <i class="bi bi-star"></i>
+            </div>
+            <div class="text-muted small">ระดับความสำคัญ</div>
+            <div class="h2 fw-bold mb-0">Normal</div>
+        </div>
+    </div>
+</div>
 
     <div class="messages-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold mb-0" style="color: #333;">รายการข้อความทั้งหมด</h4>
         </div>
 
-        <div class="search-container d-flex align-items-center">
-            <i class="bi bi-search text-muted me-3"></i>
-            <input type="text" id="msgSearch" class="search-input" placeholder="ค้นหาหัวข้อหรือชื่อลูกค้า...">
-        </div>
+       
 
         
         <div class="table-responsive">
@@ -254,51 +316,63 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($messages)): ?>
-                        <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">ยังไม่มีข้อความติดต่อเข้ามาค่ะ</td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($messages as $msg): ?>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-light text-secondary fw-bold" style="width: 40px; height: 40px; margin-right: 12px; font-size: 0.8rem;">
-                                        <?= mb_substr($msg['fullname'] ?? 'G', 0, 1) ?>
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-dark" style="font-size: 0.95rem;"><?= htmlspecialchars($msg['fullname'] ?? 'บุคคลทั่วไป') ?></div>
-                                        <div class="text-muted small" style="font-size: 0.8rem;"><?= htmlspecialchars($msg['user_email'] ?? 'ไม่มีอีเมล') ?></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="small text-muted">
-                                <?= date('Y-m-d H:i', strtotime($msg['created_at'])) ?>
-                            </td>
-                            <td>
-                                <span class="badge rounded-pill fw-normal px-3 py-2" style="background: #fdf5f7; color: var(--mira-pink-dark); font-size: 0.8rem;">
-                                    <?= htmlspecialchars($msg['subject']) ?>
-                                </span>
-                            </td>
+    <?php if (empty($messages)): ?>
+        <tr>
+            <td colspan="5" class="text-center py-5 text-muted">ยังไม่มีข้อความติดต่อเข้ามาค่ะ</td>
+        </tr>
+    <?php else: ?>
+        <?php foreach ($messages as $msg): ?>
+        <tr>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-light text-secondary fw-bold" style="width: 40px; height: 40px; margin-right: 12px; font-size: 0.8rem;">
+                        <?= mb_substr($msg['fullname'] ?? 'G', 0, 1) ?>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark" style="font-size: 0.95rem;"><?= htmlspecialchars($msg['fullname'] ?? 'บุคคลทั่วไป') ?></div>
+                        <div class="text-muted small" style="font-size: 0.8rem;"><?= htmlspecialchars($msg['user_email'] ?? 'ไม่มีอีเมล') ?></div>
+                    </div>
+                </div>
+            </td>
 
+            <td class="small text-muted">
+                <?= date('Y-m-d H:i', strtotime($msg['created_at'])) ?>
+            </td>
 
-                            <td>
-                                <div class="text-muted small text-truncate" style="max-width: 280px;">
-                                    <?= htmlspecialchars($msg['message']) ?>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <button class="btn-action btn-view" onclick="viewDetail('<?= htmlspecialchars(addslashes($msg['message'])) ?>', '<?= htmlspecialchars($msg['subject']) ?>')">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                                <button class="btn-action btn-delete" onclick="confirmDelete(<?= $msg['message_id'] ?>)">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
+            <td>
+                <span class="badge rounded-pill fw-normal px-3 py-2" style="background: #fdf5f7; color: var(--mira-pink-dark); font-size: 0.8rem;">
+                    <?= htmlspecialchars($msg['subject']) ?>
+                </span>
+            </td>
+
+            <td>
+                <div class="text-muted small text-truncate" style="max-width: 280px;">
+                    <?= htmlspecialchars($msg['message']) ?>
+                </div>
+            </td>
+
+            <td class="text-center">
+                <div class="d-flex justify-content-center gap-1">
+                    <button class="btn-action btn-view" title="ดูรายละเอียด" 
+                        onclick="viewDetail('<?= htmlspecialchars(addslashes($msg['message'])) ?>', '<?= htmlspecialchars($msg['subject']) ?>', '<?= htmlspecialchars(addslashes($msg['admin_reply'] ?? '')) ?>')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    
+                    <button class="btn-action" style="color: #42a5f5;" title="ตอบกลับ"
+                        onclick="replyMessage(<?= $msg['message_id'] ?>, '<?= htmlspecialchars($msg['fullname'] ?? 'ลูกค้า') ?>')">
+                        <i class="bi bi-reply-fill"></i>
+                    </button>
+
+                    <button class="btn-action btn-delete" title="ลบข้อความ"
+                        onclick="confirmDelete(<?= $msg['message_id'] ?>)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</tbody>
             </table>
         </div>
     </div>
@@ -350,6 +424,61 @@ function confirmDelete(id) {
         }
     })
 }
+
+// ฟังก์ชันสำหรับส่งการตอบกลับ
+function replyMessage(id, name) {
+    Swal.fire({
+        title: `ตอบกลับคุณ ${name}`,
+        input: 'textarea',
+        inputPlaceholder: 'พิมพ์ข้อความตอบกลับที่นี่...',
+        inputAttributes: { 'aria-label': 'พิมพ์ข้อความตอบกลับที่นี่' },
+        showCancelButton: true,
+        confirmButtonColor: '#a34a67',
+        confirmButtonText: 'ส่งข้อความ',
+        cancelButtonText: 'ยกเลิก',
+        customClass: { popup: 'rounded-5', confirmButton: 'rounded-pill px-4', cancelButton: 'rounded-pill px-4' },
+        preConfirm: (text) => {
+            if (!text) { Swal.showValidationMessage('กรุณาพิมพ์ข้อความก่อนส่งค่ะ'); }
+            return text;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // สร้าง Form ส่งค่าแบบ POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.innerHTML = `
+                <input type="hidden" name="action" value="reply">
+                <input type="hidden" name="message_id" value="${id}">
+                <input type="hidden" name="reply_content" value="${result.value}">
+            `;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+}
+
+// แก้ไขฟังก์ชันดูรายละเอียดให้แสดงข้อความที่ตอบไปแล้วด้วย
+function viewDetail(text, subject, reply) {
+    let content = `<div class="text-start p-3" style="font-size: 0.95rem; line-height: 1.6; color: #666;">
+                    <strong>ข้อความจากลูกค้า:</strong><br>${text}`;
+    if(reply) {
+        content += `<hr><strong style="color: #a34a67;">ข้อความตอบกลับจากแอดมิน:</strong><br>${reply}`;
+    }
+    content += `</div>`;
+
+    Swal.fire({
+        title: subject,
+        html: content,
+        confirmButtonColor: '#a34a67',
+        confirmButtonText: 'ปิดหน้าต่าง',
+        customClass: { popup: 'rounded-5', confirmButton: 'rounded-pill px-4' }
+    });
+}
+
+
+
+
+
 </script>
 
 <?php if ($status_msg): ?>

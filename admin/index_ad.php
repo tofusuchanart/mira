@@ -184,7 +184,7 @@ $countOrders = $stmtOrders->fetchColumn();
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-start header-section">
         <div>
-            <h1>Customer Directory</h1>
+            <h1>ข้อมูลลูกค้า</h1>
             <p>บริหารจัดการข้อมูลสมาชิกและสถิติการซื้อ</p>
         </div>
        
@@ -198,7 +198,7 @@ $countOrders = $stmtOrders->fetchColumn();
                 </div>
                 <div class="stat-label">จำนวนสินค้าทั้งหมด</div>
                 <div class="stat-number"><?php echo number_format($countProducts); ?></div>
-                <a href="orders/manage_order.php" class="btn btn-mira w-100">ดูรายการสินค้า</a>
+                <a href="orders/manage_products.php" class="btn btn-mira w-100">ดูรายการสินค้า</a>
             </div>
         </div>
 

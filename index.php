@@ -335,6 +335,61 @@ $reviews = $stmt_rev->fetchAll();
         padding-top: 25px;
         margin-top: 40px;
     }
+
+
+    
+    /* สไตล์พื้นฐานของ Social Icons */
+.social-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    margin-left: 15px; /* เว้นระยะห่างระหว่างไอคอน */
+    background-color: #ffffff; /* พื้นหลังสีขาว */
+    color: #b3365b; /* สีชมพู MIRA */
+    border-radius: 50%; /* ทรงกลม */
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* อนิเมชั่นแบบเด้งนุ่มนวล */
+    box-shadow: 0 4px 15px rgba(179, 54, 91, 0.1); /* เงาบางๆ */
+}
+
+/* Effect เมื่อเอาเมาส์ไปชี้ (Hover) */
+.social-icons a:hover {
+    color: #ffffff; /* เปลี่ยนไอคอนเป็นสีขาว */
+    transform: translateY(-5px) scale(1.1); /* ลอยขึ้นและขยายใหญ่ขึ้นเล็กน้อย */
+    box-shadow: 0 8px 20px rgba(179, 54, 91, 0.2); /* เงาเข้มขึ้น */
+}
+
+/* แยกสีตามแบรนด์เมื่อ Hover (ตัวเลือกเสริมเพื่อความพรีเมียม) */
+.social-icons a:hover .bi-facebook {
+    color: #ffffff;
+}
+.social-icons a:hover:has(.bi-facebook) {
+    background-color: #1877F2; /* สีฟ้า Facebook */
+}
+
+.social-icons a:hover:has(.bi-line) {
+    background-color: #06C755; /* สีเขียว Line */
+}
+
+.social-icons a:hover:has(.bi-instagram) {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); /* สีรุ้ง Instagram */
+}
+
+/* สำหรับมือถือ ให้ระยะห่างพอดี */
+@media (max-width: 768px) {
+    .social-icons {
+        justify-content: center !important;
+        margin-top: 20px;
+    }
+    .social-icons a {
+        margin: 0 10px;
+    }
+}
+
+
 </style>
 
 <footer class="footer-section">
@@ -373,15 +428,15 @@ $reviews = $stmt_rev->fetchAll();
 </div>
 
             <div class="col-md-4 text-md-end">
-                <h6 class="footer-title justify-content-md-end d-md-flex">Follow Our Beauty</h6>
-                <div class="social-icons d-flex align-items-center justify-content-md-end mt-4">
-                    <a href="#"><i class="bi bi-facebook"></i></a>
-                    <a href="#"><i class="bi bi-line"></i></a>
-                    <a href="#"><i class="bi bi-instagram"></i></a>                   
-                </div>
-               
-            </div>
-
+    <h6 class="footer-title justify-content-md-end d-md-flex">Follow Our Beauty & Contact us</h6>
+    <div class="social-icons d-flex align-items-center justify-content-md-end mt-4">
+        <a href="https://www.facebook.com/profile.php?id=61587653476633" target="_blank"><i class="bi bi-facebook"></i></a>
+        
+        <a href="https://line.me/" target="_blank"><i class="bi bi-line"></i></a>
+        
+        <a href="https://www.instagram.com/accounts/login" target="_blank"><i class="bi bi-instagram"></i></a>                   
+    </div>
+</div>
         </div>
 
         
