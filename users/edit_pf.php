@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (isset($_FILES['profile_img']) && $_FILES['profile_img']['error'] == 0) {
             $ext = pathinfo($_FILES['profile_img']['name'], PATHINFO_EXTENSION);
             $new_name = "user_" . uniqid() . "." . $ext;
-            $target = "../photo/" . $new_name;
+            $target = "../register/photo/" . $new_name;
             
             if (move_uploaded_file($_FILES['profile_img']['tmp_name'], $target)) {
                 $profile_img = $new_name;
