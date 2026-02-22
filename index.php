@@ -16,7 +16,7 @@
 #carouselExampleFade {
     border-radius: 30px; /* ความโค้งตามสไตล์ Dashboard */
     overflow: hidden;
-    box-shadow: 0 15px 35px rgba(179, 54, 91, 0.1); /* เงาชมพูจางๆ */
+    box-shadow: 0 15px 35px #b3365b1a; /* เงาชมพูจางๆ */
     margin: 20px auto; /* เพิ่มระยะห่างจาก Header */
     max-width: 95%; /* ให้เห็นขอบพื้นหลังสีชมพูอ่อนเล็กน้อย */
 }
@@ -40,7 +40,7 @@
 .carousel-control-prev:hover .carousel-control-prev-icon,
 .carousel-control-next:hover .carousel-control-next-icon {
     background-color: #b3365b; /* เปลี่ยนเป็นชมพู Mira เมื่อชี้ */
-    box-shadow: 0 0 15px rgba(179, 54, 91, 0.5); /* แสงฟุ้งรอบปุ่ม */
+    box-shadow: 0 0 15px #b3365b80; /* แสงฟุ้งรอบปุ่ม */
 }
 
 /* เพิ่มจุดกลมๆ (Indicators) ด้านล่าง */

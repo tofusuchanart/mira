@@ -1,33 +1,79 @@
-<?php 
+<?php
 require_once "../config.php";
-/** @var PDO $conn */
-$stmt = $conn->query("SELECT COUNT(*) FROM users");
-$user_count = ($stmt) ? $stmt->fetchColumn() : 0;
+
+
 try {
-    // 1. จัดการสินค้า: นับจากตาราง products
+    // --- LOGIC จากหน้า วิเคราะห์ยอดขาย ---
     $countProducts = $conn->query("SELECT COUNT(*) FROM products")->fetchColumn();
+    $countOrders = $conn->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+    $totalSales = $conn->query("SELECT SUM(total_price) FROM orders WHERE status != 'cancelled'")->fetchColumn() ?: 0;
+    $estimatedProfit = $totalSales * 0.3;
 
-    // 2. จัดการรีวิว: นับจากตาราง reviews
+    $dailySalesQuery = $conn->query("SELECT DATE(order_date) as day, SUM(total_price) as total 
+                                   FROM orders 
+                                   WHERE status != 'cancelled'
+                                   GROUP BY day 
+                                   ORDER BY day ASC LIMIT 7")->fetchAll(PDO::FETCH_ASSOC);
+    $days = []; $totals = [];
+    foreach($dailySalesQuery as $row) {
+        $days[] = date('d/m', strtotime($row['day']));
+        $totals[] = $row['total'];
+    }
+
+    $sexSales = $conn->query("SELECT p.sex, SUM(oi.price * oi.quantity) as total 
+                             FROM order_items oi 
+                             JOIN products p ON oi.product_id = p.product_id 
+                             GROUP BY p.sex")->fetchAll(PDO::FETCH_ASSOC);
+    $sexLabels = []; $sexData = [];
+    foreach($sexSales as $row) {
+        $sexLabels[] = ($row['sex'] == 'male') ? 'น้ำหอมผู้ชาย' : (($row['sex'] == 'female') ? 'น้ำหอมผู้หญิง' : 'Unisex');
+        $sexData[] = $row['total'];
+    }
+
+    $topCustomers = $conn->query("SELECT u.fullname, SUM(o.total_price) as spent 
+                                 FROM orders o 
+                                 JOIN users u ON o.user_id = u.user_id 
+                                 WHERE o.status != 'cancelled'
+                                 GROUP BY u.user_id 
+                                 ORDER BY spent DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+
+    $lowStockProducts = $conn->query("SELECT product_name, stock FROM products WHERE stock < 5 ORDER BY stock ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+    // --- LOGIC จากหน้า Control Center (นับจำนวนเพิ่มเติม) ---
     $countReviews = $conn->query("SELECT COUNT(*) FROM reviews")->fetchColumn();
-
-    // 3. จัดการผู้ใช้: นับจากตาราง users
     $countUsers = $conn->query("SELECT COUNT(*) FROM users")->fetchColumn();
-    
-    // 4. จัดการการเงิน: นับจำนวนรายการชำระเงินจากตาราง payments
     $countPayments = $conn->query("SELECT COUNT(*) FROM payments")->fetchColumn();
-    // นับจำนวนข้อความติดต่อ (จากตาราง contact_messages)
-$stmtMsg = $conn->prepare("SELECT COUNT(*) FROM contact_messages");
-$stmtMsg->execute();
-$countMessages = $stmtMsg->fetchColumn();
-
-// นับจำนวนรายการสั่งซื้อทั้งหมด (จากตาราง orders)
-$stmtOrders = $conn->prepare("SELECT COUNT(*) FROM orders");
-$stmtOrders->execute();
-$countOrders = $stmtOrders->fetchColumn();
+    $countMessages = $conn->query("SELECT COUNT(*) FROM contact_messages")->fetchColumn();
 
 } catch(PDOException $e) {
-    echo "เกิดข้อผิดพลาด: " . $e->getMessage();
+    $error = $e->getMessage();
 }
+
+
+?>
+
+<?php
+// แก้ไขส่วนดึงข้อมูลให้รองรับ PDO
+// 1. จัดการสต็อก
+$lowStockQuery = $conn->query("SELECT COUNT(*) as total FROM products WHERE stock < 10");
+$lowStockCount = $lowStockQuery->fetch(PDO::FETCH_ASSOC)['total'];
+
+// 2. รายการสั่งซื้อ (นับ pending และ paid)
+$newOrdersQuery = $conn->query("SELECT COUNT(*) as total FROM orders WHERE status IN ('pending', 'paid')");
+$newOrdersCount = $newOrdersQuery->fetch(PDO::FETCH_ASSOC)['total'];
+
+// 3. ข้อความติดต่อ (นับที่ยังไม่ตอบ)
+$newMsgQuery = $conn->query("SELECT COUNT(*) as total FROM contact_messages WHERE admin_reply IS NULL");
+$newMsgCount = $newMsgQuery->fetch(PDO::FETCH_ASSOC)['total'];
+
+// 4. รีวิวลูกค้า (นับของวันนี้)
+$today = date('Y-m-d');
+$newReviewQuery = $conn->query("SELECT COUNT(*) as total FROM reviews WHERE DATE(review_date) = '$today'");
+$newReviewCount = $newReviewQuery->fetch(PDO::FETCH_ASSOC)['total'];
+
+// 5. จัดการสมาชิก: นับจำนวนสมาชิกทั้งหมดที่มีบทบาทเป็นลูกค้า
+$userQuery = $conn->query("SELECT COUNT(*) as total FROM users WHERE role = 'customer'");
+$countUsers = $userQuery->fetch(PDO::FETCH_ASSOC)['total'];
 ?>
 
 <!DOCTYPE html>
@@ -35,237 +81,347 @@ $countOrders = $stmtOrders->fetchColumn();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIRA Admin Dashboard</title>
+    <title>MIRA Ultimate Admin Panel</title>
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --mira-pink: #D65A8D;
-            --mira-bg: #FDF2F5;
-            --mira-card-bg: #FFFFFF;
+            --mira-pink: #b3365b;
+            --mira-soft-pink: #f8a5c2;
+            --mira-bg: #fff5f7;
+            --mira-card-shadow: 0 10px 30px rgba(179, 54, 91, 0.05);
         }
 
         body { 
             font-family: 'Sarabun', sans-serif; 
             background-color: var(--mira-bg);
-            /* สามารถใส่รูปพื้นหลังจางๆ ได้ถ้าต้องการ */
             background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url('../admin/photo_ad/ro.jpg');
             background-size: cover;
             background-attachment: fixed;
-            min-height: 100vh;
-            color: #444;
+            color: #4a4a4a;
+            overflow-x: hidden;
         }
 
-        .header-section {
-            padding: 40px 0;
-            text-align: left;
+        /* Layout Structure */
+        .main-wrapper { display: flex; min-height: 100vh; }
+        .content-area { flex: 1; padding: 40px; }
+        .right-sidebar { 
+            width: 320px; 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(179, 54, 91, 0.1);
+            padding: 30px 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
         }
 
-        .header-section h1 {
+       /* ปรับขนาด Glass Card ให้เล็กลงและดูง่ายขึ้น */
+.glass-card {
+    background: rgba(255, 255, 255, 0.9); /* เพิ่มความใสเล็กน้อย */
+    border: none;
+    border-radius: 20px; /* ลดความมนลงนิดหน่อยให้ดูไม่เทอะทะ */
+    padding: 20px; /* ลด Padding จาก 25px เหลือ 15px */
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(179, 54, 91, 0.04);
+    margin-bottom: 15px;
+}
+
+/* ปรับหัวข้อใน Card ให้เล็กลงเพื่อให้สมดุลกับขนาดการ์ด */
+.glass-card h6 {
+    font-size: 0.9rem;
+    margin-bottom: 12px !important;
+    color: var(--mira-pink);
+}
+
+/* ปรับขนาด Canvas ของกราฟวงกลมให้เล็กลงแบบพอดี */
+#categoryChart {
+    max-height: 300px !important; /* จำกัดความสูงของกราฟ */
+    margin: 0 auto;
+}
+
+
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(179, 54, 91, 0.1); }
+
+        
+
+        /* Typography */
+        h2.fw-bold { color: var(--mira-pink); letter-spacing: -1px; }
+        .stat-icon { font-size: 1.8rem; color: var(--mira-soft-pink); }
+        .stat-label { color: #8e8e8e; font-size: 0.9rem; }
+        .stat-number { color: var(--mira-pink); font-weight: 700; font-size: 1.5rem; }
+
+        /* Sidebar Menu Items */
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 15px;
+            background: white;
+            margin-bottom: 12px;
+            text-decoration: none;
+            color: #555;
+            transition: 0.3s;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .menu-item:hover {
+            border-color: var(--mira-soft-pink);
+            background: var(--mira-bg);
             color: var(--mira-pink);
-            font-weight: 700;
-            font-size: 2.2rem;
+            transform: translateX(-5px);
         }
-
-        .header-section p {
-            color: #888;
-            font-size: 1rem;
-        }
-
-        /* ปรับแต่ง Card ให้เหมือนรูปตัวอย่าง */
-        .stat-card { 
-            background: var(--mira-card-bg);
-            border: none;
-            border-radius: 20px; 
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(214, 90, 141, 0.08);
-            padding: 25px;
-        }
-
-        .stat-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 8px 25px rgba(214, 90, 141, 0.15);
-        }
-
-        .icon-box {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+        .menu-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            margin-right: 12px;
+            font-size: 1.2rem;
         }
 
-        /* สีไอคอนตามประเภท */
-        .bg-product { background-color: #FEE2E2; color: #EF4444; }
-        .bg-review { background-color: #FEF3C7; color: #F59E0B; }
-        .bg-money { background-color: #D1FAE5; color: #10B981; }
-        .bg-user { background-color: #E0E7FF; color: #6366F1; }
+        /* Specific Menu Colors */
+        .bg-p { background: #fee2e2; color: #ef4444; }
+        .bg-r { background: #fef3c7; color: #f59e0b; }
+        .bg-m { background: #d1fae5; color: #10b981; }
+        .bg-u { background: #e0e7ff; color: #6366f1; }
+        .bg-msg { background: #f3e5f5; color: #9c27b0; }
+        .bg-ord { background: #e0f2f1; color: #009688; }
 
-        .stat-label {
-            color: #777;
-            font-size: 0.95rem;
-            margin-bottom: 5px;
+        .table-glass td { padding: 12px; vertical-align: middle; font-size: 0.95rem; }
+        .badge-low { background: #ff4d7d; border-radius: 50px; font-weight: 400; }
+        
+        .logout-btn {
+            border-radius: 50px;
+            padding: 10px;
+            width: 100%;
+            margin-top: 20px;
+            font-weight: 600;
         }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .btn-mira {
-            background-color: #f8f9fa;
-            border: 1px solid #eee;
-            color: #666;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            padding: 8px;
-            transition: 0.3s;
-        }
-
-        .btn-mira:hover {
-            background-color: var(--mira-pink);
-            color: white;
-            border-color: var(--mira-pink);
-        }
-
-        .btn-dashboard {
-            border: 1px solid #333;
-            border-radius: 20px;
-            padding: 5px 20px;
-            color: #333;
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
-
-        /* สีเดิมที่มีอยู่แล้ว... */
-    .bg-message { background-color: #f3e5f5; color: #9c27b0; } /* โทนม่วงอ่อนพาสเทล */
-    .bg-order { background-color: #e0f2f1; color: #009688; }   /* โทนเขียวมิ้นต์ */
-    
-    /* สไตล์เพิ่มเติมสำหรับ Card (ถ้ายังไม่มี) */
-    .stat-card {
-        border: none;
-        border-radius: 20px;
-        padding: 20px;
-        transition: transform 0.3s ease;
-        background: #fff;
-    }
-    .stat-card:hover {
-        transform: translateY(-10px);
-    }
-    .icon-box {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
-    }
-    .stat-label { color: #888; font-size: 0.9rem; }
-    .stat-number { font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: #444; }
     </style>
 </head>
 <body>
 
-<header class="glass-header text-center">
-    <div class="container">
-        <h1 class="fw-bold mb-0">MIRA CONTROL CENTER</h1>
-        <p class="text-gray-800">ระบบจัดการหลังบ้าน MIRA Store</p>
+<div class="main-wrapper">
+    <div class="content-area">
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1">MIRA Dashboard</h2>
+            <p class="text-muted">วิเคราะห์ภาพรวมธุรกิจและสถิติการขาย</p>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="glass-card text-center p-3">
+                    <div class="stat-label">ยอดขายรวม</div>
+                    <div class="stat-number">฿<?= number_format($totalSales) ?></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card text-center p-3">
+                    <div class="stat-label">กำไรโดยประมาณ</div>
+                    <div class="stat-number">฿<?= number_format($estimatedProfit) ?></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card text-center p-3">
+                    <div class="stat-label">ออเดอร์สำเร็จ</div>
+                    <div class="stat-number"><?= number_format($countOrders) ?></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="glass-card text-center p-3">
+                    <div class="stat-label">สินค้าทั้งหมด</div>
+                    <div class="stat-number"><?= number_format($countProducts) ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-8">
+                <div class="glass-card">
+                    <h6 class="fw-bold mb-4"><i class="bi bi-graph-up me-2"></i>แนวโน้มยอดขาย (7 วันล่าสุด)</h6>
+                    <canvas id="salesChart" style="max-height: 280px;"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card">
+                    <h6 class="fw-bold mb-4 text-center">สัดส่วนตามเพศ</h6>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="glass-card">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-star-fill me-2 text-warning"></i>ลูกค้าชั้นดี (Top 5)</h6>
+                    <table class="table table-borderless">
+                        <?php foreach($topCustomers as $cus): ?>
+                        <tr>
+                            <td><?= $cus['fullname'] ?></td>
+                            <td class="text-end fw-bold text-info">฿<?= number_format($cus['spent']) ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="glass-card">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-exclamation-circle me-2 text-danger"></i>สินค้าใกล้หมด</h6>
+                    <?php foreach($lowStockProducts as $low): ?>
+                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light">
+                            <span class="small"><?= $low['product_name'] ?></span>
+                            <span class="badge badge-low">เหลือ <?= $low['stock'] ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
     </div>
-</header>
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-start header-section">
-        <div>
-            <h1>ข้อมูลลูกค้า</h1>
-            <p>บริหารจัดการข้อมูลสมาชิกและสถิติการซื้อ</p>
+    <div class="right-sidebar">
+        <div class="text-center mb-4">
+            <h5 class="fw-bold" style="color: var(--mira-pink);">CONTROL CENTER</h5>
+            <p class="small text-muted">ระบบจัดการหลังบ้าน</p>
         </div>
-       
+
+        <a href="orders/manage_products.php" class="menu-item">
+    <div class="menu-icon bg-p"><i class="bi bi-box-seam"></i></div>
+    <div class="flex-grow-1">
+        <div class="fw-bold small">จัดการสินค้า</div>
+        <div class="text-muted" style="font-size: 0.75rem;"><?= $countProducts ?> รายการ</div>
     </div>
+    <i class="bi bi-chevron-right small opacity-50"></i>
+</a>
 
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="card stat-card h-100">
-                <div class="icon-box bg-product">
-                    <i class="bi bi-box-seam fs-4"></i>
-                </div>
-                <div class="stat-label">จำนวนสินค้าทั้งหมด</div>
-                <div class="stat-number"><?php echo number_format($countProducts); ?></div>
-                <a href="orders/manage_products.php" class="btn btn-mira w-100">ดูรายการสินค้า</a>
-            </div>
+<a href="orderss/manage_orders.php" class="menu-item">
+    <div class="menu-icon bg-ord"><i class="bi bi-cart-check"></i></div>
+    <div class="flex-grow-1">
+        <div class="fw-bold small">รายการสั่งซื้อ</div>
+        <div class="text-muted" style="font-size: 0.75rem;"><?= $countOrders ?> ออเดอร์ทั้งหมด</div>
+    </div>
+    <?php if ($newOrdersCount > 0): ?>
+        <div class="text-end me-2">
+            <span class="badge rounded-pill bg-primary" style="font-size: 0.65rem;">
+                +<?= $newOrdersCount ?> ใหม่
+            </span>
         </div>
+    <?php endif; ?>
+    <i class="bi bi-chevron-right small opacity-50"></i>
+</a>
 
-        <div class="col-md-3">
-            <div class="card stat-card h-100">
-                <div class="icon-box bg-review">
-                    <i class="bi bi-chat-left-heart fs-4"></i>
-                </div>
-                <div class="stat-label">ความคิดเห็นลูกค้า</div>
-                <div class="stat-number"><?php echo number_format($countReviews); ?></div>
-                <a href="review/review.php" class="btn btn-mira w-100">จัดการรีวิว</a>
-            </div>
+<a href="stock/manage_stock.php" class="menu-item">
+    <div class="menu-icon" style="background-color: #fff7ed; color: #f97316;">
+        <i class="bi bi-boxes"></i>
+    </div>
+    <div class="flex-grow-1">
+        <div class="fw-bold small">จัดการ Stock สินค้า</div>
+        <div class="text-muted" style="font-size: 0.75rem;">เช็คจำนวนคงเหลือ/เติมสินค้า</div>
+    </div>
+    <?php if ($lowStockCount > 0): ?>
+        <div class="text-end me-2">
+            <span class="badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                <?= $lowStockCount ?> วิกฤต
+            </span>
         </div>
+    <?php endif; ?>
+    <i class="bi bi-chevron-right small opacity-50"></i>
+</a>
 
-        <div class="col-md-3">
-            <div class="card stat-card h-100">
-                <div class="icon-box bg-money">
-                    <i class="bi bi-wallet2 fs-4"></i>
-                </div>
-                <div class="stat-label">รายการชำระเงิน</div>
-                <div class="stat-number"><?php echo number_format($countPayments); ?></div>
-                <a href="dashboard/dashboard.php" class="btn btn-mira w-100">ดูประวัติรายรับ</a>
-            </div>
+<a href="member/member.php" class="menu-item">
+    <div class="menu-icon bg-u"><i class="bi bi-people"></i></div>
+    <div class="flex-grow-1">
+        <div class="fw-bold small">สมาชิกทั้งหมด</div>
+        <div class="text-muted" style="font-size: 0.75rem;"><?= $countUsers ?> คน</div>
+    </div>
+    <i class="bi bi-chevron-right small opacity-50"></i>
+</a>
+
+<a href="review/review.php" class="menu-item">
+    <div class="menu-icon bg-r"><i class="bi bi-chat-left-heart"></i></div>
+    <div class="flex-grow-1">
+        <div class="fw-bold small">รีวิวจากลูกค้า</div>
+        <div class="text-muted" style="font-size: 0.75rem;"><?= $countReviews ?> รีวิว</div>
+    </div>
+    <?php if ($newReviewCount > 0): ?>
+        <div class="text-end me-2">
+            <span class="badge rounded-pill bg-info text-white" style="font-size: 0.65rem;">
+                +<?= $newReviewCount ?> วันนี้
+            </span>
         </div>
+    <?php endif; ?>
+    <i class="bi bi-chevron-right small opacity-50"></i>
+</a>
 
-        <div class="col-md-3">
-            <div class="card stat-card h-100">
-                <div class="icon-box bg-user">
-                    <i class="bi bi-people fs-4"></i>
-                </div>
-                <div class="stat-label">สมาชิกทั้งหมด</div>
-                <div class="stat-number"><?php echo number_format($countUsers); ?></div>
-                <a href="member/member.php" class="btn btn-mira w-100">ดูสมาชิก</a>
-            </div>
+<a href="contact/manage_messages.php" class="menu-item">
+    <div class="menu-icon bg-msg"><i class="bi bi-envelope-paper"></i></div>
+    <div class="flex-grow-1">
+        <div class="fw-bold small">ข้อความติดต่อ</div>
+        <div class="text-muted" style="font-size: 0.75rem;"><?= $countMessages ?> ข้อความ</div>
+    </div>
+    <?php if ($newMsgCount > 0): ?>
+        <div class="text-end me-2">
+            <span class="badge rounded-pill bg-warning text-dark" style="font-size: 0.65rem;">
+                รอดำเนินการ <?= $newMsgCount ?>
+            </span>
         </div>
-
+    <?php endif; ?>
+    <i class="bi bi-chevron-right small opacity-50"></i>
+</a>
+        <hr class="my-4 opacity-10">
         
-        <div class="col-md-3">
-            <div class="card stat-card h-100">
-                <div class="icon-box bg-message">
-                    <i class="bi bi-envelope-paper fs-4"></i>
-                </div>
-                <div class="stat-label">ข้อความติดต่อทั้งหมด</div>
-                <div class="stat-number"><?php echo number_format($countMessages); ?></div>
-                <a href="contact/manage_messages.php" class="btn btn-mira w-100">ดูข้อความ</a>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card stat-card h-100">
-                <div class="icon-box bg-order">
-                    <i class="bi bi-cart-check fs-4"></i>
-                </div>
-                <div class="stat-label">คำสั่งซื้อทั้งหมด</div>
-                <div class="stat-number"><?php echo number_format($countOrders); ?></div>
-                <a href="orderss/manage_orders.php" class="btn btn-mira w-100">จัดการคำสั่งซื้อ</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="text-center mt-5 pb-5">
-        <hr class="opacity-10 mb-4">
-        <a href="../login/logout.php" class="btn btn-outline-danger px-4 rounded-pill">ออกจากระบบ</a>
+        <a href="../login/logout.php" class="btn btn-outline-danger logout-btn btn-sm">
+            <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
+        </a>
     </div>
 </div>
 
+<script>
+// Sales Trend Chart
+const ctxSales = document.getElementById('salesChart').getContext('2d');
+new Chart(ctxSales, {
+    type: 'line',
+    data: {
+        labels: <?= json_encode($days) ?>, 
+        datasets: [{
+            data: <?= json_encode($totals) ?>,
+            borderColor: '#f8a5c2',
+            backgroundColor: 'rgba(248, 165, 194, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#b3365b'
+        }]
+    },
+    options: { 
+        plugins: { legend: { display: false } }, 
+        scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } 
+    }
+});
 
-<script src="../bootstrap/js/bootstrap.bundle.min.js"></script>
+// Gender Proportion Chart
+const ctxCat = document.getElementById('categoryChart').getContext('2d');
+new Chart(ctxCat, {
+    type: 'doughnut',
+    data: {
+        labels: <?= json_encode($sexLabels) ?>,
+        datasets: [{
+            data: <?= json_encode($sexData) ?>,
+            backgroundColor: ['#74b9ff', '#f8a5c2', '#a29bfe'],
+            borderWidth: 0
+        }]
+    },
+    options: { 
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { size: 11 } } } },
+        cutout: '70%'
+    }
+});
+</script>
+
 </body>
 </html>

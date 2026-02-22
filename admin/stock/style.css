@@ -1,0 +1,135 @@
+:root {
+    --mira-pink: #b3365b;
+    --mira-light-pink: #fdf2f7;
+    --mira-bg: #fff5f8;
+}
+
+body {
+    background-color: var(--mira-bg);
+    font-family: 'Sarabun', sans-serif;
+    background-image: radial-gradient(at 0% 0%, rgba(252, 231, 243, 0.5) 0, transparent 50%);
+}
+
+.container { max-width: 1100px !important; }
+
+.glass-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(179, 54, 91, 0.05);
+    border: 1px solid white;
+    margin-bottom: 25px;
+}
+
+.back-link {
+    text-decoration: none;
+    color: #888;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+.back-link:hover { color: var(--mira-pink); }
+
+/* ตาราง Minimal */
+.table { border-collapse: separate; border-spacing: 0 10px; }
+.table thead th {
+    border: none;
+    color: var(--mira-pink);
+    font-weight: 600;
+    padding: 15px;
+}
+.table tbody tr { background: white; transition: 0.3s; }
+.table tbody td { border: none; padding: 15px; }
+.table tbody tr td:first-child { border-radius: 15px 0 0 15px; }
+.table tbody tr td:last-child { border-radius: 0 15px 15px 0; }
+.table tbody tr:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+
+/* สถานะ Stock */
+.badge-ok { background: #f0fdf4; color: #16a34a; }
+.badge-low { background: #fff7ed; color: #c2410c; }
+.badge-out { background: #fef2f2; color: #dc2626; }
+
+.btn-mira {
+    background: var(--mira-pink);
+    color: white;
+    border-radius: 12px;
+    border: none;
+    padding: 10px 20px;
+}
+.btn-outline-mira {
+    border: 1px solid var(--mira-pink);
+    color: var(--mira-pink);
+    border-radius: 12px;
+    background: transparent;
+}
+.btn-mira-filter {
+    background-color: #b3365b; /* สีชมพูหลักของร้าน */
+    color: white;
+    border: none;
+    border-radius: 15px; /* ความโค้งมนระดับน่ารัก */
+    padding: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(179, 54, 91, 0.2);
+}
+
+.btn-mira-filter:hover {
+    background-color: #922b4a;
+    color: #fff;
+    transform: translateY(-2px); /* ลอยขึ้นเล็กน้อยตอนกด */
+    box-shadow: 0 6px 20px rgba(179, 54, 91, 0.3);
+}
+
+.btn-mira-filter:active {
+    transform: scale(0.95); /* เอฟเฟกต์ยุบตัวตอนกด */
+}
+
+/* แถม: ถ้าอยากได้สีชมพูอ่อนแบบ Pastel */
+.btn-mira-filter-soft {
+    background-color: #fff0f3;
+    color: #b3365b;
+    border: 1px solid #ffccd5;
+}
+/* สไตล์พื้นฐานสำหรับปุ่ม Export */
+.btn-mira-export {
+    border: none;
+    border-radius: 12px; /* ความโค้งมนแบบน่ารัก */
+    padding: 8px 18px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* ปุ่ม PDF (โทนชมพูหวาน) */
+.btn-mira-export.pdf {
+    background-color: #fff0f3;
+    color: #b3365b;
+}
+
+/* ปุ่ม Excel (โทนเขียวมิ้นท์) */
+.btn-mira-export.excel {
+    background-color: #f0fff4;
+    color: #2d6a4f;
+}
+
+/* เอฟเฟกต์ตอน Hover (เมาส์ชี้) */
+.btn-mira-export:hover {
+    transform: translateY(-3px); /* ลอยขึ้น */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn-mira-export.pdf:hover {
+    background-color: #b3365b;
+    color: white;
+}
+
+.btn-mira-export.excel:hover {
+    background-color: #2d6a4f;
+    color: white;
+}
+
+/* เอฟเฟกต์ตอนกด (Click) */
+.btn-mira-export:active {
+    transform: scale(0.95);
+}

@@ -136,8 +136,8 @@ try {
     <div class="row justify-content-center">
         <div class="col-lg-10">
             
-            <a href="index_users.php" class="nav-back">
-                <i class="bi bi-chevron-left me-2"></i> กลับหน้าหลัก
+            <a href="pf.php" class="nav-back">
+                <i class="bi bi-chevron-left me-2"></i> กลับสู่หน้าข้อมูลส่วนตัว
             </a>
 
             <div class="d-flex justify-content-between align-items-end mb-4">
