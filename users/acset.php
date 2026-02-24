@@ -143,21 +143,7 @@ if (isset($_POST['change_password'])) {
                     </form>
                 </div>
 
-                <hr style="opacity: 0.1;">
-
-                <div class="mt-4">
-                    <div class="section-title"><i class="bi bi-bell"></i>การแจ้งเตือนและการตั้งค่าอื่นๆ</div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <p class="mb-0 fw-bold text-danger">ลบบัญชีผู้ใช้</p>
-                            <small class="text-muted">ข้อมูลทั้งหมดจะถูกลบออกถาวรและไม่สามารถกู้คืนได้</small>
-                        </div>
-                        <form id="delete-form" method="POST">
-                            <input type="hidden" name="confirm_delete_account" value="1">
-                           <button type="button" onclick="confirmDelete()" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                                ลบบัญชี
-                            </button>
+               
                         
                         </form>
                     </div>

@@ -358,7 +358,7 @@ $countUsers = $userQuery->fetch(PDO::FETCH_ASSOC)['total'];
     <i class="bi bi-chevron-right small opacity-50"></i>
 </a>
 
-<a href="contact/manage_messages.php" class="menu-item">
+<a href="contact/admin_chat.php" class="menu-item">
     <div class="menu-icon bg-msg"><i class="bi bi-envelope-paper"></i></div>
     <div class="flex-grow-1">
         <div class="fw-bold small">ข้อความติดต่อ</div>

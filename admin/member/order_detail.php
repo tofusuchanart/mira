@@ -224,13 +224,9 @@ function getStatusBadge($status) {
                 <div class="mb-3"><?= getStatusBadge($order['status']) ?></div>
 
                <div class="info-label d-flex justify-content-between align-items-center">
-    หมายเลขพัสดุ
-    <button type="button" class="btn btn-sm text-pink-mira p-0" onclick="editTracking()" style="color: var(--mira-pink);">
-        <i class="bi bi-pencil-square"></i> แก้ไข
-    </button>
 </div>
 <div class="info-value text-primary" id="display_tracking">
-    <?= !empty($order['tracking_number']) ? $order['tracking_number'] : '<span class="text-muted fw-normal">ยังไม่ได้ระบุ</span>' ?>
+    <?= !empty($order['tracking_number']) ? $order['tracking_number'] : '<span class="text-muted fw-normal"></span>' ?>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -284,12 +280,7 @@ function editTracking() {
 </script>
 
 
-    <?php if (!empty($order['tracking_number'])): ?>
-        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="sendTrackingEmail()">
-            <i class="bi bi-envelope-heart"></i> ส่งอีเมลแจ้งลูกค้า
-        </button>
-    <?php endif; ?>
-</div>
+    
 
 <script>
 function sendTrackingEmail() {

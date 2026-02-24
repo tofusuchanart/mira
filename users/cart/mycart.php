@@ -287,7 +287,7 @@ if (!empty($_SESSION['cart'])) {
     }
 </style>
 <a href="../index_users.php" class="btn-back-pill">
-    <i class="bi bi-chevron-left"></i> กลับไป Shopping
+    <i class="bi bi-chevron-left"></i> กลับไปหน้าหลัก
 </a>
 
 

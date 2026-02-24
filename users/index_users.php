@@ -153,7 +153,7 @@ session_start();
         </li>
 
         <li class="nav-item">
-          <a class="nav-link mira-nav-icon" href="mes/mes.php">
+          <a class="nav-link mira-nav-icon" href="mes/chat.php">
             <i class="bi bi-chat-dots"></i>
           </a>
         </li>
