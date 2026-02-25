@@ -6,7 +6,7 @@ $password = "";
 
 try {
     $conn = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8",
+        "mysql:host=$host;dbname=$dbname;charset=utf8mb4", // เปลี่ยนเป็น utf8mb4 เพื่อรองรับ Emoji
         $username,
         $password
     );

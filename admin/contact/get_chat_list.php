@@ -1,36 +1,29 @@
 <?php
-// get_chat_list.php
 require_once "../../config.php";
 
-// ดึงรายชื่อลูกค้า โดย Join กับข้อความล่าสุดของเขา
-$sql = "SELECT 
-            u.user_id, 
-            u.fullname, 
-            u.profile_img,
-            -- นับข้อความที่แอดมินยังไม่ได้ตอบ (admin_reply เป็น NULL หรือว่าง)
-            (SELECT COUNT(*) FROM contact_messages cm2 
-             WHERE cm2.user_id = u.user_id 
-             AND (cm2.admin_reply IS NULL OR cm2.admin_reply = '')) as unread_count,
-            MAX(cm.created_at) as last_chat
-        FROM users u
-        INNER JOIN contact_messages cm ON u.user_id = cm.user_id
-        GROUP BY u.user_id
-        ORDER BY last_chat DESC";
+try {
+    $sql = "SELECT 
+                u.user_id, 
+                u.fullname, 
+                u.profile_img,
+                (SELECT COUNT(*) FROM contact_messages cm2 
+                 WHERE cm2.user_id = u.user_id 
+                 AND (cm2.admin_reply IS NULL OR cm2.admin_reply = '')) as unread_count,
+                MAX(cm.created_at) as last_chat
+            FROM users u
+            INNER JOIN contact_messages cm ON u.user_id = cm.user_id
+            GROUP BY u.user_id
+            ORDER BY last_chat DESC";
 
-$result = mysqli_query($conn, $sql);
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
 
-if (!$result) {
-    die("Query Error: " . mysqli_error($conn));
-}
-
-if (mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $user_id = $row['user_id'];
         $fullname = htmlspecialchars($row['fullname']);
         $unread = (int)$row['unread_count'];
 
-        // จัดการรูปภาพ (ถ้าไม่มีให้ใช้ Avatar)
-        $profile_pic = !empty($row['profile_img']) ? "../../uploads/profiles/" . $row['profile_img'] : "https://ui-avatars.com/api/?name=" . urlencode($fullname) . "&background=f8e1e7&color=9c3353";
+        $profile_pic = !empty($row['profile_img']) ? "../../register/photo/" . $row['profile_img'] : "https://ui-avatars.com/api/?name=" . urlencode($fullname) . "&background=f8e1e7&color=9c3353";
 
         echo '<div class="chat-item" onclick="loadMessages(' . $user_id . ', \'' . $fullname . '\')">';
         echo '  <img src="' . $profile_pic . '" class="user-img" onerror="this.src=\'https://ui-avatars.com/api/?name=' . urlencode($fullname) . '\'">';
@@ -44,6 +37,6 @@ if (mysqli_num_rows($result) > 0) {
         }
         echo '</div>';
     }
-} else {
-    echo '<div style="padding:20px; text-align:center; color:#ccc;">ไม่มีรายการติดต่อ</div>';
+} catch (PDOException $e) {
+    echo "Query Error: " . $e->getMessage();
 }
