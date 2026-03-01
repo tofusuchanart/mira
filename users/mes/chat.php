@@ -186,10 +186,7 @@ $fullname = $_SESSION['fullname'] ?? '';
     <div class="chat-container">
         <div class="chat-sidebar">
             <h5 class="fw-bold mb-4" style="color: var(--mira-dark-pink);">MIRA Support</h5>
-            <div class="topic-card active" onclick="selectTopic('สอบถามเกี่ยวกับสินค้า', this)">สินค้าและสต็อก</div>
-            <div class="topic-card" onclick="selectTopic('ปัญหาการชำระเงิน', this)">การชำระเงิน</div>
-            <div class="topic-card" onclick="selectTopic('ติดตามสถานะพัสดุ', this)">ติดตามพัสดุ</div>
-            <div class="topic-card" onclick="selectTopic('อื่นๆ', this)">เรื่องอื่นๆ</div>
+            
             <div class="mt-auto"><a href="../../users/index_users.php" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left"></i> กลับหน้าหลัก</a></div>
         </div>
 

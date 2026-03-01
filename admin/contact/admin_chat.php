@@ -497,7 +497,7 @@ require '../../config.php'; // ตรวจสอบ Path การเชื่�
         </div>
     </div>
     <button class="action-btn" id="emoji-trigger" onclick="toggleEmojiPicker(event)">
-        <i class="far fa-smile"></i>
+       
     </button>
 
     <div id="simple-emoji-picker" style="

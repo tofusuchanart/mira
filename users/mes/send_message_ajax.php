@@ -9,7 +9,7 @@ $attachment_path = null;
 
 // ตรวจสอบการอัปโหลดไฟล์
 if (isset($_FILES['chat_file']) && $_FILES['chat_file']['error'] == 0) {
-    $upload_dir = "../../uploads/chat/";
+    $upload_dir = "../../admin/contact/uploads/chat/";
     if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
     
     $file_ext = pathinfo($_FILES['chat_file']['name'], PATHINFO_EXTENSION);
