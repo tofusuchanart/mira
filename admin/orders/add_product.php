@@ -8,16 +8,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $sex = $_POST['sex'];
     $desc = $_POST['description'];
     
-    // จัดการอัปโหลดรูปภาพ
-    $image = $_FILES['image']['name'];
-    $target = "../../photo/" . basename($image);
-    move_uploaded_file($_FILES['image']['tmp_name'], $target);
+    // เริ่ม Transaction เพื่อความปลอดภัยของข้อมูล
+    $conn->begin_transaction();
 
-    $sql = "INSERT INTO products (product_name, price, stock, sex, description, image) 
-            VALUES ('$name', '$price', '$stock', '$sex', '$desc', '$image')";
-    
-    if ($conn->query($sql)) {
+    try {
+        // 1. จัดการรูปภาพหลัก
+        $main_image = "";
+        if (!empty($_FILES['image']['name'])) {
+            $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+            $main_image = "main_" . uniqid() . "." . $ext;
+            move_uploaded_file($_FILES['image']['tmp_name'], "../../photo/" . $main_image);
+        }
+
+        // 2. Insert ลงตาราง products
+        $stmt = $conn->prepare("INSERT INTO products (product_name, price, stock, sex, description, image) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sdisss", $name, $price, $stock, $sex, $desc, $main_image);
+        $stmt->execute();
+        
+        $product_id = $conn->insert_id; // ดึง ID ล่าสุดที่เพิ่ง insert ไป
+
+        // 3. จัดการรูปภาพย่อย (Gallery)
+        if (!empty($_FILES['gallery']['name'][0])) {
+            foreach ($_FILES['gallery']['tmp_name'] as $key => $tmp_name) {
+                if ($_FILES['gallery']['error'][$key] == 0) {
+                    $g_ext = pathinfo($_FILES['gallery']['name'][$key], PATHINFO_EXTENSION);
+                    $g_name = "gallery_" . uniqid() . "_" . $key . "." . $g_ext;
+                    
+                    if (move_uploaded_file($tmp_name, "../../photo/" . $g_name)) {
+                        $stmt_img = $conn->prepare("INSERT INTO product_images (product_id, image_path) VALUES (?, ?)");
+                        $stmt_img->bind_param("is", $product_id, $g_name);
+                        $stmt_img->execute();
+                    }
+                }
+            }
+        }
+
+        $conn->commit(); // ยืนยันการบันทึกทั้งหมด
         header("Location: manage_products.php");
+    } catch (Exception $e) {
+        $conn->rollback(); // หากเกิดข้อผิดพลาด ให้ยกเลิกที่ทำมาทั้งหมด
+        echo "เกิดข้อผิดพลาด: " . $e->getMessage();
     }
 }
 ?>
@@ -60,10 +90,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label class="block text-xs text-gray-400 mb-1">รายละเอียดสินค้า</label>
                 <textarea name="description" rows="3" class="w-full bg-pink-50/30 border-none rounded-xl p-3 outline-none focus:ring-1 focus:ring-pink-200"></textarea>
             </div>
-            <div>
-                <label class="block text-xs text-gray-400 mb-1">รูปภาพสินค้า</label>
-                <input type="file" name="image" class="text-sm">
-            </div>
+          <div>
+    <label class="block text-xs text-gray-400 mb-1">รูปภาพหลัก (Cover)</label>
+    <input type="file" name="image" required class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-pink-50 file:text-pink-700">
+</div>
+
+<div class="p-4 border-2 border-dashed border-pink-100 rounded-2xl bg-pink-50/10">
+    <label class="block text-xs text-[#F06292] font-semibold mb-2">รูปภาพประกอบอื่นๆ (เลือกได้หลายรูป)</label>
+    <input type="file" name="gallery[]" multiple class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-white file:text-gray-600 shadow-sm">
+    <p class="text-[10px] text-gray-400 mt-2">* กด Ctrl ค้างไว้เพื่อเลือกหลายรูป</p>
+</div>
+            
             <div class="flex gap-3 pt-4">
                 <button type="submit" class="flex-1 bg-[#F06292] text-white py-3 rounded-full font-bold shadow-md hover:bg-[#D81B60] transition">บันทึกข้อมูล</button>
                 <a href="manage_products.php" class="flex-1 text-center bg-gray-100 text-gray-400 py-3 rounded-full font-bold hover:bg-gray-200 transition">ยกเลิก</a>
