@@ -395,7 +395,7 @@ $customers = $conn->query("SELECT u.*,
 <script>
 function viewCustomer(data) {
     // กำหนดรูปภาพ
-    let pic = data.profile_img ? "../../uploads/profiles/" + data.profile_img : "https://ui-avatars.com/api/?name=" + encodeURIComponent(data.fullname) + "&background=f06292&color=fff";
+    let pic = data.profile_img ? "../../register/photo/" + data.profile_img : "https://ui-avatars.com/api/?name=" + encodeURIComponent(data.fullname) + "&background=f06292&color=fff";
     
     // ใส่ข้อมูลลงใน Modal
     document.getElementById('modal_img').src = pic;
