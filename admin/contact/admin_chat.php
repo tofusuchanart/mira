@@ -599,30 +599,35 @@ require '../../config.php'; // ตรวจสอบ Path การเชื่�
         }
 
         // 3. Load Messages
-        function loadMessages(userId, userName) {
-            currentUserId = userId;
-            document.getElementById('chatDefaultView').style.display = 'none';
-            document.getElementById('chatActiveView').style.display = 'flex';
-            document.getElementById('currentUserName').innerText = userName;
+      function loadMessages(userId, userName) {
+    currentUserId = userId;
+    document.getElementById('chatDefaultView').style.display = 'none';
+    document.getElementById('chatActiveView').style.display = 'flex';
+    document.getElementById('currentUserName').innerText = userName;
 
-            // ไฮไลท์คนที่เลือก
-            document.querySelectorAll('.chat-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            fetch(`get_messages.php?user_id=${userId}`)
-                .then(res => res.text())
-                .then(data => {
-                    const container = document.getElementById('messageContainer');
-                    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
-
-                    container.innerHTML = data;
-
-                    if (isAtBottom) {
-                        container.scrollTop = container.scrollHeight;
-                    }
-                });
+    // ไฮไลท์คนที่เลือก
+    document.querySelectorAll('.chat-item').forEach(item => {
+        item.classList.remove('active');
+        // เพิ่ม: ถ้าเป็น item ที่กดอยู่ ให้ลบ Badge ทิ้งทันทีแบบ Real-time (UI Trick)
+        if(item.getAttribute('onclick').includes(userId)) {
+            const badge = item.querySelector('.badge');
+            if(badge) badge.remove(); 
         }
+    });
+
+    fetch(`get_messages.php?user_id=${userId}`)
+        .then(res => res.text())
+        .then(data => {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = data;
+            container.scrollTop = container.scrollHeight;
+            
+            // --- เพิ่มส่วนนี้ ---
+            // หลังจากอัปเดตสถานะใน DB ผ่าน get_messages.php แล้ว
+            // ให้รีเฟรชลิสต์รายชื่อฝั่งซ้ายเพื่อให้เลข Badge หายไปจริงๆ
+            loadChatList(); 
+        });
+}
 
         function refreshCurrentChat() {
             if (currentUserId) loadMessages(currentUserId, document.getElementById('currentUserName').innerText);

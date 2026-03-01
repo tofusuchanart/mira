@@ -9,7 +9,7 @@ $attachment_path = null;
 
 // ตรวจสอบการอัปโหลดไฟล์
 if (isset($_FILES['chat_file']) && $_FILES['chat_file']['error'] == 0) {
-    $upload_dir = "../../admin/contact/uploads/chat/";
+    $upload_dir = "../../uploads/chat/";
     if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
     
     $file_ext = pathinfo($_FILES['chat_file']['name'], PATHINFO_EXTENSION);
@@ -21,9 +21,11 @@ if (isset($_FILES['chat_file']) && $_FILES['chat_file']['error'] == 0) {
     }
 }
 
+// ... (โค้ดอัปโหลดไฟล์เดิมของคุณ) ...
+
 if ($user_id && ($message || $attachment_path)) {
-    // เพิ่ม attachment_path เข้าไปใน SQL
-    $stmt = $conn->prepare("INSERT INTO contact_messages (user_id, subject, message, attachment_path) VALUES (?, ?, ?, ?)");
+    // เพิ่ม is_read = 0 เข้าไปในการ Insert ด้วย
+    $stmt = $conn->prepare("INSERT INTO contact_messages (user_id, subject, message, attachment_path, is_read) VALUES (?, ?, ?, ?, 0)");
     $stmt->execute([$user_id, $subject, $message, $attachment_path]);
     echo "success";
 }

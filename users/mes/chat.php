@@ -211,9 +211,39 @@ $fullname = $_SESSION['fullname'] ?? '';
             </div>
         </div>
     </div>
-
+<div id="client-emoji-picker" style="
+    display: none; 
+    position: absolute; 
+    bottom: 150px;           /* อยู่เหนือ input-area */
+    left: 50%;              /* ย้ายมาที่กึ่งกลางจอ */
+    transform: translateX(-50%); /* ดันกลับมาครึ่งหนึ่งเพื่อให้กลางเป๊ะ */
+    background: white; 
+    border: 1px solid #eee; 
+    border-radius: 20px; 
+    padding: 15px; 
+    z-index: 10000; 
+    box-shadow: 0 10px 30px rgba(156, 51, 83, 0.15); /* เงาสีชมพูอ่อนๆ ให้เข้ากับธีม */
+    width: 250px; 
+    display: none;          /* เริ่มต้นซ่อนไว้ */
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 10px; 
+    user-select: none;
+    border: 2px solid var(--primary-pink);
+">
+    <span onclick="addEmojiToInput('😊')" style="cursor:pointer; font-size:24px; text-align:center;">😊</span>
+    <span onclick="addEmojiToInput('😂')" style="cursor:pointer; font-size:24px; text-align:center;">😂</span>
+    <span onclick="addEmojiToInput('😍')" style="cursor:pointer; font-size:24px; text-align:center;">😍</span>
+    <span onclick="addEmojiToInput('👍')" style="cursor:pointer; font-size:24px; text-align:center;">👍</span>
+    <span onclick="addEmojiToInput('❤️')" style="cursor:pointer; font-size:24px; text-align:center;">❤️</span>
+    <span onclick="addEmojiToInput('🙏')" style="cursor:pointer; font-size:24px; text-align:center;">🙏</span>
+    <span onclick="addEmojiToInput('🤣')" style="cursor:pointer; font-size:24px; text-align:center;">🤣</span>
+    <span onclick="addEmojiToInput('😭')" style="cursor:pointer; font-size:24px; text-align:center;">😭</span>
+    <span onclick="addEmojiToInput('🔥')" style="cursor:pointer; font-size:24px; text-align:center;">🔥</span>
+    <span onclick="addEmojiToInput('✨')" style="cursor:pointer; font-size:24px; text-align:center;">✨</span>
+</div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/fg-emoji-picker@1.0.1/fgEmojiPicker.min.js"></script>
 
     <script>
@@ -263,18 +293,24 @@ $fullname = $_SESSION['fullname'] ?? '';
             loadMessages();
         }
 
-        function loadMessages() {
-            $.get('fetch_messages.php', {
-                topic: currentTopic
-            }, function(response) {
-                try {
-                    const res = JSON.parse(response);
-                    $('#chat-messages').html(res.html);
-                    var chat = document.getElementById('chat-messages');
-                    chat.scrollTop = chat.scrollHeight;
-                } catch (e) {}
-            });
+   function loadMessages() {
+    $.get('fetch_messages.php', {
+        topic: currentTopic
+    }, function(response) {
+        // ลอง console.log ดูว่ามีข้อมูลส่งกลับมาไหม
+        console.log("Server Response:", response); 
+        try {
+            const res = JSON.parse(response);
+            if(res.html !== "") {
+                $('#chat-messages').html(res.html);
+                var chat = document.getElementById('chat-messages');
+                chat.scrollTop = chat.scrollHeight;
+            }
+        } catch (e) {
+            console.error("JSON Parse Error:", e);
         }
+    });
+}
 
         function sendMessage() {
             const msg = $('#messageInput').val().trim();
@@ -304,6 +340,37 @@ $fullname = $_SESSION['fullname'] ?? '';
             $('#file-upload').val('');
             $('#file-preview-container').hide();
         }
+        // ฟังก์ชันสำหรับจิ้ม Emoji แล้วให้ไปโผล่ในช่องพิมพ์
+function addEmojiToInput(emoji) {
+    const input = document.getElementById('messageInput');
+    if (input) {
+        input.value += emoji;
+        input.focus();
+    }
+}
+
+$(document).ready(function() {
+    const emojiBtn = document.getElementById('emoji-btn');
+    const picker = document.getElementById('client-emoji-picker');
+
+    // 1. เปิด-ปิด Emoji Picker
+    if (emojiBtn && picker) {
+        emojiBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            picker.style.display = (picker.style.display === 'none' || picker.style.display === '') ? 'grid' : 'none';
+        });
+
+        // คลิกข้างนอกแล้วให้ปิด
+        document.addEventListener('click', (e) => {
+            if (!emojiBtn.contains(e.target) && !picker.contains(e.target)) {
+                picker.style.display = 'none';
+            }
+        });
+    }
+
+    // ... ส่วนของ sendMessage และอื่นๆ ของคุณยังอยู่เหมือนเดิม ...
+});
     </script>
 </body>
 
