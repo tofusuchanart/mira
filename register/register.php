@@ -27,6 +27,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "Error: " . $e->getMessage();
     }
 }
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $fullname = $_POST['fullname'];
+    $email = $_POST['email'];
+    $password = $_POST['password']; 
+    $phone = $_POST['phone'];
+    $address = $_POST['address']; // รับค่าที่อยู่มา
+
+    // เพิ่มเงื่อนไขเช็คว่าที่อยู่ห้ามว่าง
+    if (empty(trim($address))) {
+        echo "<script>alert('กรุณากรอกที่อยู่ด้วยนะคะ'); window.history.back();</script>";
+        exit();
+    }}
 ?>
 
 <!DOCTYPE html>
@@ -180,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="email" name="email" class="form-control" placeholder="อีเมล" required>
         <input type="password" name="password" class="form-control" placeholder="รหัส" required>
         <input type="text" name="phone" class="form-control" placeholder="หมายเลขโทรศัพท์" required>
-        <textarea name="address" class="form-control" placeholder="ที่อยู๋" rows="2"></textarea>
+       <textarea name="address" class="form-control" placeholder="ที่อยู่" rows="2" required></textarea>
 
         <button type="submit" class="btn-register">ลงชื่อเข้าใช้</button>
         

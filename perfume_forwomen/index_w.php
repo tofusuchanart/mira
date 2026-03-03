@@ -1,13 +1,28 @@
 <?php 
-// ไม่ต้อง include config.php ซ้ำหาก index.php เรียกไว้แล้ว
-// แต่ถ้าเปิดหน้านี้แยกต่างหาก ต้องเช็คเผื่อไว้
 if (!isset($conn)) {
     require_once "../config.php"; 
 }
 
+// รับค่าค้นหาจาก URL (ถ้ามี)
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+
 try {
-    // ดึงสินค้าผู้หญิง และ Unisex
-    $stmt = $conn->prepare("SELECT * FROM products WHERE sex IN ('female', 'unisex') ORDER BY product_id DESC");
+    // ปรับ SQL ให้ค้นหาชื่อสินค้าได้ (LIKE)
+    $sql = "SELECT * FROM products WHERE sex IN ('female', 'unisex')";
+    
+    if (!empty($search)) {
+        $sql .= " AND product_name LIKE :search";
+    }
+    
+    $sql .= " ORDER BY product_id DESC";
+    
+    $stmt = $conn->prepare($sql);
+    
+    if (!empty($search)) {
+        $searchParam = "%$search%";
+        $stmt->bindParam(':search', $searchParam);
+    }
+
     $stmt->execute();
     $products = $stmt->fetchAll();
     $total_products = count($products);
@@ -18,7 +33,7 @@ try {
 
 <style>
     .product-banner {
-background: linear-gradient(rgba(0,0,0,0.6), rgba(        0,0,0,0.6)), url('perfume_forwomen/photo/bn.png'),url('../perfume_forwomen/photo/bn.png'); 
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('../perfume_formen/photo/bner.png'),url('perfume_formen/photo/bner.png'); 
         background-size: cover;
         background-position: center;
         height: 300px;
@@ -64,6 +79,7 @@ background: linear-gradient(rgba(0,0,0,0.6), rgba(        0,0,0,0.6)), url('perf
         top: 15px;
         right: 15px;
     }
+    
 </style>
 
 <div class="product-banner mb-5">
@@ -75,7 +91,34 @@ background: linear-gradient(rgba(0,0,0,0.6), rgba(        0,0,0,0.6)), url('perf
 
 <div class="container mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
+        
         <h4 class="fw-bold m-0" style="color: #b3365b;">Collection</h4>
+        <div class="container mb-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form action="index_users.php" method="GET" class="input-group shadow-sm" style="border-radius: 50px; overflow: hidden;">
+                
+                <input type="hidden" name="link" value="<?= htmlspecialchars($_GET['link'] ?? 'women') ?>">
+
+                <input type="text" name="search" class="form-control border-0 ps-4" 
+                       placeholder="ค้นหาชื่อน้ำหอมที่ต้องการ..." 
+                       value="<?= htmlspecialchars($search ?? '') ?>" 
+                       style="height: 50px; outline: none;">
+                
+                <button class="btn btn-white border-0 px-4" type="submit" style="background: white; color: #b3365b;">
+                    <i class="bi bi-search"></i>
+                </button>
+
+                <?php if(!empty($search)): ?>
+                    <a href="?link=<?= htmlspecialchars($_GET['link'] ?? 'women') ?>" 
+                       class="btn btn-white border-0 pe-4 d-flex align-items-center" style="background: white; color: #999; text-decoration: none;">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </a>
+                <?php endif; ?>
+            </form>
+        </div>
+    </div>
+</div>
         <div class="badge bg-light text-dark rounded-pill border shadow-sm px-3">
             พบ <?= $total_products ?> รายการ
         </div>

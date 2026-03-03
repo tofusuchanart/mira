@@ -9,10 +9,11 @@ $my_vouchers = [];
 
 if ($user_id > 0) {
     // ดึงคูปองที่เก็บไว้ (unused) และยังไม่หมดอายุ
-    $v_sql = "SELECT uv.*, p.promo_name, p.discount_type, p.discount_value, p.min_spent 
-              FROM user_vouchers uv
-              JOIN promotions p ON uv.promo_id = p.promo_id
-              WHERE uv.user_id = ? AND uv.used_status = 'unused' AND p.end_date >= NOW()";
+   // ลองเอา AND p.end_date >= NOW() ออกเพื่อเช็คว่าข้อมูลมาไหม
+$v_sql = "SELECT uv.*, p.promo_name, p.discount_type, p.discount_value, p.min_spent 
+          FROM user_vouchers uv
+          JOIN promotions p ON uv.promo_id = p.promo_id
+          WHERE uv.user_id = ? AND uv.used_status = 'unused'";
     $v_stmt = $conn->prepare($v_sql);
     $v_stmt->execute([$user_id]);
     $my_vouchers = $v_stmt->fetchAll(PDO::FETCH_ASSOC);

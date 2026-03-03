@@ -207,17 +207,25 @@ try {
                         </div>
 
                         <div class="text-start mt-4">
-                            <a href="od_htr.php" class="menu-link shadow-sm">
-                                <i class="bi bi-clock-history menu-icon"></i> ประวัติการสั่งซื้อ
-                            </a>
-                            <a href="edit_pf.php" class="menu-link shadow-sm">
-                                <i class="bi bi-pencil-square menu-icon"></i> แก้ไขข้อมูลส่วนตัว
-                            </a>
-                           <a href="index_users.php" class="menu-link shadow-sm mira-back-link">
-    <i class="bi bi-chevron-left menu-icon"></i> 
-    <span class="menu-text">กลับหน้าหลัก</span>
-</a>
-                        </div>
+    <a href="od_htr.php" class="menu-link shadow-sm"style="border-left: 5px solid #f8a5c2;">
+        <i class="bi bi-clock-history menu-icon"style="color: var(--mira-pink-dark);"></i> ประวัติการสั่งซื้อ
+    </a>
+
+    <a href="my_coupons.php" class="menu-link shadow-sm" style="border-left: 5px solid #f8a5c2;">
+        <i class="bi bi-ticket-perforated menu-icon" style="color: var(--mira-pink-dark);"></i> 
+        โค้ดส่วนลดของฉัน 
+        <span class="badge rounded-pill bg-danger ms-auto" style="font-size: 0.6rem;">NEW</span>
+    </a>
+
+    <a href="edit_pf.php" class="menu-link shadow-sm"style="border-left: 5px solid #f8a5c2;">
+        <i class="bi bi-pencil-square menu-icon"style="color: var(--mira-pink-dark);"></i> แก้ไขข้อมูลส่วนตัว
+    </a>
+
+    <a href="index_users.php" class="menu-link shadow-sm mira-back-link">
+        <i class="bi bi-chevron-left menu-icon"></i> 
+        <span class="menu-text">กลับหน้าหลัก</span>
+    </a>
+</div>
                     </div>
                 </div>
 
