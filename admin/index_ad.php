@@ -44,6 +44,8 @@ try {
     $countUsers = $conn->query("SELECT COUNT(*) FROM users")->fetchColumn();
     $countPayments = $conn->query("SELECT COUNT(*) FROM payments")->fetchColumn();
     $countMessages = $conn->query("SELECT COUNT(*) FROM contact_messages")->fetchColumn();
+    // ดึงจำนวนโปรโมชั่นที่ยังไม่หมดอายุมาโชว์ที่ปุ่ม
+$countPromos = $conn->query("SELECT COUNT(*) FROM promotions WHERE end_date >= NOW() AND status = 'active'")->fetchColumn() ?: 0;
 
 } catch(PDOException $e) {
     $error = $e->getMessage();
@@ -327,6 +329,23 @@ $countUsers = $userQuery->fetch(PDO::FETCH_ASSOC)['total'];
         <div class="text-end me-2">
             <span class="badge rounded-pill bg-danger" style="font-size: 0.65rem;">
                 <?= $lowStockCount ?> วิกฤต
+            </span>
+        </div>
+    <?php endif; ?>
+    <i class="bi bi-chevron-right small opacity-50"></i>
+</a>
+<a href="promotion/manage_promotions.php" class="menu-item">
+    <div class="menu-icon" style="background-color: #fff1f2; color: #e11d48;">
+        <i class="bi bi-lightning-charge-fill"></i>
+    </div>
+    <div class="flex-grow-1">
+        <div class="fw-bold small">โปรโมชั่น & Flash Sale</div>
+        <div class="text-muted" style="font-size: 0.75rem;">ตั้งค่าส่วนลด / กำหนดเวลา</div>
+    </div>
+    <?php if ($countPromos > 0): ?>
+        <div class="text-end me-2">
+            <span class="badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                <?= $countPromos ?> กำลังรัน
             </span>
         </div>
     <?php endif; ?>

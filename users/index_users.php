@@ -1,608 +1,821 @@
 <?php include_once "../config.php";
 session_start();
+$stmt_promo = $conn->prepare("SELECT *, UNIX_TIMESTAMP(end_date) AS end_ts FROM promotions WHERE status = 'active' AND end_date >= NOW() ORDER BY promo_id DESC");
+$stmt_promo->execute();
+$active_promos = $stmt_promo->fetchAll();
+$user_id = $_SESSION['user_id'] ?? 0; // ถ้าไม่ login ให้เป็น 0
 
+// ดึงโปรโมชั่นที่สถานะ active, ยังไม่หมดอายุ และ user คนนี้ "ยังไม่เคยเก็บ"
+$sql = "SELECT p.*, UNIX_TIMESTAMP(p.end_date) AS end_ts 
+        FROM promotions p
+        LEFT JOIN user_vouchers uv ON p.promo_id = uv.promo_id AND uv.user_id = ?
+        WHERE p.status = 'active' 
+        AND p.end_date >= NOW() 
+        AND uv.uv_id IS NULL 
+        ORDER BY p.promo_id DESC";
+
+$stmt_promo = $conn->prepare($sql);
+$stmt_promo->execute([$user_id]);
+$active_promos = $stmt_promo->fetchAll();
 ?>
 
 </head>
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mira</title>
-    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet"> 
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="icon" href="photo/golo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         /* ปรับแต่งกรอบ Banner ให้มนและมีมิติ */
-#carouselExampleFade {
-    border-radius: 30px; /* ความโค้งตามสไตล์ Dashboard */
-    overflow: hidden;
-    box-shadow: 0 15px 35px rgba(179, 54, 91, 0.1); /* เงาชมพูจางๆ */
-    margin: 20px auto; /* เพิ่มระยะห่างจาก Header */
-    max-width: 95%; /* ให้เห็นขอบพื้นหลังสีชมพูอ่อนเล็กน้อย */
-}
+        #carouselExampleFade {
+            border-radius: 30px;
+            /* ความโค้งตามสไตล์ Dashboard */
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(179, 54, 91, 0.1);
+            /* เงาชมพูจางๆ */
+            margin: 20px auto;
+            /* เพิ่มระยะห่างจาก Header */
+            max-width: 95%;
+            /* ให้เห็นขอบพื้นหลังสีชมพูอ่อนเล็กน้อย */
+        }
 
-/* ปรับแต่งภาพ Banner */
-.carousel-item img {
-    object-fit: cover;
-    height: 450px; /* กำหนดความสูงให้พอดี ไม่ยาวเกินไป */
-}
+        /* ปรับแต่งภาพ Banner */
+        .carousel-item img {
+            object-fit: cover;
+            height: 450px;
+            /* กำหนดความสูงให้พอดี ไม่ยาวเกินไป */
+        }
 
-/* ปรับแต่งปุ่ม Previous / Next ให้เป็นวงกลมฟุ้งๆ */
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    background-color: rgba(255, 255, 255, 0.3); /* ขาวโปร่งแสง */
-    border-radius: 50%;
-    padding: 20px;
-    background-size: 50%;
-    transition: all 0.3s ease;
-}
+        /* ปรับแต่งปุ่ม Previous / Next ให้เป็นวงกลมฟุ้งๆ */
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(255, 255, 255, 0.3);
+            /* ขาวโปร่งแสง */
+            border-radius: 50%;
+            padding: 20px;
+            background-size: 50%;
+            transition: all 0.3s ease;
+        }
 
-.carousel-control-prev:hover .carousel-control-prev-icon,
-.carousel-control-next:hover .carousel-control-next-icon {
-    background-color: #b3365b; /* เปลี่ยนเป็นชมพู Mira เมื่อชี้ */
-    box-shadow: 0 0 15px rgba(179, 54, 91, 0.5); /* แสงฟุ้งรอบปุ่ม */
-}
+        .carousel-control-prev:hover .carousel-control-prev-icon,
+        .carousel-control-next:hover .carousel-control-next-icon {
+            background-color: #b3365b;
+            /* เปลี่ยนเป็นชมพู Mira เมื่อชี้ */
+            box-shadow: 0 0 15px rgba(179, 54, 91, 0.5);
+            /* แสงฟุ้งรอบปุ่ม */
+        }
 
-/* เพิ่มจุดกลมๆ (Indicators) ด้านล่าง */
-.carousel-indicators [data-bs-target] {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #b3365b;
-    margin: 0 5px;
-}
-    /* ปรับแต่งเมนูให้ดูพรีเมียมตามแบบ Dashboard */
-    .navbar-nav .nav-link {
-        font-size: 1.15rem;
-        padding: 0.5rem 1rem !important;
-        margin: 0 8px; /* เพิ่มระยะห่างระหว่างปุ่ม */
-        transition: all 0.3s ease;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%; /* เตรียมทรงวงกลม */
-        width: 45px;  /* กำหนดความกว้างวงกลม */
-        height: 45px; /* กำหนดความสูงวงกลม */
-        color: #b3365b !important; /* สีไอคอนบนพื้นดำ */
-    }
+        /* เพิ่มจุดกลมๆ (Indicators) ด้านล่าง */
+        .carousel-indicators [data-bs-target] {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #b3365b;
+            margin: 0 5px;
+        }
 
-    /* Effect วงกลมสีชมพูอ่อนเมื่อ Hover */
-    .navbar-nav .nav-link:hover {
-        background-color: #b5365c33; /* สีชมพู Mira แบบจาง 20% */
-        color: #ff85a1 !important; /* สีไอคอนเมื่อ Hover ให้สว่างขึ้น */
-        transform: translateY(-2px); /* ยกตัวขึ้นเล็กน้อย */
-    }
+        /* ปรับแต่งเมนูให้ดูพรีเมียมตามแบบ Dashboard */
+        .navbar-nav .nav-link {
+            font-size: 1.15rem;
+            padding: 0.5rem 1rem !important;
+            margin: 0 8px;
+            /* เพิ่มระยะห่างระหว่างปุ่ม */
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            /* เตรียมทรงวงกลม */
+            width: 45px;
+            /* กำหนดความกว้างวงกลม */
+            height: 45px;
+            /* กำหนดความสูงวงกลม */
+            color: #b3365b !important;
+            /* สีไอคอนบนพื้นดำ */
+        }
 
-    /* ปรับแต่ง Dropdown Text (Products) ให้ยังเป็นข้อความแต่ดูดี */
-    .navbar-nav .nav-item.dropdown .nav-link {
-        width: auto; /* ให้ความกว้างตามข้อความ */
-        border-radius: 20px; /* ทรงมนยาว */
-        padding: 0.5rem 1.5rem !important;
-    }
+        /* Effect วงกลมสีชมพูอ่อนเมื่อ Hover */
+        .navbar-nav .nav-link:hover {
+            background-color: #b5365c33;
+            /* สีชมพู Mira แบบจาง 20% */
+            color: #ff85a1 !important;
+            /* สีไอคอนเมื่อ Hover ให้สว่างขึ้น */
+            transform: translateY(-2px);
+            /* ยกตัวขึ้นเล็กน้อย */
+        }
 
-    .navbar-nav .bi {
-        font-size: 1.4rem;
-        line-height: 1;
-    }
-    .btn-logout-mira {
-        border: 1px solid #D65A8D;
-        color: #D65A8D;
-        background-color: transparent;
-        border-radius: 50px; /* ทรงมนยาวแบบในรูป */
-        padding: 8px 30px;
-        font-weight: 500;
-        transition: all 0.3s;
-    }
+        /* ปรับแต่ง Dropdown Text (Products) ให้ยังเป็นข้อความแต่ดูดี */
+        .navbar-nav .nav-item.dropdown .nav-link {
+            width: auto;
+            /* ให้ความกว้างตามข้อความ */
+            border-radius: 20px;
+            /* ทรงมนยาว */
+            padding: 0.5rem 1.5rem !important;
+        }
 
-    .btn-logout-mira:hover {
-        background-color: #D65A8D;
-        color: white;
-        box-shadow: 0 4px 12px rgba(214, 90, 141, 0.2);
-    }
-</style>
+        .navbar-nav .bi {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .btn-logout-mira {
+            border: 1px solid #D65A8D;
+            color: #D65A8D;
+            background-color: transparent;
+            border-radius: 50px;
+            /* ทรงมนยาวแบบในรูป */
+            padding: 8px 30px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-logout-mira:hover {
+            background-color: #D65A8D;
+            color: white;
+            box-shadow: 0 4px 12px rgba(214, 90, 141, 0.2);
+        }
+
+        .mira-voucher {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f8a5c2;
+            transition: 0.3s;
+        }
+
+        .voucher-left {
+            background: linear-gradient(135deg, #b3365b, #f78fb3);
+            min-width: 80px;
+            position: relative;
+        }
+
+        .voucher-left::after {
+            content: "";
+            position: absolute;
+            right: -5px;
+            top: 10%;
+            height: 80%;
+            border-right: 2px dashed rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-collect-mira {
+            background-color: #b3365b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-collect-mira:hover {
+            background-color: #8e2a48;
+            transform: scale(1.02);
+        }
+    </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color:#FFF2f6">
-  <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color:#FFF2f6">
+        <div class="container-fluid">
 
-    <a class="navbar-brand">
-      <img src="../photo/golo.png" width="70" height="50" alt="Mira">
-    </a>
+            <a class="navbar-brand">
+                <img src="../photo/golo.png" width="70" height="50" alt="Mira">
+            </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      
-      <ul class="navbar-nav mx-auto align-items-center">
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
 
-        <li class="nav-item">
-          <a class="nav-link active" href="index_users.php" style="color: #b3365b !important;">
-            <i class="bi bi-house-door fs-5"></i> 
-          </a>
-        </li>
+                <ul class="navbar-nav mx-auto align-items-center">
 
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="javascript:void(0)">
-            Products
-          </a>
-          <ul class="dropdown-menu border-0 shadow-sm">
-            <li>
-              <a class="dropdown-item" href="index_users.php?link=women">
-                <i class="bi bi-gender-female me-2"></i> น้ำหอมสำหรับผู้หญิง
-              </a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="index_users.php?link=men">
-                <i class="bi bi-gender-male me-2"></i> น้ำหอมสำหรับผู้ชาย
-              </a>
-            </li>
-          </ul>
-        </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index_users.php" style="color: #b3365b !important;">
+                            <i class="bi bi-house-door fs-5"></i>
+                        </a>
+                    </li>
 
-        <li class="nav-item">
-          <a class="nav-link mira-nav-icon" href="cart/mycart.php">
-            <i class="bi bi-bag-heart"></i>
-          </a>
-        </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false" href="javascript:void(0)">
+                            Products
+                        </a>
+                        <ul class="dropdown-menu border-0 shadow-sm">
+                            <li>
+                                <a class="dropdown-item" href="index_users.php?link=women">
+                                    <i class="bi bi-gender-female me-2"></i> น้ำหอมสำหรับผู้หญิง
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="index_users.php?link=men">
+                                    <i class="bi bi-gender-male me-2"></i> น้ำหอมสำหรับผู้ชาย
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
-        <li class="nav-item">
-          <a class="nav-link mira-nav-icon" href="mes/chat.php">
-            <i class="bi bi-chat-dots"></i>
-          </a>
-        </li>
+                    <li class="nav-item">
+                        <a class="nav-link mira-nav-icon" href="cart/mycart.php">
+                            <i class="bi bi-bag-heart"></i>
+                        </a>
+                    </li>
 
-        <li class="nav-item">
-          <a class="nav-link mira-nav-icon" href="pf.php">
-            <i class="bi bi-person-circle"></i>
-          </a>
-        </li>
-      </ul>
+                    <li class="nav-item">
+                        <a class="nav-link mira-nav-icon" href="mes/chat.php">
+                            <i class="bi bi-chat-dots"></i>
+                        </a>
+                    </li>
 
-      <div class="d-lg-flex align-items-center mt-3 mt-lg-0">
-        <a href="../login/logout.php" class="text-decoration-none">
-          <button class="btn btn-logout-mira">ออกจากระบบ</button>
-        </a>
-      </div>
-      
-    </div>
-  </div>
-</nav>
+                    <li class="nav-item">
+                        <a class="nav-link mira-nav-icon" href="pf.php">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                    </li>
+                </ul>
 
-<style>
-    /* CSS เดิมของคุณ */
-    .mira-nav-icon {
-        color: #a34a67 !important;
-        font-size: 1.4rem;
-        padding: 8px 12px !important;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+                <div class="d-lg-flex align-items-center mt-3 mt-lg-0">
+                    <a href="../login/logout.php" class="text-decoration-none">
+                        <button class="btn btn-logout-mira">ออกจากระบบ</button>
+                    </a>
+                </div>
 
-    .mira-nav-icon:hover {
-        color: #f8a5c2 !important;
-        transform: translateY(-2px);
-    }
+            </div>
+        </div>
+    </nav>
 
-    /* ตกแต่งปุ่ม Logout เพิ่มเติมเพื่อให้เข้ากับธีม */
-    .btn-logout-mira {
-        background-color: #b3365b;
-        color: white;
-        border-radius: 50px;
-        padding: 8px 20px;
-        border: none;
-        transition: 0.3s;
-    }
-    .btn-logout-mira:hover {
-        background-color: #a34a67;
-        color: white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-</style>
+    <style>
+        /* CSS เดิมของคุณ */
+        .mira-nav-icon {
+            color: #a34a67 !important;
+            font-size: 1.4rem;
+            padding: 8px 12px !important;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-<style>
-  /* กำหนดให้ปุ่มมีความกว้างเท่ากัน */
-  .nav-btn {
-    min-width: 110px; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+        .mira-nav-icon:hover {
+            color: #f8a5c2 !important;
+            transform: translateY(-2px);
+        }
 
-  /* ปรับแต่ง Dropdown ให้ดูทันสมัยขึ้น */
-  .nav-link {
-    font-weight: 500;
-    transition: color 0.2s;
-  }
+        /* ตกแต่งปุ่ม Logout เพิ่มเติมเพื่อให้เข้ากับธีม */
+        .btn-logout-mira {
+            background-color: #b3365b;
+            color: white;
+            border-radius: 50px;
+            padding: 8px 20px;
+            border: none;
+            transition: 0.3s;
+        }
 
-  .dropdown-item:active {
-    background-color: #198754;
-  }
+        .btn-logout-mira:hover {
+            background-color: #a34a67;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 
-  /* ระยะห่างสำหรับมือถือ */
-  @media (max-width: 991.98px) {
-    .nav-btn {
-      width: 100%; /* พอมือถือให้ปุ่มเต็มความกว้าง */
-      margin-top: 5px;
-    }
-  }
-</style>
-      
-          <!-- สิ้นสุดแบนเนอร์ -->
+    <style>
+        /* กำหนดให้ปุ่มมีความกว้างเท่ากัน */
+        .nav-btn {
+            min-width: 110px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-          <!-- เริ่มต้นfooter -->
-           
+        /* ปรับแต่ง Dropdown ให้ดูทันสมัยขึ้น */
+        .nav-link {
+            font-weight: 500;
+            transition: color 0.2s;
+        }
 
-<?php include_once "body.php"; ?>
-<?php 
-// ดึงข้อมูลรีวิว พร้อมชื่อผู้รีวิว (Join ตาราง reviews และ users)
-try {
-// ตัวอย่างคำสั่ง SQL ในหน้า index.php
-$stmt_rev = $conn->prepare("SELECT r.*, u.fullname, u.profile_img FROM reviews r 
+        .dropdown-item:active {
+            background-color: #198754;
+        }
+
+        /* ระยะห่างสำหรับมือถือ */
+        @media (max-width: 991.98px) {
+            .nav-btn {
+                width: 100%;
+                /* พอมือถือให้ปุ่มเต็มความกว้าง */
+                margin-top: 5px;
+            }
+        }
+
+        .mira-voucher {
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(179, 54, 91, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .mira-voucher:hover {
+            transform: translateY(-5px);
+        }
+
+        .voucher-left {
+            background-color: #b3365b;
+            position: relative;
+            min-width: 80px;
+        }
+
+        /* รอยปรุตรงกลางบัตร */
+        .voucher-left::after {
+            content: "";
+            position: absolute;
+            right: -5px;
+            top: 10%;
+            height: 80%;
+            border-right: 2px dashed #f8a5c2;
+        }
+
+        .btn-collect-voucher {
+            background-color: #fff2f6;
+            color: #b3365b;
+            border: 1px solid #f8a5c2;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-collect-voucher:hover {
+            background-color: #b3365b;
+            color: white;
+        }
+    </style>
+
+
+    <!-- สิ้นสุดแบนเนอร์ -->
+
+    <!-- เริ่มต้นfooter -->
+
+
+    <?php include_once "body.php"; ?>
+
+    <?php
+    // ดึงข้อมูลรีวิว พร้อมชื่อผู้รีวิว (Join ตาราง reviews และ users)
+    try {
+        // ตัวอย่างคำสั่ง SQL ในหน้า index.php
+        $stmt_rev = $conn->prepare("SELECT r.*, u.fullname, u.profile_img FROM reviews r 
                             JOIN users u ON r.user_id = u.user_id 
                             ORDER BY r.review_date DESC LIMIT 3");
-$stmt_rev->execute();
-$reviews = $stmt_rev->fetchAll();
-} catch(PDOException $e) {
-    $reviews = []; // ป้องกัน error หากยังไม่มีข้อมูล
-}
-?>
+        $stmt_rev->execute();
+        $reviews = $stmt_rev->fetchAll();
+    } catch (PDOException $e) {
+        $reviews = []; // ป้องกัน error หากยังไม่มีข้อมูล
+    }
+    ?>
 
-<style>
-    .review-section {
-        background-color: #1a1a1a; /* พื้นหลังสีดำเข้ม */
-        color: white;
-        padding: 80px 0;
-    }
-    .review-title {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 50px;
-    }
-    .review-card {
-        background: white;
-        color: #333;
-        border-radius: 10px;
-        padding: 30px;
-        position: relative;
-        height: 100%;
-        border: none;
-    }
-    .review-text {
-        font-size: 0.95rem;
-        line-height: 1.6;
-        margin-bottom: 40px;
-        color: #555;
-    }
-    .reviewer-info {
-        display: flex;
-        align-items: center;
-        position: absolute;
-        bottom: -25px;
-        left: 30px;
-    }
-    .reviewer-img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        border: 3px solid #1a1a1a;
-        object-fit: cover;
-        background: #eee;
-    }
-    .reviewer-name {
-        margin-left: 10px;
-        color: white;
-        font-size: 0.85rem;
-        margin-top: 25px;
-    }
-    .review-quote {
-        color: #e84c88;
-        font-weight: bold;
-        margin-bottom: 10px;
-        display: block;
-    }
-</style>
+    <style>
+        .review-section {
+            background-color: #1a1a1a;
+            /* พื้นหลังสีดำเข้ม */
+            color: white;
+            padding: 80px 0;
+        }
 
-<section class="review-section">
-    <div class="container text-center">
-        <h2 class="review-title">Social Proof & Review</h2>
-        <div class="mb-3">— ⚪ —</div>
-        <button type="button" class="btn btn-outline-light mb-5" data-bs-toggle="modal" data-bs-target="#reviewModal">
-            <i class="bi bi-pencil-square"></i> เขียนรีวิวของคุณ
-        </button>
-        <div class="row g-5">
-            <?php if (empty($reviews)): ?>
-                <p class="text-white-50">ยังไม่มีรีวิวในขณะนี้ เป็นคนแรกที่รีวิวสิ!</p>
-            <?php else: ?>
-                <?php foreach($reviews as $rev): ?>
-                <div class="col-md-4">
-                    <div class="review-card text-start shadow">
-                        <div class="mb-2">
-                            <span class="text-warning"><?= str_repeat('⭐', $rev['rating']) ?></span>
-                            <span class="text-muted small">(<?= $rev['rating'] ?>/5)</span>
-                        </div>
-                        
-                        <p class="review-text"><?= htmlspecialchars($rev['comment']) ?></p>
-                        
-                        <div class="reviewer-info">
-                            <?php 
-                                $user_pic = (!empty($rev['profile_img'])) 
-                                            ? "../register/photo/" . $rev['profile_img'] 
-                                            : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
-                            ?>
-                            <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
-                            
-                            <div class="reviewer-name">
-                                <strong><?= htmlspecialchars($rev['fullname']) ?></strong>
+        .review-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 50px;
+        }
+
+        .review-card {
+            background: white;
+            color: #333;
+            border-radius: 10px;
+            padding: 30px;
+            position: relative;
+            height: 100%;
+            border: none;
+        }
+
+        .review-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            color: #555;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            bottom: -25px;
+            left: 30px;
+        }
+
+        .reviewer-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid #1a1a1a;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .reviewer-name {
+            margin-left: 10px;
+            color: white;
+            font-size: 0.85rem;
+            margin-top: 25px;
+        }
+
+        .review-quote {
+            color: #e84c88;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+
+    <section class="review-section">
+        <div class="container text-center">
+            <h2 class="review-title">Social Proof & Review</h2>
+            <div class="mb-3">— ⚪ —</div>
+            <button type="button" class="btn btn-outline-light mb-5" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                <i class="bi bi-pencil-square"></i> เขียนรีวิวของคุณ
+            </button>
+            <div class="row g-5">
+                <?php if (empty($reviews)): ?>
+                    <p class="text-white-50">ยังไม่มีรีวิวในขณะนี้ เป็นคนแรกที่รีวิวสิ!</p>
+                <?php else: ?>
+                    <?php foreach ($reviews as $rev): ?>
+                        <div class="col-md-4">
+                            <div class="review-card text-start shadow">
+                                <div class="mb-2">
+                                    <span class="text-warning"><?= str_repeat('⭐', $rev['rating']) ?></span>
+                                    <span class="text-muted small">(<?= $rev['rating'] ?>/5)</span>
+                                </div>
+
+                                <p class="review-text"><?= htmlspecialchars($rev['comment']) ?></p>
+
+                                <div class="reviewer-info">
+                                    <?php
+                                    $user_pic = (!empty($rev['profile_img']))
+                                        ? "../register/photo/" . $rev['profile_img']
+                                        : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
+                                    ?>
+                                    <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
+
+                                    <div class="reviewer-name">
+                                        <strong><?= htmlspecialchars($rev['fullname']) ?></strong>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    </div>
-</section>
-<style>
-    /* ปรับแต่ง Footer ให้เข้ากับโทนในรูปภาพ */
-    .footer-section {
-        background-color: #fff2f6; /* สีชมพูอ่อนพาสเทลตามรูป Customer Directory */
-        padding: 60px 0 30px;
-        color: #444;
-        border-top: 1px solid rgba(179, 54, 91, 0.1);
-    }
-    .footer-title {
-        font-family: 'Playfair Display', serif;
-        color: #b3365b; /* สีชมพูเข้มตัวเดียวกับโลโก้ในรูป */
-        font-weight: bold;
-        font-size: 1.25rem;
-        margin-bottom: 25px;
-        position: relative;
-    }
-    /* ขีดเส้นใต้หัวข้อเล็กๆ เพื่อความสวยงาม */
-    
-    .footer-contact-text {
-        font-size: 1rem;
-        text-decoration: none;
-        color: #555;
-        transition: 0.3s;
-    }
-    .footer-contact-text:hover {
-        color: #b3365b;
-    }
-    /* ปรับแต่ง Icon Social ให้ดูสะอาดตา (ขาว-ชมพู) */
-    .social-icons a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        background: #ffffff;
-        border-radius: 12px; /* โค้งมนแบบ Card ในรูป */
-        color: #b3365b;
-        margin-right: 12px;
-        text-decoration: none;
-        box-shadow: 0 4px 10px rgba(179, 54, 91, 0.08);
-        transition: all 0.3s ease;
-    }
-    .social-icons a:hover {
-        background: #b3365b;
-        color: #ffffff;
-        transform: translateY(-3px);
-    }
-    .footer-info-box {
-        background: rgba(255, 255, 255, 0.5);
-        padding: 20px;
-        border-radius: 15px;
-        border: 1px solid #ffffff;
-    }
-    .copyright-text {
-        font-size: 0.85rem;
-        color: #888;
-        border-top: 1px solid rgba(179, 54, 91, 0.1);
-        padding-top: 25px;
-        margin-top: 40px;
-    }
-
-
-
-
-
-    /* สไตล์พื้นฐานของ Social Icons */
-.social-icons a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    margin-left: 15px; /* เว้นระยะห่างระหว่างไอคอน */
-    background-color: #ffffff; /* พื้นหลังสีขาว */
-    color: #b3365b; /* สีชมพู MIRA */
-    border-radius: 50%; /* ทรงกลม */
-    text-decoration: none;
-    font-size: 1.2rem;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* อนิเมชั่นแบบเด้งนุ่มนวล */
-    box-shadow: 0 4px 15px rgba(179, 54, 91, 0.1); /* เงาบางๆ */
-}
-
-/* Effect เมื่อเอาเมาส์ไปชี้ (Hover) */
-.social-icons a:hover {
-    color: #ffffff; /* เปลี่ยนไอคอนเป็นสีขาว */
-    transform: translateY(-5px) scale(1.1); /* ลอยขึ้นและขยายใหญ่ขึ้นเล็กน้อย */
-    box-shadow: 0 8px 20px rgba(179, 54, 91, 0.2); /* เงาเข้มขึ้น */
-}
-
-/* แยกสีตามแบรนด์เมื่อ Hover (ตัวเลือกเสริมเพื่อความพรีเมียม) */
-.social-icons a:hover .bi-facebook {
-    color: #ffffff;
-}
-.social-icons a:hover:has(.bi-facebook) {
-    background-color: #1877F2; /* สีฟ้า Facebook */
-}
-
-.social-icons a:hover:has(.bi-line) {
-    background-color: #06C755; /* สีเขียว Line */
-}
-
-.social-icons a:hover:has(.bi-instagram) {
-    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); /* สีรุ้ง Instagram */
-}
-
-/* สำหรับมือถือ ให้ระยะห่างพอดี */
-@media (max-width: 768px) {
-    .social-icons {
-        justify-content: center !important;
-        margin-top: 20px;
-    }
-    .social-icons a {
-        margin: 0 10px;
-    }
-}
-
-
-</style>
-
-
-<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-            <div class="modal-header text-white border-0" style="background: linear-gradient(45deg, #f8a5c2, #f78fb3);">
-                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>แบ่งปันประสบการณ์ของคุณ</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
+        </div>
+    </section>
+    <style>
+        /* ปรับแต่ง Footer ให้เข้ากับโทนในรูปภาพ */
+        .footer-section {
+            background-color: #fff2f6;
+            /* สีชมพูอ่อนพาสเทลตามรูป Customer Directory */
+            padding: 60px 0 30px;
+            color: #444;
+            border-top: 1px solid rgba(179, 54, 91, 0.1);
+        }
 
-            <form action="save_review.php" method="POST">
-                <div class="modal-body p-4 text-start text-dark bg-light">
-                    
-                    <div class="text-center mb-4">
-                        <div class="position-relative d-inline-block">
-                           <?php 
-                                $user_pic = (!empty($rev['profile_img'])) 
-                                            ? "../register/photo/" . $rev['profile_img'] 
-                                            : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
-                            ?>
-                            <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
-            
-                            <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-success border border-2 border-white">
-                                <i class="bi bi-check"></i>
-                            </span>
-                        </div>
-                        <h6 class="mt-2 fw-bold mb-0"><?php echo $_SESSION['fullname']; ?></h6>
-                        <small class="text-muted">คุณกำลังเขียนรีวิวในชื่อนี้</small>
-                    </div>
+        .footer-title {
+            font-family: 'Playfair Display', serif;
+            color: #b3365b;
+            /* สีชมพูเข้มตัวเดียวกับโลโก้ในรูป */
+            font-weight: bold;
+            font-size: 1.25rem;
+            margin-bottom: 25px;
+            position: relative;
+        }
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-secondary">คะแนนความพึงพอใจ</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-warning"><i class="bi bi-star-fill"></i></span>
-                            <select name="rating" class="form-select border-start-0" required>
-                                <option value="5">5 ดาว - ประทับใจที่สุด</option>
-                                <option value="4">4 ดาว - ดีมาก</option>
-                                <option value="3">3 ดาว - ปานกลาง</option>
-                                <option value="2">2 ดาว - พอใช้</option>
-                                <option value="1">1 ดาว - ควรปรับปรุง</option>
-                            </select>
-                        </div>
-                    </div>
+        /* ขีดเส้นใต้หัวข้อเล็กๆ เพื่อความสวยงาม */
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-secondary">สินค้าที่ต้องการรีวิว</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-bag-heart-fill"></i></span>
-                            <select name="product_id" class="form-select border-start-0" required>
+        .footer-contact-text {
+            font-size: 1rem;
+            text-decoration: none;
+            color: #555;
+            transition: 0.3s;
+        }
+
+        .footer-contact-text:hover {
+            color: #b3365b;
+        }
+
+        /* ปรับแต่ง Icon Social ให้ดูสะอาดตา (ขาว-ชมพู) */
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #ffffff;
+            border-radius: 12px;
+            /* โค้งมนแบบ Card ในรูป */
+            color: #b3365b;
+            margin-right: 12px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(179, 54, 91, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            background: #b3365b;
+            color: #ffffff;
+            transform: translateY(-3px);
+        }
+
+        .footer-info-box {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #ffffff;
+        }
+
+        .copyright-text {
+            font-size: 0.85rem;
+            color: #888;
+            border-top: 1px solid rgba(179, 54, 91, 0.1);
+            padding-top: 25px;
+            margin-top: 40px;
+        }
+
+
+
+
+
+        /* สไตล์พื้นฐานของ Social Icons */
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            margin-left: 15px;
+            /* เว้นระยะห่างระหว่างไอคอน */
+            background-color: #ffffff;
+            /* พื้นหลังสีขาว */
+            color: #b3365b;
+            /* สีชมพู MIRA */
+            border-radius: 50%;
+            /* ทรงกลม */
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            /* อนิเมชั่นแบบเด้งนุ่มนวล */
+            box-shadow: 0 4px 15px rgba(179, 54, 91, 0.1);
+            /* เงาบางๆ */
+        }
+
+        /* Effect เมื่อเอาเมาส์ไปชี้ (Hover) */
+        .social-icons a:hover {
+            color: #ffffff;
+            /* เปลี่ยนไอคอนเป็นสีขาว */
+            transform: translateY(-5px) scale(1.1);
+            /* ลอยขึ้นและขยายใหญ่ขึ้นเล็กน้อย */
+            box-shadow: 0 8px 20px rgba(179, 54, 91, 0.2);
+            /* เงาเข้มขึ้น */
+        }
+
+        /* แยกสีตามแบรนด์เมื่อ Hover (ตัวเลือกเสริมเพื่อความพรีเมียม) */
+        .social-icons a:hover .bi-facebook {
+            color: #ffffff;
+        }
+
+        .social-icons a:hover:has(.bi-facebook) {
+            background-color: #1877F2;
+            /* สีฟ้า Facebook */
+        }
+
+        .social-icons a:hover:has(.bi-line) {
+            background-color: #06C755;
+            /* สีเขียว Line */
+        }
+
+        .social-icons a:hover:has(.bi-instagram) {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+            /* สีรุ้ง Instagram */
+        }
+
+        /* สำหรับมือถือ ให้ระยะห่างพอดี */
+        @media (max-width: 768px) {
+            .social-icons {
+                justify-content: center !important;
+                margin-top: 20px;
+            }
+
+            .social-icons a {
+                margin: 0 10px;
+            }
+        }
+    </style>
+
+
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header text-white border-0" style="background: linear-gradient(45deg, #f8a5c2, #f78fb3);">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>แบ่งปันประสบการณ์ของคุณ</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form action="save_review.php" method="POST">
+                    <div class="modal-body p-4 text-start text-dark bg-light">
+
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
                                 <?php
-                                $stmt_p = $conn->query("SELECT product_id, product_name FROM products ORDER BY product_name ASC");
-                                while($p = $stmt_p->fetch()) {
-                                    echo "<option value='{$p['product_id']}'>{$p['product_name']}</option>";
-                                }
+                                $user_pic = (!empty($rev['profile_img']))
+                                    ? "../register/photo/" . $rev['profile_img']
+                                    : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
                                 ?>
-                            </select>
+                                <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
+
+                                <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-success border border-2 border-white">
+                                    <i class="bi bi-check"></i>
+                                </span>
+                            </div>
+                            <h6 class="mt-2 fw-bold mb-0"><?php echo $_SESSION['fullname']; ?></h6>
+                            <small class="text-muted">คุณกำลังเขียนรีวิวในชื่อนี้</small>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary">คะแนนความพึงพอใจ</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-warning"><i class="bi bi-star-fill"></i></span>
+                                <select name="rating" class="form-select border-start-0" required>
+                                    <option value="5">5 ดาว - ประทับใจที่สุด</option>
+                                    <option value="4">4 ดาว - ดีมาก</option>
+                                    <option value="3">3 ดาว - ปานกลาง</option>
+                                    <option value="2">2 ดาว - พอใช้</option>
+                                    <option value="1">1 ดาว - ควรปรับปรุง</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary">สินค้าที่ต้องการรีวิว</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-bag-heart-fill"></i></span>
+                                <select name="product_id" class="form-select border-start-0" required>
+                                    <?php
+                                    $stmt_p = $conn->query("SELECT product_id, product_name FROM products ORDER BY product_name ASC");
+                                    while ($p = $stmt_p->fetch()) {
+                                        echo "<option value='{$p['product_id']}'>{$p['product_name']}</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary">ความรู้สึกของคุณ</label>
+                            <textarea name="comment" class="form-control" rows="4"
+                                style="border-radius: 12px; resize: none;"
+                                placeholder="เขียนบอกเราหน่อยว่าสินค้าชิ้นนี้ดียังไง..." required></textarea>
+                        </div>
+
+                        <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-secondary">ความรู้สึกของคุณ</label>
-                        <textarea name="comment" class="form-control" rows="4" 
-                                  style="border-radius: 12px; resize: none;" 
-                                  placeholder="เขียนบอกเราหน่อยว่าสินค้าชิ้นนี้ดียังไง..." required></textarea>
-                    </div>
-
-                    <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
-                </div>
-
-                <div class="modal-footer border-0 bg-light p-3">
-                    <button type="button" class="btn btn-outline-secondary px-4 border-0" data-bs-dismiss="modal">ไว้วันหลัง</button>
-                    <button type="submit" class="btn text-white px-4 shadow-sm" 
+                    <div class="modal-footer border-0 bg-light p-3">
+                        <button type="button" class="btn btn-outline-secondary px-4 border-0" data-bs-dismiss="modal">ไว้วันหลัง</button>
+                        <button type="submit" class="btn text-white px-4 shadow-sm"
                             style="background: #f8a5c2; border-radius: 10px; transition: 0.3s;">
-                        ส่งรีวิวเลย <i class="bi bi-send-fill ms-1"></i>
-                    </button>
-                </div>
-            </form>
+                            ส่งรีวิวเลย <i class="bi bi-send-fill ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<footer class="footer-section">
-    <div class="container">
-        <div class="row g-4">
-            
-            <div class="col-md-4">
-                <div class="footer-info-box h-100">
-                    <h6 class="footer-title">บริษัท มิรา จำกัด</h6>
-                    <p class="mb-0 text-muted small">ศาลากลางจังหวัดพะเยา ถนนพหลโยธิน<br>
-                    ต.บ้านต๋อม อ.เมืองพะเยา จ.พะเยา 56000</p>
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <div class="footer-info-box h-100">
+                        <h6 class="footer-title">บริษัท มิรา จำกัด</h6>
+                        <p class="mb-0 text-muted small">ศาลากลางจังหวัดพะเยา ถนนพหลโยธิน<br>
+                            ต.บ้านต๋อม อ.เมืองพะเยา จ.พะเยา 56000</p>
+                    </div>
                 </div>
+
+                <div class="col-md-4 text-center">
+                    <h6 class="footer-title justify-content-center d-flex" style="font-size: 1.1rem;">Customer Support</h6>
+
+                    <div class="d-flex flex-column align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center w-100">
+                            <div class="me-2 text-white d-flex align-items-center justify-content-center"
+                                style="width:28px; height:28px; background:#b3365b; border-radius:50%; flex-shrink: 0;">
+                                <i class="bi bi-telephone-fill" style="font-size: 0.75rem;"></i>
+                            </div>
+                            <span class="footer-contact-text fw-bold" style="font-size: 0.9rem;">098-818-9079</span>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-center w-100">
+                            <div class="me-2 text-white d-flex align-items-center justify-content-center"
+                                style="width:28px; height:28px; background:#b3365b; border-radius:50%; flex-shrink: 0;">
+                                <i class="bi bi-envelope-heart-fill" style="font-size: 0.75rem;"></i>
+                            </div>
+                            <a href="mailto:miraperfume@gmail.com" class="footer-contact-text fw-bold"
+                                style="font-size: 0.9rem; text-decoration: none;">miraperfume@gmail.com</a>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div class="col-md-4 text-md-end">
+                    <h6 class="footer-title justify-content-md-end d-md-flex">Follow Our Beauty & Contact us</h6>
+                    <div class="social-icons d-flex align-items-center justify-content-md-end mt-4">
+                        <a href="https://www.facebook.com/profile.php?id=61587653476633" target="_blank"><i class="bi bi-facebook"></i></a>
+                        <a href="https://line.me/" target="_blank"><i class="bi bi-line"></i></a>
+                        <a href="https://www.instagram.com/accounts/login" target="_blank"><i class="bi bi-instagram"></i></a>
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="col-md-4 text-center"> 
-    <h6 class="footer-title justify-content-center d-flex" style="font-size: 1.1rem;">Customer Support</h6> 
+
+        </div>
+        </div>
+    </footer>
+    <!-- สิ้นสุดfooter -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// --- ระบบนับถอยหลัง ---
+function updateCountdowns() {
+    const timers = document.querySelectorAll('.countdown');
+    timers.forEach(timer => {
+        const endTime = parseInt(timer.getAttribute('data-time')) * 1000;
+        const now = new Date().getTime();
+        const diff = endTime - now;
+
+        if (diff <= 0) {
+            timer.innerHTML = "หมดเวลา";
+            return;
+        }
+
+        const hours = Math.floor((diff / (1000 * 60 * 60)));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+        timer.innerHTML = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    });
+}
+setInterval(updateCountdowns, 1000); // อัปเดตทุกวินาที
+
+// --- ระบบเก็บส่วนลดแล้วหายไป ---
+function collectVoucher(promoId) {
+    const card = document.getElementById('promo-card-' + promoId);
     
-    <div class="d-flex flex-column align-items-center gap-2"> <div class="d-flex align-items-center justify-content-center w-100">
-            <div class="me-2 text-white d-flex align-items-center justify-content-center" 
-                 style="width:28px; height:28px; background:#b3365b; border-radius:50%; flex-shrink: 0;">
-                <i class="bi bi-telephone-fill" style="font-size: 0.75rem;"></i>
-            </div>
-            <span class="footer-contact-text fw-bold" style="font-size: 0.9rem;">098-818-9079</span>
-        </div>
+    // ส่งข้อมูลไปที่ PHP
+    fetch('collect_voucher.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'promo_id=' + promoId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            // สั่งทำ Animation ค่อยๆ หายไป
+            card.style.transition = "all 0.5s ease";
+            card.style.opacity = "0";
+            card.style.transform = "scale(0.8)";
+            
+            setTimeout(() => {
+                card.remove(); // ลบออกจาหน้าเว็บ
+            }, 500);
 
-        <div class="d-flex align-items-center justify-content-center w-100">
-            <div class="me-2 text-white d-flex align-items-center justify-content-center" 
-                 style="width:28px; height:28px; background:#b3365b; border-radius:50%; flex-shrink: 0;">
-                <i class="bi bi-envelope-heart-fill" style="font-size: 0.75rem;"></i>
-            </div>
-            <a href="mailto:miraperfume@gmail.com" class="footer-contact-text fw-bold" 
-               style="font-size: 0.9rem; text-decoration: none;">miraperfume@gmail.com</a>
-        </div>
+            Swal.fire({
+                icon: 'success',
+                title: 'เก็บแล้ว!',
+                text: 'ส่วนลดนี้อยู่ในบัญชีของคุณแล้ว',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } else {
+            Swal.fire({ icon: 'error', title: 'โอ๊ะ!', text: data.message });
+        }
+    });
+}
+</script>
+</body>
 
-    </div>
-</div>
-
-
-            <div class="col-md-4 text-md-end">
-                <h6 class="footer-title justify-content-md-end d-md-flex">Follow Our Beauty & Contact us</h6>
-                <div class="social-icons d-flex align-items-center justify-content-md-end mt-4">
-                    <a href="https://www.facebook.com/profile.php?id=61587653476633" target="_blank"><i class="bi bi-facebook"></i></a>
-                    <a href="https://line.me/" target="_blank"><i class="bi bi-line"></i></a>
-                    <a href="https://www.instagram.com/accounts/login" target="_blank"><i class="bi bi-instagram"></i></a>                   
-                </div>
-               
-            </div>
-
-        </div>
-
-        
-        </div>
-    </div>
-</footer>
-           <!-- สิ้นสุดfooter -->
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-      </body>
-      </html>
+</html>

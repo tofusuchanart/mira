@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <title>MIRA | Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+
     <style>
         :root {
             --mira-pink: #f8a5c2;
@@ -21,25 +22,25 @@
             font-family: 'Sarabun', sans-serif;
         }
 
-       body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100vh;
-    /* ใส่สีชมพูเป็นพื้นหลังสำรอง ถ้าสีนี้ขึ้นแต่รูปไม่ขึ้น แสดงว่า Path รูปผิดชัวร์ๆ ครับ */
-    background-color: #fff2f6; 
-    
-    /* ลองลบ ../ ออกถ้าไฟล์ login.php อยู่หน้าหลัก */
-    background-image: url("photo/op.jpg"); 
-    
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            /* ใส่สีชมพูเป็นพื้นหลังสำรอง ถ้าสีนี้ขึ้นแต่รูปไม่ขึ้น แสดงว่า Path รูปผิดชัวร์ๆ ครับ */
+            background-color: #fff2f6;
+
+            /* ลองลบ ../ ออกถ้าไฟล์ login.php อยู่หน้าหลัก */
+            background-image: url("photo/op.jpg");
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         /* Container หลัก */
         .login-card {
@@ -188,42 +189,56 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px #0000001a;
         }
+        /* ล็อคไม่ให้ SweetAlert เพิ่ม Padding หรือขยับ Body */
+body.swal2-shown {
+    padding-right: 0 !important;
+}
 
+/* ล็อคหน้าจอไม่ให้ขยับตอน Alert แสดง */
+.swal2-container {
+    height: 100vh !important;
+}
     </style>
 </head>
+
 <body>
 
-<div class="login-card">
-    <div class="logo-wrapper">
-        <img src="../photo/golo.png" alt="Mira Logo" class="mira-logo-top">
-    </div>
-
-    <h1>Welcome to MIRA</h1>
-
-    <form method="post" action="login_db.php">
-        <div class="input-group">
-            <input type="text" placeholder="Username" name="email" required>
+    <div class="login-card">
+        <div class="logo-wrapper">
+            <img src="../photo/golo.png" alt="Mira Logo" class="mira-logo-top">
         </div>
-        <div class="input-group">
-            <input type="password" placeholder="Password" name="password" required>
+
+        <h1>Welcome to MIRA</h1>
+
+        <form method="post" action="login_db.php">
+            <div class="input-group">
+                <input type="text" placeholder="Username" name="email" required>
+            </div>
+            <div class="input-group">
+                <input type="password"
+                    placeholder="Password (6 ตัวขึ้นไป)"
+                    name="password"
+                    minlength="6"
+                    required>
+            </div>
+            <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
+        </form>
+
+        <div class="options">
+            <label>
+                <input type="checkbox"> จดจำฉันไว้
+            </label>
+            <a href="../index.php"><i class="bi bi-house-door"></i> กลับหน้าหลัก</a>
         </div>
-        <button type="submit" class="btn-login">เข้าสู่ระบบ</button>
-    </form>
 
-    <div class="options">
-        <label>
-            <input type="checkbox"> จดจำฉันไว้
-        </label>
-        <a href="../index.php"><i class="bi bi-house-door"></i> กลับหน้าหลัก</a>
+        <div class="register-section">
+            <p>หากคุณยังไม่มีบัญชี?</p>
+            <a href="../register/register.php" class="register-link">สมัครสมาชิก</a>
+        </div>
     </div>
-
-    <div class="register-section">
-        <p>หากคุณยังไม่มีบัญชี?</p>
-        <a href="../register/register.php" class="register-link">สมัครสมาชิก</a>
-    </div>
-</div>
 
 </body>
+
 </html>
 
 
@@ -232,20 +247,35 @@
 
 <script>
     // ตรวจสอบ Parameter จาก URL
-    const urlParams = new URLSearchParams(window.location.search);
+   const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('status') === 'error') {
         Swal.fire({
             icon: 'error',
             title: 'เข้าสู่ระบบไม่สำเร็จ',
             text: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง',
-            confirmButtonColor: '#b3365b', // สีชมพูเข้มตามธีม MIRA
+            confirmButtonColor: '#b3365b',
             confirmButtonText: 'ตกลง',
-            background: '#fff0f5', // พื้นหลังชมพูอ่อน
+            background: '#fff0f5',
+            heightAuto: false, // เพิ่มบรรทัดนี้เพื่อไม่ให้ Layout ขยับ
             customClass: {
-                title: 'mira-header' // ใช้ฟอนต์ Playfair Display ถ้าตั้งค่าไว้
+                title: 'mira-header'
             }
         });
     }
+    document.querySelector('form').addEventListener('submit', function(e) {
+    const password = document.querySelector('input[name="password"]').value;
+    
+    if (password.length < 6) {
+        e.preventDefault(); // สั่งระงับการส่งฟอร์ม
+        Swal.fire({
+            icon: 'warning',
+            title: 'รหัสผ่านสั้นเกินไป',
+            text: 'กรุณาตั้งรหัสผ่านอย่างน้อย 6 ตัวอักษรนะคะ ✨',
+            confirmButtonColor: '#b3365b'
+        });
+    }
+});
 </script>
 </body>
+
 </html>
