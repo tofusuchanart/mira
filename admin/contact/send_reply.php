@@ -27,8 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     }
 
     // ป้องกันปัญหา "ส่งรูปอย่างเดียวแล้วหลงฝั่ง"
-    // ถ้าไม่มีข้อความพิมพ์มา แต่มีรูป ให้ตั้งค่า admin_reply เป็นช่องว่าง (Space) แทนค่าว่างเปล่า (Empty String)
-    // เพื่อให้ Logic ฝั่งดึงข้อมูล (fetch) ตรวจเจอว่าแถวนี้มีข้อมูลแอดมิน
     if ($reply === '' && $attachment_path !== null) {
         $reply = ' '; 
     }
@@ -40,10 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
     }
 
     try {
-        // ใช้ PDO ในการ Insert ข้อความตอบกลับ
-        // สำคัญ: subject ต้องเป็น 'Admin Reply' เสมอเพื่อใช้แยกฝั่งในหน้า Chat
+        // *** จุดแก้ไขที่ 1: เปลี่ยนค่าสุดท้ายจาก 1 เป็น 0 เพื่อให้แจ้งเตือนฝั่งลูกค้า ***
         $sql = "INSERT INTO contact_messages (user_id, subject, message, admin_reply, message_type, attachment_path, replied_at, is_read) 
-                VALUES (:user_id, 'Admin Reply', '', :reply, :m_type, :attach, CURRENT_TIMESTAMP, 1)";
+                VALUES (:user_id, 'Admin Reply', '', :reply, :m_type, :attach, CURRENT_TIMESTAMP, 0)";
         
         $stmt = $conn->prepare($sql);
         $result = $stmt->execute([
@@ -54,9 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         ]);
         
         if ($result) {
-            // อัปเดตข้อความเก่าๆ ที่ลูกค้าส่งมา ให้ถือว่าแอดมินตอบแล้วทั้งหมด
+            // *** จุดแก้ไขที่ 2: เปลี่ยน is_read = 1 เป็น is_read = 0 ***
+            // เพื่อให้ข้อความชุดนี้ทั้งหมดแสดงสถานะ "ยังไม่อ่าน" สำหรับลูกค้า
             $update = "UPDATE contact_messages 
-                       SET replied_at = CURRENT_TIMESTAMP, is_read = 1
+                       SET replied_at = CURRENT_TIMESTAMP, is_read = 0
                        WHERE user_id = :u_id AND (admin_reply IS NULL OR admin_reply = '' OR admin_reply = ' ')";
             $stmt_up = $conn->prepare($update);
             $stmt_up->execute(['u_id' => $user_id]);

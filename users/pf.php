@@ -214,7 +214,7 @@ try {
     <a href="my_coupons.php" class="menu-link shadow-sm" style="border-left: 5px solid #f8a5c2;">
         <i class="bi bi-ticket-perforated menu-icon" style="color: var(--mira-pink-dark);"></i> 
         โค้ดส่วนลดของฉัน 
-        <span class="badge rounded-pill bg-danger ms-auto" style="font-size: 0.6rem;">NEW</span>
+       
     </a>
 
     <a href="edit_pf.php" class="menu-link shadow-sm"style="border-left: 5px solid #f8a5c2;">

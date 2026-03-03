@@ -85,65 +85,95 @@ $total_products = count($products);
                             <th class="px-8 py-4 text-center">จัดการ</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        <?php foreach($products as $row): ?>
-                        <tr class="hover:bg-pink-50/20 transition-colors group">
-                            <td class="px-8 py-5">
-                                <img src="../../photo/<?php echo htmlspecialchars($row['image']); ?>" class="w-16 h-16 rounded-2xl object-cover shadow-sm border border-pink-50" onerror="this.src='https://via.placeholder.com/100'">
-                            </td>
-                            <td class="px-8 py-5">
-                                <div class="text-sm font-semibold text-gray-800"><?php echo htmlspecialchars($row['product_name']); ?></div>
-                                <div class="text-[11px] text-gray-400 truncate max-w-[200px]"><?php echo htmlspecialchars($row['description']); ?></div>
-                            </td>
-                            <td class="px-8 py-5">
-                                <span class="px-3 py-1 bg-pink-50 text-pink-500 rounded-full text-[10px] font-bold uppercase">
-                                    <?php echo htmlspecialchars($row['sex']); ?>
-                                </span>
-                            </td>
-                            <td class="px-8 py-5 text-center text-sm <?php echo $row['stock'] <= 0 ? 'text-red-500 font-bold' : 'text-gray-600'; ?>">
-                                <?php echo number_format($row['stock']); ?>
-                            </td>
-                            <td class="px-8 py-5 text-right font-bold text-gray-700">
-                                ฿<?php echo number_format($row['price'], 2); ?>
-                            </td>
-                            <td class="px-8 py-5 text-center">
-                                <div class="flex justify-center gap-2">
-                                    <a href="edit_product.php?id=<?php echo $row['product_id']; ?>" class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </a>
-                                    <button onclick="confirmDelete(<?php echo $row['product_id']; ?>)" class="p-2 text-red-400 hover:bg-red-50 rounded-xl transition">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
+                   <tbody class="divide-y divide-gray-50">
+    <?php foreach($products as $row): ?>
+    <tr class="hover:bg-pink-50/20 transition-colors group <?php echo $row['status'] == 'inactive' ? 'opacity-60 bg-gray-50' : ''; ?>">
+        <td class="px-8 py-5">
+            <img src="../../photo/<?php echo htmlspecialchars($row['image']); ?>" class="w-16 h-16 rounded-2xl object-cover shadow-sm border border-pink-50" onerror="this.src='https://via.placeholder.com/100'">
+        </td>
+        <td class="px-8 py-5">
+            <div class="flex items-center gap-2">
+                <div class="text-sm font-semibold text-gray-800"><?php echo htmlspecialchars($row['product_name']); ?></div>
+                <?php if($row['status'] == 'inactive'): ?>
+                    <span class="px-2 py-0.5 bg-gray-200 text-gray-500 text-[9px] rounded-md font-bold uppercase border border-gray-300">ปิดใช้งานอยู่</span>
+                <?php else: ?>
+                    <span class="px-2 py-0.5 bg-green-100 text-green-600 text-[9px] rounded-md font-bold uppercase border border-green-200">กำลังขาย</span>
+                <?php endif; ?>
+            </div>
+            <div class="text-[11px] text-gray-400 truncate max-w-[200px]"><?php echo htmlspecialchars($row['description']); ?></div>
+        </td>
+        <td class="px-8 py-5">
+            <span class="px-3 py-1 bg-pink-50 text-pink-500 rounded-full text-[10px] font-bold uppercase">
+                <?php echo htmlspecialchars($row['sex']); ?>
+            </span>
+        </td>
+        <td class="px-8 py-5 text-center text-sm <?php echo $row['stock'] <= 0 ? 'text-red-500 font-bold' : 'text-gray-600'; ?>">
+            <?php echo number_format($row['stock']); ?>
+        </td>
+        <td class="px-8 py-5 text-right font-bold text-gray-700">
+            ฿<?php echo number_format($row['price'], 2); ?>
+        </td>
+        <td class="px-8 py-5 text-center">
+            <div class="flex justify-center gap-2">
+                <a href="edit_product.php?id=<?php echo $row['product_id']; ?>" class="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition" title="แก้ไข">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </a>
+                
+                <?php if($row['status'] == 'active'): ?>
+                    <button onclick="confirmToggleStatus(<?php echo $row['product_id']; ?>, 'inactive')" class="p-2 text-orange-400 hover:bg-orange-50 rounded-xl transition" title="กดเพื่อปิดใช้งาน">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    </button>
+                <?php else: ?>
+                    <button onclick="confirmToggleStatus(<?php echo $row['product_id']; ?>, 'active')" class="p-2 text-green-400 hover:bg-green-50 rounded-xl transition" title="กดเพื่อเปิดใช้งาน">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
+                <?php endif; ?>
+            </div>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-    function confirmDelete(id) {
-        Swal.fire({
-            title: 'คุณแน่ใจไหม?',
-            text: "ข้อมูลสินค้านี้จะถูกลบออกจากคลังถาวร!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#F06292',
-            cancelButtonColor: '#9CA3AF',
-            confirmButtonText: 'ยืนยันการลบ',
-            cancelButtonText: 'ยกเลิก',
-            customClass: {
-                popup: 'rounded-[2rem]'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = 'delete.php?id=' + id;
-            }
-        })
+function confirmToggleStatus(id, newStatus) {
+    // ตั้งค่าข้อความตามสถานะที่จะเปลี่ยน
+    let titleText, descText, confirmBtnColor, iconType;
+
+    if (newStatus === 'inactive') {
+        titleText = 'ปิดการใช้งานสินค้า?';
+        descText = 'สินค้านี้จะไม่แสดงบนหน้าเว็บลูกค้า แต่ข้อมูลยังอยู่ในระบบ';
+        confirmBtnColor = '#f59e0b'; // สีส้ม (เตือน)
+        iconType = 'warning';
+    } else {
+        titleText = 'เปิดการใช้งานสินค้า?';
+        descText = 'สินค้าจะกลับไปแสดงบนหน้าเว็บลูกค้าอีกครั้ง';
+        confirmBtnColor = '#10b981'; // สีเขียว (สำเร็จ)
+        iconType = 'question';
     }
-    </script>
+
+    Swal.fire({
+        title: titleText,
+        text: descText,
+        icon: iconType,
+        showCancelButton: true,
+        confirmButtonColor: confirmBtnColor,
+        cancelButtonColor: '#9CA3AF',
+        confirmButtonText: 'ตกลง',
+        cancelButtonText: 'ยกเลิก',
+        customClass: {
+            popup: 'rounded-[2rem]' // ปรับความมนให้เข้ากับสไตล์ Mira
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // ส่งค่า id และ status ใหม่ไปที่ไฟล์ delete.php
+            window.location.href = 'delete.php?id=' + id + '&status=' + newStatus;
+        }
+    })
+}
+</script>
 </body>
 </html>

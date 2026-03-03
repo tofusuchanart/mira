@@ -1,5 +1,61 @@
 <?php include_once "config.php";
+session_start();
+$stmt_promo = $conn->prepare("SELECT *, UNIX_TIMESTAMP(end_date) AS end_ts FROM promotions WHERE status = 'active' AND end_date >= NOW() ORDER BY promo_id DESC");
+$stmt_promo->execute();
+$active_promos = $stmt_promo->fetchAll();
+$user_id = $_SESSION['user_id'] ?? 0; // ถ้าไม่ login ให้เป็น 0
+try {
+    $stmt_rev = $conn->prepare("SELECT r.*, u.fullname, u.profile_img, p.product_name, p.product_img 
+                                FROM reviews r 
+                                JOIN users u ON r.user_id = u.user_id 
+                                JOIN products p ON r.product_id = p.product_id 
+                                ORDER BY r.review_date DESC LIMIT 3");
+    $stmt_rev->execute();
+    $reviews = $stmt_rev->fetchAll();
+} catch (PDOException $e) {
+    $reviews = [];
+}
+$stmt_all_reviews = $conn->prepare("
+    SELECT r.*, u.fullname, u.profile_img, p.product_name, p.image AS product_main_img
+    FROM reviews r 
+    JOIN users u ON r.user_id = u.user_id 
+    JOIN products p ON r.product_id = p.product_id 
+    ORDER BY r.review_date DESC 
+    LIMIT 6
+");
+
+// เชื่อมตาราง reviews เข้ากับ products และ users
+$stmt_all_reviews = $conn->prepare("
+    SELECT 
+        r.*, 
+        u.fullname, 
+        p.product_name, 
+        p.price, 
+        p.image AS product_main_img
+    FROM reviews r 
+    JOIN users u ON r.user_id = u.user_id 
+    JOIN products p ON r.product_id = p.product_id 
+    ORDER BY r.review_date DESC
+");
+$stmt_all_reviews->execute();
+$all_reviews = $stmt_all_reviews->fetchAll();
+
+$stmt_all_reviews->execute();
+$all_reviews = $stmt_all_reviews->fetchAll();
+// ดึงโปรโมชั่นที่สถานะ active, ยังไม่หมดอายุ และ user คนนี้ "ยังไม่เคยเก็บ"
+$sql = "SELECT p.*, UNIX_TIMESTAMP(p.end_date) AS end_ts 
+        FROM promotions p
+        LEFT JOIN user_vouchers uv ON p.promo_id = uv.promo_id AND uv.user_id = ?
+        WHERE p.status = 'active' 
+        AND p.end_date >= NOW() 
+        AND uv.uv_id IS NULL 
+        ORDER BY p.promo_id DESC";
+
+$stmt_promo = $conn->prepare($sql);
+$stmt_promo->execute([$user_id]);
+$active_promos = $stmt_promo->fetchAll();
 ?>
+
 </head>
 <!DOCTYPE html>
 <html lang="th">
@@ -236,40 +292,75 @@ $reviews = $stmt_rev->fetchAll();
     }
 </style>
 
-<section class="review-section">
-    <div class="container text-center">
-        <h2 class="review-title">Social Proof & Review</h2>
-        <div class="mb-3">— ⚪ —</div>
-        <div class="row g-5">
-            <?php if (empty($reviews)): ?>
-                <p class="text-white-50">ยังไม่มีรีวิวในขณะนี้ เป็นคนแรกที่รีวิวสิ!</p>
-            <?php else: ?>
-                <?php foreach($reviews as $rev): ?>
-                <div class="col-md-4">
-                    <div class="review-card text-start shadow">
-                        <div class="mb-2">
-                            <span class="text-warning"><?= str_repeat('⭐', $rev['rating']) ?></span>
-                            <span class="text-muted small">(<?= $rev['rating'] ?>/5)</span>
-                        </div>
-                        
-                        <p class="review-text"><?= htmlspecialchars($rev['comment']) ?></p>
-                        
-                        <div class="reviewer-info">
-                            <?php 
-                                $user_pic = (!empty($rev['profile_img'])) 
-                                            ? "register/photo/" . $rev['profile_img'] 
-                                            : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
-                            ?>
-                            <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
-                            
-                            <div class="reviewer-name">
-                                <strong><?= htmlspecialchars($rev['fullname']) ?></strong>
+<style>
+    /* ตกแต่งแถบเลื่อนให้เข้ากับธีมมืด */
+    .review-scroll-container::-webkit-scrollbar { width: 5px; }
+    .review-scroll-container::-webkit-scrollbar-track { background: #1a1a1a; }
+    .review-scroll-container::-webkit-scrollbar-thumb { background: #b3365b; border-radius: 10px; }
+    
+    .review-card-mini {
+        background: #1e1e1e;
+        border-radius: 12px;
+        border: 1px solid #333;
+        transition: 0.3s;
+    }
+    .review-card-mini:hover { border-color: #f8a5c2; }
+</style>
+
+<section class="review-section py-5" style="background: #121212; color: #ffffff;">
+    <div class="container">
+        <div class="text-start mb-4 d-flex justify-content-between align-items-end">
+            <div>
+                <h2 class="fw-bold m-0" style="color: #f8a5c2; font-size: 1.5rem;">CUSTOMER REVIEWS</h2>
+                <p class="text-muted small m-0">เลื่อนเพื่ออ่านรีวิวทั้งหมด</p>
+            </div>
+            <div class="text-warning" style="font-size: 0.8rem;">
+                <i class="bi bi-star-fill"></i> รีวิวเฉลี่ย 5.0
+            </div>
+        </div>
+
+        <div class="review-scroll-container" style="max-height: 450px; overflow-y: auto; overflow-x: hidden; padding-right: 8px;">
+            <div class="row g-2">
+                <?php foreach ($all_reviews as $rev): ?>
+                    <div class="col-12">
+                        <div class="review-card-mini p-2 px-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="photo/<?= $rev['product_main_img'] ?>" 
+                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" 
+                                     alt="product">
+                                
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <span class="fw-bold" style="font-size: 0.85rem; color: #f8a5c2;">
+                                                <?= htmlspecialchars($rev['product_name']) ?>
+                                            </span>
+                                            <span class="text-white-50 ms-2" style="font-size: 0.75rem;">
+                                                ฿<?= number_format($rev['price'], 0) ?>
+                                            </span>
+                                        </div>
+                                        <div class="text-warning" style="font-size: 0.65rem;">
+                                            <?= str_repeat('<i class="bi bi-star-fill"></i>', $rev['rating']) ?>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-light m-0" style="font-size: 0.85rem; opacity: 0.85;">
+                                        "<?php 
+                                            $bad_words = ["มึง", "กู", "ควย", "เย็ด", "สัด", "เหี้ย", "ไอ้สัส", "หี"];
+                                            echo htmlspecialchars(str_ireplace($bad_words, "***", $rev['comment']));
+                                        ?>"
+                                    </p>
+
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <small style="font-size: 0.7rem; color: #666;">โดย: <?= htmlspecialchars($rev['fullname']) ?></small>
+                                        <small style="font-size: 0.65rem; color: #666;"><?= date('d/m/Y', strtotime($rev['review_date'])) ?></small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 <?php endforeach; ?>
-            <?php endif; ?>
+            </div>
         </div>
     </div>
 </section>

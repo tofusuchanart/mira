@@ -13,6 +13,22 @@ if (!$user_id) {
     exit;
 }
 $fullname = $_SESSION['fullname'] ?? '';
+$current_user_id = $_SESSION['user_id'] ?? 0;
+
+if ($current_user_id > 0) {
+    // ลองแบบไม่เช็ค admin_reply ดูก่อน เพื่อเน้นให้เลขหาย
+    $sql_update_read = "UPDATE contact_messages 
+                        SET is_read = 1 
+                        WHERE user_id = ? 
+                        AND is_read = 0";
+    
+    $stmt_update = $conn->prepare($sql_update_read);
+    $stmt_update->execute([$current_user_id]);
+// ใส่ไว้ในหน้า chat.php
+$sql_update_read = "UPDATE contact_messages SET is_read = 1 WHERE user_id = ? AND is_read = 0 AND admin_reply IS NOT NULL";
+$stmt_update = $conn->prepare($sql_update_read);
+$stmt_update->execute([$_SESSION['user_id']]);
+}
 ?>
 
 <!DOCTYPE html>

@@ -1,22 +1,67 @@
-<?php include_once "../config.php";
+<?php 
+include_once "../config.php";
+if (!$conn) { die("Database Connection Failed"); }
 session_start();
-$stmt_promo = $conn->prepare("SELECT *, UNIX_TIMESTAMP(end_date) AS end_ts FROM promotions WHERE status = 'active' AND end_date >= NOW() ORDER BY promo_id DESC");
-$stmt_promo->execute();
-$active_promos = $stmt_promo->fetchAll();
-$user_id = $_SESSION['user_id'] ?? 0; // ถ้าไม่ login ให้เป็น 0
+$current_user_id = $_SESSION['user_id'] ?? 0;
 
-// ดึงโปรโมชั่นที่สถานะ active, ยังไม่หมดอายุ และ user คนนี้ "ยังไม่เคยเก็บ"
-$sql = "SELECT p.*, UNIX_TIMESTAMP(p.end_date) AS end_ts 
-        FROM promotions p
-        LEFT JOIN user_vouchers uv ON p.promo_id = uv.promo_id AND uv.user_id = ?
-        WHERE p.status = 'active' 
-        AND p.end_date >= NOW() 
-        AND uv.uv_id IS NULL 
-        ORDER BY p.promo_id DESC";
+if ($current_user_id > 0) {
+    // เมื่อผู้ใช้เปิดหน้านี้ ให้ปรับสถานะข้อความ... ให้เป็น "อ่านแล้ว (1)"
+    $sql_update_read = "UPDATE contact_messages 
+                        SET is_read = 1 
+                        WHERE user_id = ? 
+                        AND admin_reply IS NOT NULL 
+                        AND is_read = 0";
+    $stmt_update = $conn->prepare($sql_update_read);
+    $stmt_update->execute([$current_user_id]);
+}
+// 1. กำหนดค่า User ID จาก Session
+$user_id = $_SESSION['user_id'] ?? 0;
+$current_user_id = $user_id; // ใช้ตัวแปรเดียวกันเพื่อความไม่งง
 
-$stmt_promo = $conn->prepare($sql);
+// 2. ดึงโปรโมชั่นที่ยังไม่หมดอายุและ User ยังไม่ได้เก็บ
+$sql_promo = "SELECT p.*, UNIX_TIMESTAMP(p.end_date) AS end_ts 
+              FROM promotions p
+              LEFT JOIN user_vouchers uv ON p.promo_id = uv.promo_id AND uv.user_id = ?
+              WHERE p.status = 'active' 
+              AND p.end_date >= NOW() 
+              AND uv.uv_id IS NULL 
+              ORDER BY p.promo_id DESC";
+$stmt_promo = $conn->prepare($sql_promo);
 $stmt_promo->execute([$user_id]);
 $active_promos = $stmt_promo->fetchAll();
+
+// 3. ดึงรีวิวทั้งหมด
+try {
+    $stmt_all_reviews = $conn->prepare("
+        SELECT r.*, u.fullname, p.product_name, p.price, p.image AS product_main_img
+        FROM reviews r 
+        JOIN users u ON r.user_id = u.user_id 
+        JOIN products p ON r.product_id = p.product_id 
+        ORDER BY r.review_date DESC
+    ");
+    $stmt_all_reviews->execute();
+    $all_reviews = $stmt_all_reviews->fetchAll();
+} catch (PDOException $e) {
+    $all_reviews = [];
+}
+
+// 4. นับจำนวนสินค้าในตะกร้า
+$cart_count = 0;
+if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+    $cart_count = array_sum($_SESSION['cart']); 
+}
+
+// 5. นับข้อความแชทที่ยังไม่ได้อ่าน
+// 5. นับข้อความแชทที่ยังไม่ได้อ่าน
+// 5. นับข้อความแชทที่ยังไม่ได้อ่าน
+$sql_unread_chat = "SELECT COUNT(*) as unread_count FROM contact_messages 
+                    WHERE user_id = ? 
+                    AND is_read = 0 
+                    AND admin_reply IS NOT NULL"; // นับทุกอย่างที่แอดมินตอบและยังไม่ได้อ่าน
+$stmt_chat = $conn->prepare($sql_unread_chat);
+$stmt_chat->execute([$current_user_id]);
+$row_chat = $stmt_chat->fetch(PDO::FETCH_ASSOC);
+$unread_chats = $row_chat['unread_count'] ?? 0;
 ?>
 
 </head>
@@ -32,6 +77,28 @@ $active_promos = $stmt_promo->fetchAll();
     <link rel="icon" href="photo/golo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
+        .cart-badge {
+        position: absolute;
+        top: -2px;      /* ปรับขึ้นลงตามความเหมาะสม */
+        right: -2px;    /* ปรับซ้ายขวาตามความเหมาะสม */
+        background-color: #ff4757; /* สีแดงสด */
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        border-radius: 50%;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #FFF2f6; /* ขอบสีเดียวกับ Navbar เพื่อให้ดูมีมิติ */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* ปรับ nav-link ให้รองรับ position absolute ของ badge */
+    .mira-nav-icon {
+        position: relative; 
+    }
         /* ปรับแต่งกรอบ Banner ให้มนและมีมิติ */
         #carouselExampleFade {
             border-radius: 30px;
@@ -223,16 +290,27 @@ $active_promos = $stmt_promo->fetchAll();
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link mira-nav-icon" href="cart/mycart.php">
-                            <i class="bi bi-bag-heart"></i>
-                        </a>
-                    </li>
+    <a class="nav-link mira-nav-icon" href="cart/mycart.php">
+        <i class="bi bi-bag-heart"></i>
+        <?php if ($cart_count > 0): ?>
+            <span class="cart-badge">
+                <?php echo $cart_count; ?>
+            </span>
+        <?php endif; ?>
+    </a>
+</li>
 
-                    <li class="nav-item">
-                        <a class="nav-link mira-nav-icon" href="mes/chat.php">
-                            <i class="bi bi-chat-dots"></i>
-                        </a>
-                    </li>
+
+       <li class="nav-item">
+        <a class="nav-link mira-nav-icon" href="mes/chat.php">
+            <i class="bi bi-chat-dots"></i>
+            <?php if ($unread_chats > 0): ?>
+                <span class="cart-badge" style="background-color: #ff4757;">
+                    <?= $unread_chats ?>
+                </span>
+            <?php endif; ?>
+        </a>
+    </li>
 
                     <li class="nav-item">
                         <a class="nav-link mira-nav-icon" href="pf.php">
@@ -440,47 +518,78 @@ $active_promos = $stmt_promo->fetchAll();
             display: block;
         }
     </style>
+<style>
+    /* ตกแต่งแถบเลื่อนให้เข้ากับธีมมืด */
+    .review-scroll-container::-webkit-scrollbar { width: 5px; }
+    .review-scroll-container::-webkit-scrollbar-track { background: #1a1a1a; }
+    .review-scroll-container::-webkit-scrollbar-thumb { background: #b3365b; border-radius: 10px; }
+    
+    .review-card-mini {
+        background: #1e1e1e;
+        border-radius: 12px;
+        border: 1px solid #333;
+        transition: 0.3s;
+    }
+    .review-card-mini:hover { border-color: #f8a5c2; }
+</style>
 
-    <section class="review-section">
-        <div class="container text-center">
-            <h2 class="review-title">Social Proof & Review</h2>
-            <div class="mb-3">— ⚪ —</div>
-            <button type="button" class="btn btn-outline-light mb-5" data-bs-toggle="modal" data-bs-target="#reviewModal">
-                <i class="bi bi-pencil-square"></i> เขียนรีวิวของคุณ
-            </button>
-            <div class="row g-5">
-                <?php if (empty($reviews)): ?>
-                    <p class="text-white-50">ยังไม่มีรีวิวในขณะนี้ เป็นคนแรกที่รีวิวสิ!</p>
-                <?php else: ?>
-                    <?php foreach ($reviews as $rev): ?>
-                        <div class="col-md-4">
-                            <div class="review-card text-start shadow">
-                                <div class="mb-2">
-                                    <span class="text-warning"><?= str_repeat('⭐', $rev['rating']) ?></span>
-                                    <span class="text-muted small">(<?= $rev['rating'] ?>/5)</span>
-                                </div>
+<section class="review-section py-5" style="background: #121212; color: #ffffff;">
+    <div class="container">
+        <div class="text-start mb-4 d-flex justify-content-between align-items-end">
+            <div>
+                <h2 class="fw-bold m-0" style="color: #f8a5c2; font-size: 1.5rem;">CUSTOMER REVIEWS</h2>
+                <p class="text-muted small m-0">เลื่อนเพื่ออ่านรีวิวทั้งหมด</p>
+            </div>
+            <div class="text-warning" style="font-size: 0.8rem;">
+                <i class="bi bi-star-fill"></i> รีวิวเฉลี่ย 5.0
+            </div>
+        </div>
 
-                                <p class="review-text"><?= htmlspecialchars($rev['comment']) ?></p>
+        <div class="review-scroll-container" style="max-height: 450px; overflow-y: auto; overflow-x: hidden; padding-right: 8px;">
+            <div class="row g-2">
+                <?php foreach ($all_reviews as $rev): ?>
+                    <div class="col-12">
+                        <div class="review-card-mini p-2 px-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="../photo/<?= $rev['product_main_img'] ?>" 
+                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" 
+                                     alt="product">
+                                
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <span class="fw-bold" style="font-size: 0.85rem; color: #f8a5c2;">
+                                                <?= htmlspecialchars($rev['product_name']) ?>
+                                            </span>
+                                            <span class="text-white-50 ms-2" style="font-size: 0.75rem;">
+                                                ฿<?= number_format($rev['price'], 0) ?>
+                                            </span>
+                                        </div>
+                                        <div class="text-warning" style="font-size: 0.65rem;">
+                                            <?= str_repeat('<i class="bi bi-star-fill"></i>', $rev['rating']) ?>
+                                        </div>
+                                    </div>
 
-                                <div class="reviewer-info">
-                                    <?php
-                                    $user_pic = (!empty($rev['profile_img']))
-                                        ? "../register/photo/" . $rev['profile_img']
-                                        : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
-                                    ?>
-                                    <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
+                                    <p class="text-light m-0" style="font-size: 0.85rem; opacity: 0.85;">
+                                        "<?php 
+                                            $bad_words = ["มึง", "กู", "ควย", "เย็ด", "สัด", "เหี้ย", "ไอ้สัส", "หี"];
+                                            echo htmlspecialchars(str_ireplace($bad_words, "***", $rev['comment']));
+                                        ?>"
+                                    </p>
 
-                                    <div class="reviewer-name">
-                                        <strong><?= htmlspecialchars($rev['fullname']) ?></strong>
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <small style="font-size: 0.7rem; color: #666;">โดย: <?= htmlspecialchars($rev['fullname']) ?></small>
+                                        <small style="font-size: 0.65rem; color: #666;"><?= date('d/m/Y', strtotime($rev['review_date'])) ?></small>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
-    </section>
+    </div>
+</section>
     <style>
         /* ปรับแต่ง Footer ให้เข้ากับโทนในรูปภาพ */
         .footer-section {
@@ -623,84 +732,7 @@ $active_promos = $stmt_promo->fetchAll();
     </style>
 
 
-    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-                <div class="modal-header text-white border-0" style="background: linear-gradient(45deg, #f8a5c2, #f78fb3);">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>แบ่งปันประสบการณ์ของคุณ</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <form action="save_review.php" method="POST">
-                    <div class="modal-body p-4 text-start text-dark bg-light">
-
-                        <div class="text-center mb-4">
-                            <div class="position-relative d-inline-block">
-                                <?php
-                                $user_pic = (!empty($rev['profile_img']))
-                                    ? "../register/photo/" . $rev['profile_img']
-                                    : "https://ui-avatars.com/api/?name=" . urlencode($rev['fullname']) . "&background=random";
-                                ?>
-                                <img src="<?= $user_pic ?>" class="reviewer-img" alt="Profile">
-
-                                <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-success border border-2 border-white">
-                                    <i class="bi bi-check"></i>
-                                </span>
-                            </div>
-                            <h6 class="mt-2 fw-bold mb-0"><?php echo $_SESSION['fullname']; ?></h6>
-                            <small class="text-muted">คุณกำลังเขียนรีวิวในชื่อนี้</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary">คะแนนความพึงพอใจ</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0 text-warning"><i class="bi bi-star-fill"></i></span>
-                                <select name="rating" class="form-select border-start-0" required>
-                                    <option value="5">5 ดาว - ประทับใจที่สุด</option>
-                                    <option value="4">4 ดาว - ดีมาก</option>
-                                    <option value="3">3 ดาว - ปานกลาง</option>
-                                    <option value="2">2 ดาว - พอใช้</option>
-                                    <option value="1">1 ดาว - ควรปรับปรุง</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary">สินค้าที่ต้องการรีวิว</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-bag-heart-fill"></i></span>
-                                <select name="product_id" class="form-select border-start-0" required>
-                                    <?php
-                                    $stmt_p = $conn->query("SELECT product_id, product_name FROM products ORDER BY product_name ASC");
-                                    while ($p = $stmt_p->fetch()) {
-                                        echo "<option value='{$p['product_id']}'>{$p['product_name']}</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary">ความรู้สึกของคุณ</label>
-                            <textarea name="comment" class="form-control" rows="4"
-                                style="border-radius: 12px; resize: none;"
-                                placeholder="เขียนบอกเราหน่อยว่าสินค้าชิ้นนี้ดียังไง..." required></textarea>
-                        </div>
-
-                        <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
-                    </div>
-
-                    <div class="modal-footer border-0 bg-light p-3">
-                        <button type="button" class="btn btn-outline-secondary px-4 border-0" data-bs-dismiss="modal">ไว้วันหลัง</button>
-                        <button type="submit" class="btn text-white px-4 shadow-sm"
-                            style="background: #f8a5c2; border-radius: 10px; transition: 0.3s;">
-                            ส่งรีวิวเลย <i class="bi bi-send-fill ms-1"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    
     <footer class="footer-section">
         <div class="container">
             <div class="row g-4">
