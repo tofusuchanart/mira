@@ -190,9 +190,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <input type="text" name="fullname" class="form-control" placeholder="ชื่อ" required>
         <input type="email" name="email" class="form-control" placeholder="อีเมล" required>
-        <input type="password" name="password" class="form-control" placeholder="รหัส" required>
+        <input type="password" name="password" class="form-control"  placeholder="Password (6 ตัวขึ้นไป)"
+                    name="password"
+                    minlength="6"
+                    required>
         <input type="text" name="phone" class="form-control" placeholder="หมายเลขโทรศัพท์" required>
        <textarea name="address" class="form-control" placeholder="ที่อยู่" rows="2" required></textarea>
+       
 
         <button type="submit" class="btn-register">ลงชื่อเข้าใช้</button>
         
