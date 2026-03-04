@@ -289,6 +289,18 @@ $unread_chats = $row_chat['unread_count'] ?? 0;
                         </ul>
                     </li>
 
+
+
+                    <li class="nav-item">
+        <a class="nav-link mira-nav-icon" href="mes/chat.php">
+            <i class="bi bi-chat-dots"></i>
+            <?php if ($unread_chats > 0): ?>
+                <span class="cart-badge" style="background-color: #ff4757;">
+                    <?= $unread_chats ?>
+                </span>
+            <?php endif; ?>
+        </a>
+    </li>
                     <li class="nav-item">
     <a class="nav-link mira-nav-icon" href="cart/mycart.php">
         <i class="bi bi-bag-heart"></i>
@@ -301,16 +313,7 @@ $unread_chats = $row_chat['unread_count'] ?? 0;
 </li>
 
 
-       <li class="nav-item">
-        <a class="nav-link mira-nav-icon" href="mes/chat.php">
-            <i class="bi bi-chat-dots"></i>
-            <?php if ($unread_chats > 0): ?>
-                <span class="cart-badge" style="background-color: #ff4757;">
-                    <?= $unread_chats ?>
-                </span>
-            <?php endif; ?>
-        </a>
-    </li>
+       
 
                     <li class="nav-item">
                         <a class="nav-link mira-nav-icon" href="pf.php">
@@ -572,7 +575,7 @@ $unread_chats = $row_chat['unread_count'] ?? 0;
 
                                     <p class="text-light m-0" style="font-size: 0.85rem; opacity: 0.85;">
                                         "<?php 
-                                            $bad_words = ["มึง", "กู", "ควย", "เย็ด", "สัด", "เหี้ย", "ไอ้สัส", "หี"];
+                                            $bad_words = ["มึง", "กู", "ควย", "เย็ด", "สัส", "เหี้ย", "ส้นตีน", "หี", "จิ๋ม", "หำ", "เงี่ยน", "เสียว", "แตกใน", "เย็ดกัน", "โดนเย็ด", "โดนแตก", "โดนเสียว", "โดนเงี่ยน", "โดนหี", "โดนหำ", "โดนจิ๋ม", "โดนควย", "โดนกู", "โดนมึง", "โดนสัส", "โดนเหี้ย", "โดนส้นตีน", "โดนไอ้", "อี", "แม่ง", "เวรเอ๊ย", "ห่วยแตกชิบ", "ควาย", "บัดซบ", "ชั่ว", "เลว", "โง่", "ปัญญาอ่อน", "เหี้ยไร้สาระ", "ส้นตีนไร้สมอง", "ไอ้ควาย", "ไอ้บัดซบ", "ไอ้ชั่ว", "ไอ้เลว", "ไอ้โง่", "ไอ้ปัญญาอ่อน", "โกง", "หลอกลวง", "ขี้โกง", "ขี้หลอก", "ขี้ขโมย", "ขี้เมา", "ขี้เหล้า", "ขี้เถ้า", "ขี้ตั๊ว", "ขี้ตั๊วแตก", "ขี้ตั๊วแตกชิบหาย", "ขี้ตั๊วแตกชิบหายโคตรๆ", "ขี้ตั๊วแตกชิบหายโคตรๆเลย", "ขี้ตั๊วแตกชิบหายโคตรๆมาก", "ขี้ตั๊วแตกชิบหายโคตรๆสุดๆ", "ขี้ตั๊วแตกชิบหายโคตรๆที่สุด", "ขี้ตั๊วแตกชิบหายโคตรๆจริงๆ", "ขี้ตั๊วแตกชิบหายโคตรๆจริงๆเลย", "ขี้ตั๊วแตกชิบหายโคตรๆจริงๆมาก", "ขี้ตั๊วแตกชิบหายโคตรๆจริงๆสุดๆ", "ขี้ตั๊วแตกชิบหายโคตรๆจริงๆที่สุด"];
                                             echo htmlspecialchars(str_ireplace($bad_words, "***", $rev['comment']));
                                         ?>"
                                     </p>

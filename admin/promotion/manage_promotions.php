@@ -63,9 +63,10 @@ $promos = $conn->query("SELECT * FROM promotions ORDER BY start_date DESC")->fet
 <body class="p-4">
 
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-pink" style="color: var(--mira-pink);"><i class="bi bi-lightning-charge me-2"></i>จัดการโปรโมชั่น & Flash Sale</h2>
-        <a href="../index_ad.php" class="btn btn-outline-secondary btn-sm rounded-pill px-3">กลับหน้าหลัก</a>
+    <div class="mb-2">
+        <a href="../index_ad.php" class="text-decoration-none" style="color: #ff4d7d; font-size: 0.95rem;">
+            <i class="bi bi-arrow-left me-1"></i> กลับสู่หน้า Dashboard
+        </a>
     </div>
 
     <?php if(isset($success)): ?>

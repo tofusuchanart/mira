@@ -155,7 +155,7 @@ $items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <div class="p-4 p-md-5">
-                    <h5 class="mira-header fw-bold mb-4">Items Ordered</h5>
+                    <h5 class="mira-header fw-bold mb-4">สินค้าที่สั่ง</h5>
                     
                     <?php foreach ($items as $item): ?>
                     <div class="row item-row align-items-center">
@@ -177,7 +177,7 @@ $items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
                             <h6 class="fw-bold mb-3">ข้อมูลการจัดส่ง</h6>
                             <p class="text-muted small">
                                 <i class="bi bi-calendar3 me-2"></i> สั่งซื้อเมื่อ: <?= date('d F Y (H:i)', strtotime($order['order_date'])) ?><br>
-                                <i class="bi bi-credit-card me-2"></i> ชำระเงินผ่าน: โอนผ่านธนาคาร / QR Code
+                                <i class="bi bi-credit-card me-2"></i> ชำระเงินผ่าน: โอนผ่านธนาคาร
                             </p>
                         </div>
                         <div class="col-md-6">
