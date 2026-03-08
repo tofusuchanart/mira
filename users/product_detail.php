@@ -326,16 +326,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
     <div class="card shadow-sm p-4" style="border-radius: 20px; border: none;">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold m-0" style="color: #b3365b;">รีวิวจากลูกค้า</h4>
-            
-            <?php if ($can_review): ?>
-                <button class="btn btn-mira-cart" type="button" data-bs-toggle="modal" data-bs-target="#reviewModal">
-                    <i class="bi bi-pencil-square me-2"></i> เขียนรีวิวของคุณ
-                </button>
-            <?php else: ?>
-                <span class="badge bg-light text-muted border py-2 px-3 rounded-pill">
-                    <i class="bi bi-info-circle me-1"></i> เฉพาะผู้ที่เคยซื้อสินค้านี้เท่านั้นที่รีวิวได้
-                </span>
-            <?php endif; ?>
         </div>
 
         <hr class="my-4 opacity-50">

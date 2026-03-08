@@ -28,6 +28,18 @@ $sql_items = "SELECT oi.*, p.product_name, p.image
 $stmt_items = $conn->prepare($sql_items);
 $stmt_items->execute([$order_id]);
 $items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
+// 2. ดึงรายการสินค้าในคำสั่งซื้อนี้ + เช็คสถานะการรีวิว
+// ดึงรายการสินค้า + เช็คว่า "ออเดอร์นี้" สินค้าชิ้นนี้รีวิวไปหรือยัง
+$sql_items = "SELECT oi.*, p.product_name, p.image, r.review_id 
+              FROM order_items oi 
+              JOIN products p ON oi.product_id = p.product_id 
+              LEFT JOIN reviews r ON (oi.product_id = r.product_id 
+                                     AND r.user_id = ? 
+                                     AND r.order_id = ?) 
+              WHERE oi.order_id = ?";
+$stmt_items = $conn->prepare($sql_items);
+$stmt_items->execute([$user_id, $order_id, $order_id]); 
+$items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -121,7 +133,27 @@ $items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
             margin-right: 8px;
             box-shadow: 0 0 8px rgba(255,255,255,0.8);
         }
-    </style>
+
+.btn-review {
+    background-color: var(--mira-pink-dark);
+    color: white;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-review:hover {
+    background-color: #8a3d56;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(163, 74, 103, 0.2);
+}
+
+.text-success-mira {
+    color: #28a745;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+</style>
 </head>
 <body>
 
@@ -157,20 +189,33 @@ $items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
                 <div class="p-4 p-md-5">
                     <h5 class="mira-header fw-bold mb-4">สินค้าที่สั่ง</h5>
                     
-                    <?php foreach ($items as $item): ?>
-                    <div class="row item-row align-items-center">
-                        <div class="col-3 col-md-2">
-                            <img src="../photo/<?= $item['image'] ?>" class="product-img shadow-sm" alt="product">
-                        </div>
-                        <div class="col-6 col-md-7">
-                            <h6 class="mb-1 fw-bold"><?= htmlspecialchars($item['product_name']) ?></h6>
-                            <small class="text-muted">จำนวน: <?= $item['quantity'] ?> ชิ้น</small>
-                        </div>
-                        <div class="col-3 col-md-3 text-end">
-                            <span class="price-label">฿<?= number_format($item['price'] * $item['quantity'], 2) ?></span>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
+                  <?php foreach ($items as $item): ?>
+<div class="row item-row align-items-center">
+    <div class="col-3 col-md-2">
+        <img src="../photo/<?= $item['image'] ?>" class="product-img shadow-sm" alt="product">
+    </div>
+    <div class="col-6 col-md-7">
+        <h6 class="mb-1 fw-bold"><?= htmlspecialchars($item['product_name']) ?></h6>
+        <small class="text-muted">จำนวน: <?= $item['quantity'] ?> ชิ้น</small>
+    </div>
+    <div class="col-3 col-md-3 text-end">
+        <span class="price-label d-block mb-2">฿<?= number_format($item['price'] * $item['quantity'], 2) ?></span>
+        
+        <?php if ($order['status'] == 'completed'): ?>
+            <?php if (empty($item['review_id'])): ?>
+                <button type="button" 
+                        class="btn btn-sm rounded-pill px-3" 
+                        style="background-color: var(--mira-pink-dark); color: white;"
+                        onclick="openReviewModal(<?= $item['product_id'] ?>, '<?= htmlspecialchars($item['product_name']) ?>')">
+                    <i class="bi bi-pencil-square"></i> รีวิวสินค้า
+                </button>
+            <?php else: ?>
+                <span class="badge rounded-pill bg-light text-success border">รีวิวแล้ว</span>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endforeach; ?>
 
                     <div class="row mt-5">
                         <div class="col-md-6 mb-4">
@@ -211,6 +256,65 @@ $items = $stmt_items->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </div>
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"> <div class="modal-content" style="border-radius: 25px; border: none;">
+            <div class="modal-header border-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold" style="color: #b3365b;">
+                    <i class="bi bi-stars me-2"></i> รีวิวสินค้า: <span id="modal_product_name"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="submit_review.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="product_id" id="modal_product_id">
+                    <input type="hidden" name="order_id" value="<?= $order_id ?>"> <div class="mb-4 text-center bg-light p-3" style="border-radius: 15px;">
+                        <label class="form-label d-block fw-bold mb-3">คะแนนความพึงพอใจ</label>
+                        <select name="rating" class="form-select w-auto mx-auto border-0 shadow-sm" style="border-radius: 10px;" required>
+                            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4/5)</option>
+                            <option value="3">⭐⭐⭐ (3/5)</option>
+                            <option value="2">⭐⭐ (2/5)</option>
+                            <option value="1">⭐ (1/5)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ข้อความรีวิวของคุณ</label>
+                        <textarea name="comment" class="form-control border-0 bg-light" rows="4" 
+                                  style="border-radius: 15px;" placeholder="บอกเราหน่อยว่าคุณชอบสินค้านี้อย่างไร..." required></textarea>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">แนบรูปภาพสินค้า</label>
+                            <input type="file" name="review_image" class="form-control" accept="image/*" style="border-radius: 10px;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted">แนบวิดีโอสินค้า</label>
+                            <input type="file" name="review_video" class="form-control" accept="video/*" style="border-radius: 10px;">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn py-3" style="background-color: #b3365b; color: white; border-radius: 50px; font-weight: bold;">
+                            ส่งรีวิวและวิดีโอของคุณ <i class="bi bi-send-fill ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+<script>
+function openReviewModal(productId, productName) {
+    document.getElementById('modal_product_id').value = productId;
+    document.getElementById('modal_product_name').innerText = productName;
+    var myModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+    myModal.show();
+}
+</script>
 
 </body>
 </html>
