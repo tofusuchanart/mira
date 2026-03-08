@@ -31,6 +31,7 @@ $logs = $conn->query("SELECT l.*, p.product_name FROM stock_log l
     <meta charset="UTF-8">
     <title>Stock Management | MIRA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="../photo_ad/golo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
 </head>

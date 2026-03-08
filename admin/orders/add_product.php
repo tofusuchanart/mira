@@ -58,6 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <title>Add Product - Mira</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="../photo_ad/golo.png">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body class="bg-[#FFF5F7] p-10 font-['Sarabun']">

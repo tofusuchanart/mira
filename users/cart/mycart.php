@@ -26,6 +26,7 @@ if (!empty($_SESSION['cart'])) {
     <title>MIRA | Your Shopping Bag</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Sarabun:wght@300;400;600&family=Itim&display=swap" rel="stylesheet">
     <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="../photo/golo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <style>

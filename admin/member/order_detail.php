@@ -54,6 +54,7 @@ function getStatusBadge($status) {
     <title>MIRA | รายละเอียดคำสั่งซื้อ #<?= str_pad($order['order_id'], 5, '0', STR_PAD_LEFT) ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="../photo_ad/golo.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root { 
